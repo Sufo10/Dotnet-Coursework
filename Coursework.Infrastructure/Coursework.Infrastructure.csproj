@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -26,10 +26,5 @@
     <None Remove="DI\" />
     <None Remove="Persistent\" />
     <None Remove="Services\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DI\" />
-    <Folder Include="Persistent\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 </Project>

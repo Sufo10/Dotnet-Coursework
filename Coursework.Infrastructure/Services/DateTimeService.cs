@@ -3,7 +3,7 @@ using Coursework.Application.Common.Interface;
 
 namespace Coursework.Infrastructure.Services
 {
-	public class DateTimeServices:IDateTime
+	public class DateTimeService:IDateTime
 	{
         public DateTime Now => DateTime.UtcNow;
     }

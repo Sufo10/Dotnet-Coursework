@@ -17,6 +17,7 @@ namespace Coursework.Infrastructure.DI
                 options.UseNpgsql(configuration.GetConnectionString("CAPostgreSQL"),
                 b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)), ServiceLifetime.Transient);
             services.AddScoped<IApplicationDBContext>(provider => provider.GetService<ApplicationDBContext>());
+            services.AddTransient<IDateTime, DateTimeService>();
             return services;
         }
     }
