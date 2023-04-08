@@ -22,4 +22,14 @@
     <ProjectReference Include="..\Coursework.Application\Coursework.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="DI\" />
+    <None Remove="Persistent\" />
+    <None Remove="Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DI\" />
+    <Folder Include="Persistent\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
 </Project>

@@ -14,4 +14,12 @@
     <ProjectReference Include="..\Coursework.Domain\Coursework.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Common\" />
+    <None Remove="Common\Interface\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Common\" />
+    <Folder Include="Common\Interface\" />
+  </ItemGroup>
 </Project>
