@@ -1,0 +1,10 @@
+﻿.card-image {
+    max-width:100%;
+    height:auto;
+}
+
+    .card-image img {
+        max-width:100%;
+        height:auto;
+        object-fit:contain
+    }
