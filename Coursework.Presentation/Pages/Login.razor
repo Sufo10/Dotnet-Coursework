@@ -1,0 +1,65 @@
+﻿@page "/login"
+<PageTitle>Login</PageTitle>
+<div class="row min-vh-100">
+   <div class="col-12 d-flex justify-content-center align-item-center">
+<MudPaper Width="350px" Height="400px" Class="pa-5 ma-2 mt-15" Outlined="true" Square="true">
+    <div class="text-center">
+
+    <MudText Class="mt-1 mx-auto" Typo="Typo.h5">Login</MudText>
+    </div>
+    <div class="mt-3">
+        <MudTextField Class="mt-7" @bind-Value="Email" Label="Email" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
+        <MudTextField Class="mt-7" @bind-Value="Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
+        <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" Disabled="@_processing" OnClick="ProcessSomething" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">
+            @if (_processing)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">Processing</MudText>
+            }
+            else
+            {
+                <MudText>Login</MudText>
+            }
+        </MudButton>
+        <div class="mt-4 text-center">
+        <MudLink Href="register" Class="mt-5 text-center text-primary" Typo="Typo.body2">Not a member? Register Now</MudLink>
+        </div>
+    </div>
+</MudPaper>
+   </div>
+    @*<div class="col-7">
+        <LoginCar/>
+    </div>*@
+</div>
+@code {
+    public string Email { get; set; }
+    public string Password { get; set; }
+    private bool _processing = false;
+    bool isShow;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    void ButtonTestclick()
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+    async Task ProcessSomething()
+    {
+        _processing = true;
+        await Task.Delay(2000);
+        _processing = false;
+    }
+}
+
