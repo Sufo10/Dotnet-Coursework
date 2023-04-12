@@ -2,8 +2,9 @@
 <PageTitle>Login</PageTitle>
 <div class="row min-vh-100">
    <div class="col-12 d-flex justify-content-center align-item-center">
-<MudPaper Width="350px" Height="400px" Class="pa-5 ma-2 mt-15" Outlined="true" Square="true">
-    <div class="text-center">
+<MudPaper Width="350px" Height="400px" Class="pa-5 mx-auto ma-2 mt-15" Outlined="true" Square="true">
+
+    <div class="text-center mx-auto">
 
     <MudText Class="mt-1 mx-auto" Typo="Typo.h5">Login</MudText>
     </div>
@@ -21,15 +22,13 @@
                 <MudText>Login</MudText>
             }
         </MudButton>
-        <div class="mt-4 text-center">
-        <MudLink Href="register" Class="mt-5 text-center text-primary" Typo="Typo.body2">Not a member? Register Now</MudLink>
+        <div class="d-flex justify-content-center">
+        <MudLink Href="register" Class="mt-5 mx-auto text-center text-primary" Typo="Typo.body2">Not a member? Register Now</MudLink>
         </div>
     </div>
 </MudPaper>
    </div>
-    @*<div class="col-7">
-        <LoginCar/>
-    </div>*@
+   
 </div>
 @code {
     public string Email { get; set; }

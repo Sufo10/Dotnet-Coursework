@@ -8,8 +8,14 @@
     <MudAppBar Elevation="0">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudSpacer />
-        <MudButton Href="/login" Variant="Variant.Filled" Class="me-2" Color="Color.Primary">Login</MudButton>
-        <MudButton Href="/register" Variant="Variant.Outlined" Color="Color.Primary">Sign Up</MudButton>
+        @if (_isDarkMode)
+        {
+            <MudSwitch @bind-Checked="@_isDarkMode"  ThumbIcon="@Icons.Material.Outlined.LightMode" ThumbIconColor="Color.Info"></MudSwitch>
+        }
+        else
+        {
+            <MudSwitch @bind-Checked="@_isDarkMode" ThumbIcon="@Icons.Material.Outlined.DarkMode" ThumbIconColor="Color.Info"></MudSwitch>
+        }
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
         <MudDrawerHeader>
@@ -32,16 +38,14 @@
     {
         Palette = new Palette()
         {
-            Primary = Colors.Blue.Default,
+            Primary = Colors.Teal.Darken1,
             Secondary = Colors.Green.Accent4,
-            AppbarBackground = Colors.Red.Default,
+            AppbarBackground = Colors.Teal.Lighten1,
         },
-        
-        LayoutProperties = new LayoutProperties()
+        PaletteDark = new PaletteDark()
         {
-            DrawerWidthLeft = "260px",
-            DrawerWidthRight = "300px"
-        }
+            Primary = Colors.Teal.Darken1,
+        },
     };
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
