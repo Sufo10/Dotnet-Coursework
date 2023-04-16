@@ -1,5 +1,6 @@
 ﻿using System;
 using Coursework.Application.Common.Interface;
+using Coursework.Domain.Entities;
 using Coursework.Domain.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -19,7 +20,10 @@ namespace Coursework.Infrastructure.Persistent
             _dateTime = dateTime;
 
         }
-             public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+
+        public DbSet<Customer> Customer { get; set; }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             foreach (Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<BaseEntity> entry in ChangeTracker.Entries<BaseEntity>())
             {

@@ -12,6 +12,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.13" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,4 +20,7 @@
     <ProjectReference Include="..\Coursework.Infrastructure\Coursework.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Microsoft.VisualStudio.Web.CodeGeneration.Design" />
+  </ItemGroup>
 </Project>

@@ -9,9 +9,11 @@
   <ItemGroup>
     <None Remove="Shared\" />
     <None Remove="Entities\" />
+    <None Remove="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Shared\" />
     <Folder Include="Entities\" />
+    <Folder Include="Models\" />
   </ItemGroup>
 </Project>
