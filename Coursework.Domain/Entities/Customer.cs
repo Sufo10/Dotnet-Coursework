@@ -13,6 +13,7 @@ namespace Coursework.Domain.Entities
         public Boolean IsVerified { get; set; }
         public Guid UserId { get; set; }
         public Boolean PaymentFulfilled { get; set; }
+        public string Phone { get; set; }
     }
 }
 

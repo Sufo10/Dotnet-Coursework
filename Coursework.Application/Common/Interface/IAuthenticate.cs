@@ -1,5 +1,6 @@
 ﻿using System;
 using Coursework.Application.DTO;
+using Microsoft.AspNetCore.Http;
 
 namespace Coursework.Application.Common.Interface
 {

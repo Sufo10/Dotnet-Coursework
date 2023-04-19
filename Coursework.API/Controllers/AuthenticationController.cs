@@ -33,8 +33,10 @@ namespace Coursework.API.Controllers
         }
 
         [HttpPost]
+        [Consumes("multipart/form-data")]
+        //[RequestSizeLimit(100_000_000)] // 100 MB limit
         [Route("/api/register")]
-        public async Task<ResponseDTO> AddCustomer(CustomerRegisterRequestDTO model)
+        public async Task<ResponseDTO> AddCustomer([FromForm]CustomerRegisterRequestDTO model)
         {
             var data = await _authenticate.Register(model);
             return data;

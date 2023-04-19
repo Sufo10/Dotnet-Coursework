@@ -2,7 +2,9 @@ using System;
 using Coursework.Application.Common.Interface;
 using Coursework.Infrastructure.DI;
 using Coursework.Infrastructure.Persistent;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +16,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 100_000_000; // 100 MB limit
+});
 var serviceProvider = builder.Services.BuildServiceProvider();
 try
 {

@@ -22,6 +22,7 @@ namespace Coursework.Infrastructure.Persistent
         }
 
         public DbSet<Customer> Customer { get; set; }
+        public DbSet<CustomerFileUpload> CustomerFileUpload { get; set; }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
