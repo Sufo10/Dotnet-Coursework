@@ -7,18 +7,22 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Coursework.Infrastructure.Services
 {
-	public class AuthenticationService: IAuthenticate
-	{
+    public class AuthenticationService : IAuthenticate
+    {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IApplicationDBContext _dbContext;
         private readonly IFileStorage _fileStorage;
-        public AuthenticationService(UserManager<IdentityUser> userManager,RoleManager<IdentityRole> roleManager, IApplicationDBContext dBContext,IFileStorage fileStorage)
+        private readonly ITokenService _tokenService;
+        public AuthenticationService(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, SignInManager<IdentityUser> signInManager, IApplicationDBContext dBContext, IFileStorage fileStorage, ITokenService tokenService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _signInManager = signInManager;
             _dbContext = dBContext;
             _fileStorage = fileStorage;
+            _tokenService = tokenService;
         }
         public async Task<string> UploadAsync(IFormFile file)
         {
@@ -53,7 +57,7 @@ namespace Coursework.Infrastructure.Services
                 if (!result.Succeeded)
                 {
                     var errorMessages = result.Errors.Select(e => e.Description).ToList();
-                return new ResponseDTO { Status = "Error", Message = string.Join("; ", errorMessages) };
+                    return new ResponseDTO { Status = "Error", Message = string.Join("; ", errorMessages) };
                 }
 
                 var roleExists = await _roleManager.RoleExistsAsync("Customer");
@@ -87,9 +91,9 @@ namespace Coursework.Infrastructure.Services
                         FileName = uploadedFile,
                         UserID = customerID,
                         DocumentType = model.FileType,
-                        CreatedBy=customerID
+                        CreatedBy = customerID
                     };
-                  var customerInput= await _dbContext.CustomerFileUpload.AddAsync(customerUpload);
+                    var customerInput = await _dbContext.CustomerFileUpload.AddAsync(customerUpload);
                     //if(customerInput)
                     await _dbContext.SaveChangesAsync(default(CancellationToken));
                     return new ResponseDTO { Status = "Success", Message = "Customer Created successfully" };
@@ -99,7 +103,30 @@ namespace Coursework.Infrastructure.Services
             {
                 return new ResponseDTO { Status = "Error", Message = err.ToString() };
             }
-           
+
+        }
+
+        public async Task<LoginResponseDTO> TokenLoginAsync(LoginRequestDTO model)
+        {
+            try
+            {
+                var user = await _userManager.FindByNameAsync(model.UserName);
+                if (user == null) { return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" }; }
+                else
+                {
+                    var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+                    if (!result.Succeeded) return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" };
+
+                    var roles = await _userManager.GetRolesAsync(user);
+                    var role = roles.FirstOrDefault();
+                    var token =  _tokenService.GenerateToken(user, role!);
+                    return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role };
+                }
+            }
+            catch (Exception err)
+            {
+                return new LoginResponseDTO { Status = "Error", Message = err.ToString() };
+            }
         }
     }
 }

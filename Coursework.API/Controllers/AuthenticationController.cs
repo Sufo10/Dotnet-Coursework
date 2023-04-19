@@ -41,5 +41,13 @@ namespace Coursework.API.Controllers
             var data = await _authenticate.Register(model);
             return data;
         }
+
+        [HttpPost]
+        [Route("/api/login")]
+        public async Task<LoginResponseDTO> Login([FromBody] LoginRequestDTO login)
+        {
+            var data = await _authenticate.TokenLoginAsync(login);
+            return data;
+        }
     }
 }

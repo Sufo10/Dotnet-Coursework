@@ -19,9 +19,4 @@
     <None Remove="Common\Interface\" />
     <None Remove="DTO\" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Common\" />
-    <Folder Include="Common\Interface\" />
-    <Folder Include="DTO\" />
-  </ItemGroup>
 </Project>
