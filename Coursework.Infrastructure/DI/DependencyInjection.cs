@@ -33,7 +33,7 @@ namespace Coursework.Infrastructure.DI
             services.AddScoped<IApplicationDBContext>(provider => provider.GetService<ApplicationDBContext>());
             services.AddTransient<IDateTime, DateTimeService>();
             services.AddTransient<IFileStorage,ServerFileStorage>();
-
+            services.AddTransient<ICarDetails, CarService>();
             services.AddTransient<IAuthenticate, AuthenticationService>();
             services.AddTransient<ICustomerDetails, CustomerService>();
             return services;
