@@ -12,6 +12,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include="Microsoft.AspNet.Cors" Version="5.2.9" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,4 +22,15 @@
     <ProjectReference Include="..\Coursework.Infrastructure\Coursework.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Microsoft.VisualStudio.Web.CodeGeneration.Design" />
+    <None Remove="Microsoft.AspNetCore.Http" />
+    <None Remove="Uploads\" />
+    <None Remove="Uploads\Documents\" />
+    <None Remove="Microsoft.AspNet.Cors" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Uploads\" />
+    <Folder Include="Uploads\Documents\" />
+  </ItemGroup>
 </Project>

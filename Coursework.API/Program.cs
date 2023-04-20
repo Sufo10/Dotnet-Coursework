@@ -1,6 +1,13 @@
+using System;
+using Coursework.Application.Common.Interface;
 using Coursework.Infrastructure.DI;
 using Coursework.Infrastructure.Persistent;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +19,36 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-var app = builder.Build();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyPolicy",
+           builder =>
+           {
+               builder.WithOrigins("https://localhost:5001")
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+           });
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 100_000_000; // 100 MB limit
+});
+var serviceProvider = builder.Services.BuildServiceProvider();
+try
+{
+    var dbContext = serviceProvider.GetRequiredService<ApplicationDBContext>();
+    dbContext.Database.Migrate();
+}
+catch
+{
+}
+
+
+
+
+var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -28,6 +63,7 @@ app.UseRouting();
 app.UseAuthentication();
 
 app.UseAuthorization();
+app.UseCors("MyPolicy");
 
 app.MapControllers();
 

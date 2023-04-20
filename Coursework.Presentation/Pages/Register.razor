@@ -4,66 +4,100 @@
 <PageTitle>Register</PageTitle>
 <div class="row min-vh-100">
     <div class="col-12 d-flex justify-content-center align-item-center">
-        <MudPaper Width="850px" Class="pa-5 mx-auto ma-2 mt-15" Outlined="true" Square="true">
+        <MudPaper Width="650px" Class="pa-5 mx-auto ma-2 mt-15" Outlined="true" Square="true">
 
             <div class="text-center mx-auto">
 
                 <MudText Class="mt-1 mx-auto" Typo="Typo.h5">Register</MudText>
             </div>
             <div class="mt-3">
+                <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors" ReadOnly="false">
+                    <MudGrid Spacing=3>
+                        <MudItem xs="12">
+                            <MudTextField Class="mt-3" @bind-Value="Name" Required="true" RequiredError="Name is required" Label="Name" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
+                        </MudItem>
+                    </MudGrid>
+                    <MudGrid Spacing=3>
+                        <MudItem xs="6">
+                            <MudTextField Class="mt-3" @bind-Value="Phone"
+                                          Required="true"
+                                          RequiredError="Phone number is required" Label="Mobile Number" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField T="string" Class="mt-3" @bind-Value="Email" Required="true" RequiredError="Email is required" Label="Email"
+                                          Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})"
+                                          Variant="Variant.Outlined" Clearable="true" Immediate="true" />
+                        </MudItem>
+                    </MudGrid>
+                    <MudGrid Spacing=3>
+                        <MudItem xs="12">
+                            <MudTextField Class="mt-7" @bind-Value="Address" Required="true" RequiredError="Address is required" Label="Address" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
+                        </MudItem>
+                    </MudGrid>
+                    <MudGrid Spacing=3>
+                        <MudItem xs="6">
+                            <MudTextField Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
+                                          RequiredError="Password is required!"
+                                          @ref="pwField1"
+                                          Class="mt-7" @bind-Value="Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField Class="mt-7" @bind-Value="ConfirmPassword" Label=" Confirm Password" Variant="Variant.Outlined"
+                                          Validation="@(new Func<string, string>(PasswordMatch))" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
+                        </MudItem>
+                    </MudGrid>
+                    <MudFileUpload Class="mt-7" T="IBrowserFile" Accept=".png" FilesChanged="UploadFiles2" MaximumFileCount="1">
+                        <ButtonTemplate>
+                            <MudButton HtmlTag="label"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                                       for="@context">
+                                Upload Documents
+                            </MudButton>
+                        </ButtonTemplate>
+                    </MudFileUpload>
+                    @if (files != null)
+                    {
+                        <MudList>
 
-                <MudTextField Class="mt-3" @bind-Value="Phone" RequiredError="Phone number is required" Label="Mobile Number" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
-                <MudTextField T="string" Class="mt-7" @bind-Value="Email" Required="true" RequiredError="Email is required" Label="Email"
-                              Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})"
-                              Variant="Variant.Outlined" Clearable="true" Immediate="true" />
-                <MudTextField Class="mt-7" @bind-Value="Address" RequiredError="Address is required" Label="Address" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
-                <MudTextField Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
-                              RequiredError="Password is required!"
-                              @ref="pwField1"
-                              Class="mt-7" @bind-Value="Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
-                <MudTextField Class="mt-7" @bind-Value="ConfirmPassword" Label=" Confirm Password" Variant="Variant.Outlined"
-                              Validation="@(new Func<string, string>(PasswordMatch))" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
-
-                <MudFileUpload Class="mt-7" T="IBrowserFile" Accept=".png" FilesChanged="UploadFiles2" MaximumFileCount="1">
-                    <ButtonTemplate>
-                        <MudButton HtmlTag="label"
-                                   Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.CloudUpload"
-                                   for="@context">
-                            Upload Documents
-                        </MudButton>
-                    </ButtonTemplate>
-                </MudFileUpload>
-                @if (files != null)
-                {
-                    <MudList>
-                        @foreach (var file in files)
-                        {
                             <MudListItem Icon="@Icons.Material.Filled.AttachFile">
-                                @file.Name <code>@file.Size bytes</code>
+                                @files.Name <code>@files.Size bytes</code>
                             </MudListItem>
-                        }
-                    </MudList>
-                }
-                <MudText>
-                    Upload driving license or citizenship (Optional)
-                </MudText>
-                <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" Disabled="@_processing" OnClick="ProcessSomething" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">
+                            <MudRadioGroup Required="true" @bind-SelectedOption="Dense_Radio">
+                                <MudRadio Option="@("Citizenship")" Color="Color.Primary" Dense="true">Citizenship</MudRadio>
+                                <MudRadio Option="@("License")" Color="Color.Primary" Dense="false">Driving License</MudRadio>
+                            </MudRadioGroup>
 
-                    @if (_processing)
-                    {
-                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                        <MudText Class="ms-2">Processing</MudText>
+                        </MudList>
                     }
-                    else
-                    {
-                        <MudText>Register</MudText>
-                    }
-                </MudButton>
-                <div class="d-flex justify-content-center">
-                    <MudLink Href="login" Class="mt-5 mx-auto text-center text-primary" Typo="Typo.body2">Already a member? Login</MudLink>
-                </div>
+                    <MudText>
+                        Upload driving license or citizenship (Optional)
+                    </MudText>
+                    <MudCardActions>
+                        <MudButton Disabled="@(!success || _processing)"
+                                   Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" OnClick="ProcessSomething" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary"
+                                   ButtonType="ButtonType.Submit">
+                            @if (_processing)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                <MudText Class="ms-2">Processing</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Register</MudText>
+                            }
+
+                        </MudButton>
+                    </MudCardActions>
+                    </MudForm>
+                    @*<MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" Disabled="@_processing" OnClick="ProcessSomething" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">*@
+
+
+                    @*</MudButton>*@
+                    <div class="d-flex justify-content-center">
+                        <MudLink Href="login" Class="mt-5 mx-auto text-center text-primary" Typo="Typo.body2">Already a member? Login</MudLink>
+                    </div>
             </div>
         </MudPaper>
     </div>
@@ -71,13 +105,18 @@
 </div>
 @code {
     public string Email { get; set; }
+    public string Name { get; set; }
     public string Phone { get; set; }
     public string Password { get; set; }
     public string ConfirmPassword { get; set; }
     private bool _processing = false;
     private string Address { get; set; }
+    public bool Dense_Radio { get; set; } = true;
     MudTextField<string> pwField1;
+    MudForm form;
+    string[] errors = { };
     bool isShow;
+    bool success;
     InputType PasswordInput = InputType.Password;
     string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
 
@@ -127,20 +166,18 @@
             return "Passwords don't match";
         return null;
     }
-
-    IList<IBrowserFile> files = new List<IBrowserFile>();
-    private void UploadFiles(IReadOnlyList<IBrowserFile> files)
-    {
-        foreach (var file in files)
-        {
-            this.files.Add(file);
-        }
-        //TODO upload the files to the server
-    }
+    IBrowserFile files { get; set; }
 
     private void UploadFiles2(IBrowserFile file)
     {
-        files.Add(file);
+        files= file;
         //TODO upload the files to the server
+
     }
-}
+
+    private void OnValidSubmit(EditContext context)
+    {
+        success = true;
+        StateHasChanged();
+    }
+    }
