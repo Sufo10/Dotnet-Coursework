@@ -51,9 +51,9 @@ namespace Coursework.Infrastructure.Services
 
             }
         }
-        public async Task<ResponseDataDTO> GetActiveCars()
+        public async Task<ResponseDataDTO<List<CarUserDTO>>> GetActiveCars()
         {
-            var data = _dbContext.Car.Select(e => new Car()
+            var data = _dbContext.Car.Select(e => new CarUserDTO()
             {
                 Id = e.Id,
                 Name=e.Name,
@@ -61,7 +61,7 @@ namespace Coursework.Infrastructure.Services
                 IsAvailable=e.IsAvailable
             }).ToList();
 
-            return new ResponseDataDTO { Status="Success",Message="Data Fetched Successully",Data=data};
+            return new ResponseDataDTO<List<CarUserDTO>> { Status="Success",Message="Data Fetched Successully",Data=data};
         }
     }
 }

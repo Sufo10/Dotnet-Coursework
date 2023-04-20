@@ -20,7 +20,7 @@ namespace Coursework.API.Controllers
 
         [HttpGet]
         [Route("/api/cars")]
-        public async Task<ResponseDataDTO> GetAllCars()
+        public async Task<ResponseDataDTO<List<CarUserDTO>>> GetAllCars()
         {
             var data = await _carDetails.GetActiveCars();
             return data;

@@ -13,7 +13,18 @@ namespace Coursework.Infrastructure.DI
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            
+            //services.AddCors
+            //services.AddCors(options =>
+            //{
+            //    options.AddPolicy("AllowAllOrigins",
+            //        builder =>
+            //        {
+            //            builder.AllowAnyOrigin()
+            //                .AllowAnyHeader()
+            //                .AllowAnyMethod();
+            //        });
+            //});
+
             services.AddDbContext<ApplicationDBContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("CAPostgreSQL"),
                 b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)), ServiceLifetime.Transient);

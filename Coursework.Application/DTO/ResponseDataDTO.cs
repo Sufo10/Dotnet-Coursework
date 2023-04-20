@@ -3,9 +3,9 @@ using Coursework.Domain.Entities;
 
 namespace Coursework.Application.DTO
 {
-	public class ResponseDataDTO:ResponseDTO
+	public class ResponseDataDTO<T>:ResponseDTO
 	{
-		public List<Car> Data { get; set; } 
+		public T Data { get; set; } 
 		
 	}
 }
