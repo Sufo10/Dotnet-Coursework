@@ -3,6 +3,7 @@ using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
 using Coursework.Domain.Entities;
 using Microsoft.AspNetCore.Http;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Coursework.Infrastructure.Services
 {
@@ -53,12 +54,13 @@ namespace Coursework.Infrastructure.Services
         }
         public async Task<ResponseDataDTO<List<CarUserDTO>>> GetActiveCars()
         {
+             var baseUrl = "https://localhost:7190/images/";
             var data = _dbContext.Car.Select(e => new CarUserDTO()
             {
                 Id = e.Id,
                 Name=e.Name,
-                Image=e.Image,
-                IsAvailable=e.IsAvailable
+                Image = "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fGNhcnN8ZW58MHx8MHx8&w=1000&q=80",
+                IsAvailable=e.IsAvailable,
             }).ToList();
 
             return new ResponseDataDTO<List<CarUserDTO>> { Status="Success",Message="Data Fetched Successully",Data=data};

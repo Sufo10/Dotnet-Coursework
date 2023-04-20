@@ -46,7 +46,7 @@
 
 @code{
     DialogOptions fullScreen = new DialogOptions() { FullScreen = true, CloseButton = true };
-    public List<Cars> Servers;
+    public List<Cars> Servers { get; set; }=new List<Cars>();
     async Task OpenDialog(DialogOptions options, Cars car)
     {
         var parameters = new DialogParameters { ["car"] = car };

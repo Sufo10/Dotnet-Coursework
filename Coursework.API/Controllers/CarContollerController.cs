@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
@@ -13,9 +14,12 @@ namespace Coursework.API.Controllers
     public class CarContollerController : ControllerBase
     {
         private readonly ICarDetails _carDetails;
-        public CarContollerController(ICarDetails carDetails)
+        private readonly IWebHostEnvironment _environment;
+
+        public CarContollerController(ICarDetails carDetails, IWebHostEnvironment environment)
         {
             _carDetails = carDetails;
+            _environment = environment;
         }
 
         [HttpGet]
@@ -34,6 +38,5 @@ namespace Coursework.API.Controllers
             var data = await _carDetails.AddCars(model);
             return data;
         }
-
     }
 }
