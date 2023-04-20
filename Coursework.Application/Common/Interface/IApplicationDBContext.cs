@@ -8,6 +8,7 @@ namespace Coursework.Application.Common.Interface
 	{
         DbSet<Customer> Customer { get; set; }
         DbSet<CustomerFileUpload> CustomerFileUpload { get; set; }
+        DbSet<Car> Car { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
 }

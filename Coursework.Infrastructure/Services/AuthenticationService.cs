@@ -35,6 +35,7 @@ namespace Coursework.Infrastructure.Services
         }
 
 
+
         public async Task<ResponseDTO> Register(CustomerRegisterRequestDTO model)
         {
             try
@@ -76,15 +77,16 @@ namespace Coursework.Infrastructure.Services
                     Phone = model.Phone,
                     UserId = new Guid(user.Id)
                 };
-                _dbContext.Customer.AddAsync(customer);
                 var customerID = customer.Id;
                 if (model.File == null || model.File.Length == 0)
                 {
+                _dbContext.Customer.AddAsync(customer);
                     await _dbContext.SaveChangesAsync(default(CancellationToken));
                     return new ResponseDTO { Status = "Success", Message = "Customer Created successfully" };
                 }
                 else
                 {
+
                     var uploadedFile = await UploadAsync(model.File);
                     var customerUpload = new CustomerFileUpload
                     {
@@ -93,6 +95,8 @@ namespace Coursework.Infrastructure.Services
                         DocumentType = model.FileType,
                         CreatedBy = customerID
                     };
+                    customer.IsVerified = true;
+                    _dbContext.Customer.AddAsync(customer);
                     var customerInput = await _dbContext.CustomerFileUpload.AddAsync(customerUpload);
                     //if(customerInput)
                     await _dbContext.SaveChangesAsync(default(CancellationToken));
