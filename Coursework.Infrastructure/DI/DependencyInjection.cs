@@ -39,7 +39,7 @@ namespace Coursework.Infrastructure.DI
                 options.Password.RequireLowercase = false;
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@.";
-            }).AddRoles<IdentityRole>().AddEntityFrameworkStores<ApplicationDBContext>();
+            }).AddRoles<IdentityRole>().AddEntityFrameworkStores<ApplicationDBContext>().AddSignInManager<SignInManager<IdentityUser>>();
 
             services.AddScoped<IApplicationDBContext>(provider => provider.GetService<ApplicationDBContext>());
             services.AddTransient<IDateTime, DateTimeService>();
@@ -47,6 +47,7 @@ namespace Coursework.Infrastructure.DI
             services.AddTransient<ICarDetails, CarService>();
             services.AddTransient<IAuthenticate, AuthenticationService>();
             services.AddTransient<ICustomerDetails, CustomerService>();
+            services.AddTransient<ITokenService, TokenService>();
             return services;
         }
     }

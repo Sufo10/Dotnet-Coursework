@@ -59,7 +59,7 @@ namespace Coursework.Infrastructure.Services
             {
                 Id = e.Id,
                 Name=e.Name,
-                Image = "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fGNhcnN8ZW58MHx8MHx8&w=1000&q=80",
+                Image = baseUrl + e.Image,
                 IsAvailable=e.IsAvailable,
             }).ToList();
 
