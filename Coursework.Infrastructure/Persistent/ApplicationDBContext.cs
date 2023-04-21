@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Coursework.Infrastructure.Persistent
 {
-	public class ApplicationDBContext: IdentityDbContext<IdentityUser, IdentityRole, string>, IApplicationDBContext
+	public class ApplicationDBContext: IdentityDbContext<AppUser, IdentityRole, string>, IApplicationDBContext
 	{
                  private readonly IDateTime _dateTime;
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options, IDateTime dateTime)
