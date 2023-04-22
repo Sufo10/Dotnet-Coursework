@@ -6,7 +6,7 @@ using Coursework.Application.DTO;
 using Coursework.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Coursework.Infrastructure.Services
@@ -81,7 +81,7 @@ namespace Coursework.Infrastructure.Services
                     Address = model.Address,
                     IsVerified = false,
                     Phone = model.Phone,
-                    UserId = new Guid(user.Id)
+                    UserId = user.Id
                 };
                 var customerID = customer.Id;
                 var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -99,7 +99,7 @@ namespace Coursework.Infrastructure.Services
                     var customerUpload = new CustomerFileUpload
                     {
                         FileName = uploadedFile,
-                        UserID = customerID,
+                        CustomerId = customerID,
                         DocumentType = model.FileType,
                         CreatedBy = customerID
                     };
@@ -138,6 +138,46 @@ namespace Coursework.Infrastructure.Services
             catch (Exception err)
             {
                 return new LoginResponseDTO { Status = "Error", Message = err.ToString() };
+            }
+        }
+
+
+        public async Task<ResponseDTO> ChangePassword(UserChangePasswordDTO model,Guid userID) {
+            try
+            {
+                var currentUser= await _userManager.FindByIdAsync(userID.ToString());
+
+                var passwordIsValid = await _userManager.CheckPasswordAsync(currentUser, model.Password);
+                if (!passwordIsValid)
+                {
+                    return new ResponseDTO { Status = "Error", Message = "Invalid current password" };
+                }
+
+                if (model.Password.Equals(model.NewPassword))
+                {
+                    return new ResponseDTO { Status = "Error", Message = "New Password cannot be same as current password" };
+
+                }
+
+                if (!model.NewPassword.Equals(model.ConfirmPassword))
+                {
+                    return new ResponseDTO { Status = "Error", Message = "Confirm Password doesnot match" };
+                }
+
+                // Attempt to change the password
+                var result = await _userManager.ChangePasswordAsync(currentUser, model.Password, model.NewPassword);
+                if (!result.Succeeded)
+                {
+                    return new ResponseDTO { Status = "Error", Message = $"{result.Errors.FirstOrDefault()?.Description}" };
+                }
+
+                return new ResponseDTO { Status = "Success", Message = "Password Changed Successfully!" };
+
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO { Status = "Error", Message = "Some Problem Occured" };
+
             }
         }
 

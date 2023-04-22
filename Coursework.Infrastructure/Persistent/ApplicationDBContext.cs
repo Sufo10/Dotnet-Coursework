@@ -14,6 +14,11 @@ namespace Coursework.Infrastructure.Persistent
 	public class ApplicationDBContext: IdentityDbContext<AppUser, IdentityRole, string>, IApplicationDBContext
 	{
                  private readonly IDateTime _dateTime;
+
+        //public ApplicationDBContext()
+        //{
+
+        //}
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options, IDateTime dateTime)
             : base(options)
         {
