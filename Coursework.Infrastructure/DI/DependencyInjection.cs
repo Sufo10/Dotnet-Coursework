@@ -7,7 +7,6 @@ using Coursework.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +35,11 @@ namespace Coursework.Infrastructure.DI
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@.";
             }).AddEntityFrameworkStores<ApplicationDBContext>().AddDefaultTokenProviders();
 
+
+            services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromDays(-1);
+            });
 
             services.ConfigureApplicationCookie(options => {
                 options.Cookie.SameSite = SameSiteMode.None;
