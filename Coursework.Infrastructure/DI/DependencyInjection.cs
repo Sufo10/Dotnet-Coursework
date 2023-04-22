@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Text;
 using Coursework.Application.Common.Interface;
+using Coursework.Domain.Entities;
 using Coursework.Infrastructure.Persistent;
 using Coursework.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Coursework.Infrastructure.DI
 {
@@ -13,23 +17,11 @@ namespace Coursework.Infrastructure.DI
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            //services.AddCors
-            //services.AddCors(options =>
-            //{
-            //    options.AddPolicy("AllowAllOrigins",
-            //        builder =>
-            //        {
-            //            builder.AllowAnyOrigin()
-            //                .AllowAnyHeader()
-            //                .AllowAnyMethod();
-            //        });
-            //});
-
             services.AddDbContext<ApplicationDBContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("CAPostgreSQL"),
                 b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)), ServiceLifetime.Transient);
 
-            services.AddIdentityCore<IdentityUser>(options =>
+            services.AddIdentity<AppUser,IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = true;
                 options.Password.RequireDigit = false;
@@ -39,13 +31,38 @@ namespace Coursework.Infrastructure.DI
                 options.Password.RequireLowercase = false;
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@.";
-            }).AddRoles<IdentityRole>().AddEntityFrameworkStores<ApplicationDBContext>().AddSignInManager<SignInManager<IdentityUser>>();
+            }).AddEntityFrameworkStores<ApplicationDBContext>().AddDefaultTokenProviders();
+
+
+            services.ConfigureApplicationCookie(options => {
+                options.LoginPath = "/Auth/SignIn";
+            });
+            services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidAudience =  configuration["Jwt:Audience"],
+            ValidIssuer = configuration["Jwt:Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(configuration["Jwt:Key"])
+            )
+        };
+    });
+
+
 
             services.AddScoped<IApplicationDBContext>(provider => provider.GetService<ApplicationDBContext>());
             services.AddTransient<IDateTime, DateTimeService>();
             services.AddTransient<IFileStorage,ServerFileStorage>();
             services.AddTransient<ICarDetails, CarService>();
             services.AddTransient<IAuthenticate, AuthenticationService>();
+            //services.AddTransient<AppUser, AuthenticationService>();
             services.AddTransient<ICustomerDetails, CustomerService>();
             services.AddTransient<ITokenService, TokenService>();
 

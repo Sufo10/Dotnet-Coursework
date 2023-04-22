@@ -35,24 +35,6 @@ builder.Services.AddCors(options =>
            });
 });
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
-builder.Services.AddAuthentication(auth =>
-{
-    auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuerSigningKey = true,
-        ValidateLifetime = false
-    };
-});
-
 builder.Services.AddAuthorization();
 
 builder.Services.Configure<FormOptions>(options =>
@@ -79,7 +61,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+//app.UseSession();
+app.UseHttpsRedirection();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
@@ -87,15 +70,10 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/images"
 });
 
-app.UseHttpsRedirection();
 
-app.UseRouting();
-
-app.UseAuthentication();
-
-app.UseAuthorization();
 app.UseCors("MyPolicy");
-
+app.UseAuthentication();
+app.UseRouting();
+app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
