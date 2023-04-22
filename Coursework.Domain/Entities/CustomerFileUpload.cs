@@ -9,8 +9,8 @@ namespace Coursework.Domain.Entities
 		public string FileName { get; set; }
 		public string DocumentType { get; set; }
 
-        public Guid CustomerId { get; set; }
-		public virtual Customer Customer { get; set; }
+        public string UserId { get; set; }
+		public virtual AppUser User { get; set; }
     }
 }
 

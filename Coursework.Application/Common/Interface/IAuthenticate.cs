@@ -11,6 +11,8 @@ namespace Coursework.Application.Common.Interface
 		Task<ResponseDTO> ChangePassword(UserChangePasswordDTO model,Guid userID);
 		Task ForgotPasswordAsync(string email);
 		Task ConfirmEmailAsync(string userId, string token);
+
+		Task<ResponseDTO> EmployeeRegister(EmployeeRegistrationRequestDTO model, string userID);
    }
 }
 

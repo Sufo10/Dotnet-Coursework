@@ -82,5 +82,15 @@ namespace Coursework.API.Controllers
             await _authenticate.ConfirmEmailAsync(userId, token);
             return Redirect("https://www.google.com");
         }
+
+        [Authorize(Roles ="ADMIN")]
+        [HttpPost]
+        [Route("/api/admin/register-employee")]
+        public async Task<ResponseDTO> RegisterEmployee(EmployeeRegistrationRequestDTO model)
+        {
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var data = await _authenticate.EmployeeRegister(model, userID);
+            return data;
+        }
     }
 }

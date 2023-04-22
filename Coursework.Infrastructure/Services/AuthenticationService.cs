@@ -41,7 +41,6 @@ namespace Coursework.Infrastructure.Services
         }
 
 
-
         public async Task<ResponseDTO> Register(CustomerRegisterRequestDTO model)
         {
             try
@@ -67,17 +66,17 @@ namespace Coursework.Infrastructure.Services
                     return new ResponseDTO { Status = "Error", Message = string.Join("; ", errorMessages) };
                 }
 
-                var roleExists = await _roleManager.RoleExistsAsync("Customer");
+                var roleExists = await _roleManager.RoleExistsAsync("CUSTOMER");
                 if (!roleExists)
                 {
-                    await _roleManager.CreateAsync(new IdentityRole { Name = "Customer" });
+                    await _roleManager.CreateAsync(new IdentityRole { Name = "CUSTOMER" });
                 }
 
-                await _userManager.AddToRoleAsync(user, "Customer");
+                await _userManager.AddToRoleAsync(user, "CUSTOMER");
                 var customer = new Customer
                 {
                     Name = model.Name,
-                    CustomerType = Domain.Models.CustomerType.Basic,
+                    CustomerType = Domain.Models.CustomerType.BASIC,
                     Address = model.Address,
                     IsVerified = false,
                     Phone = model.Phone,
@@ -99,7 +98,7 @@ namespace Coursework.Infrastructure.Services
                     var customerUpload = new CustomerFileUpload
                     {
                         FileName = uploadedFile,
-                        CustomerId = customerID,
+                        UserId =  user.Id,
                         DocumentType = model.FileType,
                         CreatedBy = customerID
                     };
@@ -209,6 +208,68 @@ namespace Coursework.Infrastructure.Services
             var emailConfirmationToken = UtilityService.FromUrlSafeBase64(token);
             var result = await _userManager.ConfirmEmailAsync(user, emailConfirmationToken);
             UtilityService.ValidateIdentityResult(result);
+        }
+
+        public async Task<ResponseDTO> EmployeeRegister(EmployeeRegistrationRequestDTO model, string userID)
+        {
+            try
+            {
+                var userExists = await _userManager.FindByEmailAsync(model.Email);
+                if (userExists != null)
+                    return new ResponseDTO { Status = "Error", Message = "Email already exists" };
+
+                if (!model.Password.Equals(model.ConfirmPassword))
+                {
+                    return new ResponseDTO { Status = "Error", Message = "Password doesnot match" };
+                }
+                AppUser user = new()
+                {
+                    Email = model.Email,
+                    UserName = model.UserName,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                };
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded)
+                {
+                    var errorMessages = result.Errors.Select(e => e.Description).ToList();
+                    return new ResponseDTO { Status = "Error", Message = string.Join("; ", errorMessages) };
+                }
+
+                if (model.EmployeeType.ToUpper() == "ADMIN" || model.EmployeeType.ToUpper() =="STAFF")
+                {
+
+                var roleExists = await _roleManager.RoleExistsAsync(model.EmployeeType.ToUpper());
+                if (!roleExists)
+                {
+                    await _roleManager.CreateAsync(new IdentityRole { Name = model.EmployeeType.ToUpper() });
+                }
+
+                await _userManager.AddToRoleAsync(user, model.EmployeeType.ToUpper());
+                    var employee = new CompanyEmployee
+                    {
+                        Name = model.Name,
+                        Address = model.Address,
+                        IsVerified = false,
+                        Phone = model.Phone,
+                        UserId = user.Id,
+                        PaymentFulfilled=true,
+
+                    };
+                    var employeeID = employee.Id;
+                    _dbContext.Employee.AddAsync(employee);
+                    await _dbContext.SaveChangesAsync(default(CancellationToken));
+                    return new ResponseDTO { Status = "Success", Message = "Employee Created successfully" };
+                }
+                else
+                {
+                    return new ResponseDTO { Status = "Error", Message ="Employee Type can only be admin or staff"};
+
+                }
+            }
+            catch (Exception err)
+            {
+                return new ResponseDTO { Status = "Error", Message = err.ToString() };
+            }
         }
     }
 }

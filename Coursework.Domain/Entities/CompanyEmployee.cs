@@ -4,16 +4,14 @@ using Coursework.Domain.Shared;
 
 namespace Coursework.Domain.Entities
 {
-    public class Customer : BaseEntity
-    {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public string Name { get; set; }
-        public CustomerType CustomerType { get; set; }
+	public class CompanyEmployee:BaseEntity
+	{
+		public Guid Id { get; set; } = Guid.NewGuid();
+		public string Name { get; set; }
         public string Address { get; set; }
         public Boolean IsVerified { get; set; }
-        public Boolean PaymentFulfilled { get; set; }
-        public string Phone { get; set; }
-
+		public Boolean PaymentFulfilled { get; set; }
+		public string Phone { get; set; }
 
         public string UserId { get; set; }
         public virtual AppUser User { get; set; }
