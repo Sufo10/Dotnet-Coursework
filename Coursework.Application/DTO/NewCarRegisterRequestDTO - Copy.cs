@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Coursework.Application.DTO
 {
-	public class NewCarRegisterRequestDTO
+	public class EditCarRequestDTO
 	{
         [Required(ErrorMessage = "Name is required")]
         public string? Name { get; set; }

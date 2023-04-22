@@ -51,6 +51,7 @@ catch
 {
 }
 
+//builder.Services.AddScoped<ICarTestDetails, CarTestDetails>();
 
 
 var app = builder.Build();

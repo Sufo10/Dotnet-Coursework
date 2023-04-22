@@ -65,6 +65,9 @@ namespace Coursework.Infrastructure.DI
             //services.AddTransient<AppUser, AuthenticationService>();
             services.AddTransient<ICustomerDetails, CustomerService>();
             services.AddTransient<ITokenService, TokenService>();
+
+            services.AddTransient<ICarTestDetails, CarTestService>();
+
             return services;
         }
     }

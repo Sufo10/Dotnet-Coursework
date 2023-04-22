@@ -27,7 +27,7 @@ namespace Coursework.Infrastructure.Services
         }
 
 
-        public async Task<ResponseDTO> AddCars(NewCarRegisterRequestDTO model)
+        public async Task<ResponseDTO> AddCars(EditCarRequestDTO model)
         {
             try
             {
