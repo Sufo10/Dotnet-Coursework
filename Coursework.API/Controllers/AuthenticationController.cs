@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
 using Coursework.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Coursework.API.Controllers
 {
@@ -16,12 +19,14 @@ namespace Coursework.API.Controllers
     {
         private readonly ICustomerDetails _customerDetails;
         private readonly IAuthenticate _authenticate;
+        private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public AuthenticationController(ICustomerDetails customerDetails, IAuthenticate authenticate, RoleManager<IdentityRole> roleManager)
+        public AuthenticationController(ICustomerDetails customerDetails, IAuthenticate authenticate, UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _customerDetails = customerDetails;
             _authenticate = authenticate;
             _roleManager = roleManager;
+            _userManager = userManager;
 
         }
         [HttpGet]
@@ -47,6 +52,17 @@ namespace Coursework.API.Controllers
         public async Task<LoginResponseDTO> Login([FromBody] LoginRequestDTO login)
         {
             var data = await _authenticate.TokenLoginAsync(login);
+            return data;
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("/api/change-password")]
+        public async Task<ResponseDTO> ChangePassword([FromBody] UserChangePasswordDTO model)
+        {
+            var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var data = await _authenticate.ChangePassword(model, userID);
             return data;
         }
     }
