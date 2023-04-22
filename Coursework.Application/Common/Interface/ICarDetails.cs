@@ -6,7 +6,7 @@ namespace Coursework.Application.Common.Interface
 {
 	public interface ICarDetails
 	{
-		Task<ResponseDTO> AddCars(NewCarRegisterRequestDTO model);
+		Task<ResponseDTO> AddCars(EditCarRequestDTO model);
 		Task<ResponseDataDTO<List<CarUserDTO>>> GetActiveCars();
 	}
 }

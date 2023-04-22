@@ -1,17 +1,22 @@
-﻿@page "/login"
+﻿@using System.Text;
+@using Newtonsoft.Json;
+@page "/login"
+@inject NavigationManager NavManager
+
 <PageTitle>Login</PageTitle>
 <div class="row min-vh-100">
    <div class="col-12 d-flex justify-content-center align-item-center">
-<MudPaper Width="350px" Height="400px" Class="pa-5 mx-auto ma-2 mt-15" Outlined="true" Square="true">
-
-    <div class="text-center mx-auto">
-
-    <MudText Class="mt-1 mx-auto" Typo="Typo.h5">Login</MudText>
-    </div>
-    <div class="mt-3">
-        <MudTextField Class="mt-7" @bind-Value="Email" Label="Email" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
-        <MudTextField Class="mt-7" @bind-Value="Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
-        <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" Disabled="@_processing" OnClick="ProcessSomething" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">
+        <MudPaper Width="350px" Height="400px" Class="pa-5 mx-auto ma-2 mt-15" Outlined="true" Square="true">
+            <div class="text-center mx-auto">
+                <MudText Class="mt-1 mx-auto" Typo="Typo.h5">Login</MudText>
+                
+            </div>
+            <div class="mt-3">
+                <MudTextField Class="mt-7" @bind-Value="UserName" Label="Username" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
+                <MudTextField Class="mt-7" @bind-Value="Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
+                @*<MudAlert id="err" style="display: none; margin-top: 10px;" Severity="Severity.Warning" Variant="Variant.Outlined">@Emessage</MudAlert>*@
+                <p style="color: red;">@Emessage</p>
+                <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" Disabled="@_processing" OnClick="ProcessLogin" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">
             @if (_processing)
             {
                 <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
@@ -22,17 +27,18 @@
                 <MudText>Login</MudText>
             }
         </MudButton>
-        <div class="d-flex justify-content-center">
-        <MudLink Href="register" Class="mt-5 mx-auto text-center text-primary" Typo="Typo.body2">Not a member? Register Now</MudLink>
+            <div class="d-flex justify-content-center">
+            <MudLink Href="register" Class="mt-5 mx-auto text-center text-primary" Typo="Typo.body2">Not a member? Register Now</MudLink>
         </div>
     </div>
-</MudPaper>
+        </MudPaper>
    </div>
-   
 </div>
+
 @code {
-    public string Email { get; set; }
+    public string UserName { get; set; }
     public string Password { get; set; }
+    public string Emessage { get; set; }
     private bool _processing = false;
     bool isShow;
     InputType PasswordInput = InputType.Password;
@@ -54,11 +60,45 @@
         }
     }
 
-    async Task ProcessSomething()
+    // login user
+    async Task ProcessLogin()
     {
         _processing = true;
-        await Task.Delay(2000);
-        _processing = false;
+
+        if (UserName == "" || UserName == null || Password == "" || Password == null)
+        {
+            Console.WriteLine("Empty Fields Found");
+            await Task.Delay(1000);
+            _processing = false;
+        }else
+        {
+            var client = new HttpClient();
+            var data = new { userName = UserName, password = Password };
+            var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("https://localhost:7190/api/login", content);
+            var result = await response.Content.ReadAsStringAsync();
+
+            // Process the response...
+            dynamic jsonResponse = JsonConvert.DeserializeObject(result);
+            Console.WriteLine($"status: {jsonResponse.status}");
+
+            if (jsonResponse.status == "Success")
+            {
+                // Access props from the response obj
+                Console.WriteLine($"status: {jsonResponse.status}");
+
+                _processing = false;
+                await Task.Delay(1000);
+                NavManager.NavigateTo("/");
+            }
+            else
+            {
+                // Handle error responses
+                Console.WriteLine($"Response body: {jsonResponse.message}");
+                Emessage = jsonResponse.message;
+                _processing = false;
+            }
+        }
     }
 }
 
