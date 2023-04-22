@@ -62,7 +62,7 @@ namespace Coursework.Infrastructure.Services
                     var customerUpload = new CustomerFileUpload
                     {
                         FileName = uploadedFile,
-                        CustomerId = customerDetails.Id,
+                        UserId = userID.ToString(),
                         DocumentType = model.FileType,
                         CreatedBy = customerDetails.Id
                     };

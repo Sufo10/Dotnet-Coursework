@@ -29,7 +29,7 @@ namespace Coursework.Infrastructure.Persistent
         public DbSet<Customer> Customer { get; set; }
         public DbSet<CustomerFileUpload> CustomerFileUpload { get; set; }
         public DbSet<Car> Car { get; set; }
-
+        public DbSet<CompanyEmployee> Employee { get; set; }
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             foreach (Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<BaseEntity> entry in ChangeTracker.Entries<BaseEntity>())

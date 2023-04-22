@@ -3,10 +3,10 @@ namespace Coursework.Domain.Models
 {
 	public enum RentStatus
 	{
-		Pending,
-		Approved,
-		OnLease,
-		Completed
+		PENDING,
+		APPROVED,
+		ONLEASE,
+		COMPLETED
 	}
 }
 

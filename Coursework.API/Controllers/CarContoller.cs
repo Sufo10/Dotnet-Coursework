@@ -24,7 +24,6 @@ namespace Coursework.API.Controllers
             _environment = environment;
         }
 
-        [Authorize(Roles ="Customer")]
         [HttpGet]
         [Route("/api/cars")]
         public async Task<ResponseDataDTO<List<CarUserDTO>>> GetAllCars()
