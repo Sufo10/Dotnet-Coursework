@@ -8,6 +8,8 @@ namespace Coursework.Application.Common.Interface
 	{
 		Task<ResponseDTO> Register(CustomerRegisterRequestDTO model);
 		Task<LoginResponseDTO> TokenLoginAsync(LoginRequestDTO model);
-	}
+		Task ForgotPasswordAsync(string email);
+		Task ConfirmEmailAsync(string userId, string token);
+    }
 }
 
