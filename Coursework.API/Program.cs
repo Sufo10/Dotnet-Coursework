@@ -31,7 +31,8 @@ builder.Services.AddCors(options =>
 
                builder.WithOrigins("https://localhost:5001", "https://localhost:44398")
                    .AllowAnyMethod()
-                   .AllowAnyHeader();
+                   .AllowAnyHeader()
+                   .AllowCredentials();
            });
 });
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
@@ -72,6 +73,10 @@ app.UseStaticFiles(new StaticFileOptions
 
 
 app.UseCors("MyPolicy");
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    Secure = CookieSecurePolicy.SameAsRequest
+});
 app.UseAuthentication();
 app.UseRouting();
 app.UseAuthorization();
