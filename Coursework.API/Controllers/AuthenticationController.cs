@@ -9,6 +9,7 @@ using Coursework.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,8 +28,8 @@ namespace Coursework.API.Controllers
             _authenticate = authenticate;
             _roleManager = roleManager;
             _userManager = userManager;
-
         }
+        
         [HttpGet]
         [Route("api/customer/all-customer")]
         public async Task<List<Customer>> GetAllCustomerDetails()
@@ -41,7 +42,7 @@ namespace Coursework.API.Controllers
         [Consumes("multipart/form-data")]
         //[RequestSizeLimit(100_000_000)] // 100 MB limit
         [Route("/api/register")]
-        public async Task<ResponseDTO> AddCustomer([FromForm]CustomerRegisterRequestDTO model)
+        public async Task<ResponseDTO> AddCustomer([FromForm] CustomerRegisterRequestDTO model)
         {
             var data = await _authenticate.Register(model);
             return data;
@@ -64,6 +65,23 @@ namespace Coursework.API.Controllers
 
             var data = await _authenticate.ChangePassword(model, userID);
             return data;
+         }
+
+        //incomplete
+        [HttpPost]
+        [Route("/api/forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] string email)
+        {
+            await _authenticate.ForgotPasswordAsync(email);
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("/api/confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            await _authenticate.ConfirmEmailAsync(userId, token);
+            return Redirect("https://www.google.com");
         }
     }
 }

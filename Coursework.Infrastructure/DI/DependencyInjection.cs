@@ -5,7 +5,9 @@ using Coursework.Domain.Entities;
 using Coursework.Infrastructure.Persistent;
 using Coursework.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,19 +25,21 @@ namespace Coursework.Infrastructure.DI
 
             services.AddIdentity<AppUser,IdentityRole>(options =>
             {
-                options.SignIn.RequireConfirmedAccount = true;
+                options.SignIn.RequireConfirmedAccount = false;
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 6;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
                 options.User.RequireUniqueEmail = true;
+                options.SignIn.RequireConfirmedEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@.";
             }).AddEntityFrameworkStores<ApplicationDBContext>().AddDefaultTokenProviders();
 
 
             services.ConfigureApplicationCookie(options => {
-                options.LoginPath = "/Auth/SignIn";
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.Name = "Access-Cookie";
             });
             services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -65,7 +69,7 @@ namespace Coursework.Infrastructure.DI
             //services.AddTransient<AppUser, AuthenticationService>();
             services.AddTransient<ICustomerDetails, CustomerService>();
             services.AddTransient<ITokenService, TokenService>();
-
+            services.AddTransient<IEmailService, EmailService>();
             services.AddTransient<ICarTestDetails, CarTestService>();
 
             return services;
