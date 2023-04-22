@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +24,7 @@ namespace Coursework.API.Controllers
             _environment = environment;
         }
 
+        [Authorize(Roles ="Customer")]
         [HttpGet]
         [Route("/api/cars")]
         public async Task<ResponseDataDTO<List<CarUserDTO>>> GetAllCars()

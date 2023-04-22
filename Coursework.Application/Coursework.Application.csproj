@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.15" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Coursework.Domain\Coursework.Domain.csproj" />
   </ItemGroup>
 
@@ -18,5 +14,9 @@
     <None Remove="Common\" />
     <None Remove="Common\Interface\" />
     <None Remove="DTO\" />
+    <None Remove="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.15" />
   </ItemGroup>
 </Project>

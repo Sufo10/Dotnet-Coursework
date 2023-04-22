@@ -9,13 +9,13 @@ namespace Coursework.Infrastructure.Services
 {
     public class AuthenticationService : IAuthenticate
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly SignInManager<AppUser> _signInManager;
         private readonly IApplicationDBContext _dbContext;
         private readonly IFileStorage _fileStorage;
         private readonly ITokenService _tokenService;
-        public AuthenticationService(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, SignInManager<IdentityUser> signInManager, IApplicationDBContext dBContext, IFileStorage fileStorage, ITokenService tokenService)
+        public AuthenticationService(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, SignInManager<AppUser> signInManager, IApplicationDBContext dBContext, IFileStorage fileStorage, ITokenService tokenService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -48,7 +48,7 @@ namespace Coursework.Infrastructure.Services
                 {
                     return new ResponseDTO { Status = "Error", Message = "Password doesnot match" };
                 }
-                IdentityUser user = new()
+                AppUser user = new()
                 {
                     Email = model.Email,
                     UserName = model.UserName,
@@ -118,7 +118,7 @@ namespace Coursework.Infrastructure.Services
                 if (user == null) { return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" }; }
                 else
                 {
-                    var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, true,false);
                     if (!result.Succeeded) return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" };
 
                     var roles = await _userManager.GetRolesAsync(user);
