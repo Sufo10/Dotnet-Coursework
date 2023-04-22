@@ -76,7 +76,7 @@ namespace Coursework.Infrastructure.Services
                     Address = model.Address,
                     IsVerified = false,
                     Phone = model.Phone,
-                    UserId = new Guid(user.Id)
+                    UserId = user.Id
                 };
                 var customerID = customer.Id;
                 if (model.File == null || model.File.Length == 0)
@@ -92,7 +92,7 @@ namespace Coursework.Infrastructure.Services
                     var customerUpload = new CustomerFileUpload
                     {
                         FileName = uploadedFile,
-                        UserID = customerID,
+                        CustomerId = customerID,
                         DocumentType = model.FileType,
                         CreatedBy = customerID
                     };

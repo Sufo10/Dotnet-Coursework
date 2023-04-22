@@ -45,7 +45,7 @@ namespace Coursework.Infrastructure.Services
         {
             try
             {
-                var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID);
+                var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
 
                 if (customerDetails == null)
                 {
@@ -62,7 +62,7 @@ namespace Coursework.Infrastructure.Services
                     var customerUpload = new CustomerFileUpload
                     {
                         FileName = uploadedFile,
-                        UserID = customerDetails.Id,
+                        CustomerId = customerDetails.Id,
                         DocumentType = model.FileType,
                         CreatedBy = customerDetails.Id
                     };
