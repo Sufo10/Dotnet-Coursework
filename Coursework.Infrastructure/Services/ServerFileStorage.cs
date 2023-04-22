@@ -14,12 +14,13 @@ namespace Coursework.Infrastructure.Services
         }
         public async Task<string> SaveFileAsync(IFormFile file)
         {
+            string startupPath = Path.Combine(System.IO.Directory.GetCurrentDirectory(),"images");
             var fileName = string.Concat(
                 Path.GetFileNameWithoutExtension(file.FileName),
                 DateTime.Now.ToString("yyyyMMddHHmmssfff"),
                 Path.GetExtension(file.FileName)
                 );
-            var filePath = Path.Combine("/Users/gaurav/Projects/Dotnet-Coursework/Uploads", fileName);
+            var filePath = Path.Combine(startupPath, fileName);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
