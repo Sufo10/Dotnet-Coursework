@@ -16,7 +16,7 @@ namespace Coursework.API.Controllers
         }
 
         [HttpPost]
-        [Route("/api/BookCars")]
+        [Route("/api/bookcars")]
         public async Task<ResponseDTO> BookRequest(BookCarRequestDTO model)
         {
             var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
