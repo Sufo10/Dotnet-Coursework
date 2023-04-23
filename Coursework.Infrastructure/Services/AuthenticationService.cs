@@ -141,7 +141,7 @@ namespace Coursework.Infrastructure.Services
             }
         }
 
-        public async Task ForgotPasswordAsync(string email)
+        public async Task<ResponseDTO> ForgotPasswordEmailAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
@@ -149,18 +149,34 @@ namespace Coursework.Infrastructure.Services
                 var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var token = UtilityService.ToUrlSafeBase64(passwordResetToken);
                 await _emailService.SendForgotPasswordEmailAsync(user.UserName, email, token);
+                return new ResponseDTO { Status = "Success", Message = "Email Sent Successful" };
+            }
+            else
+            {
+                return new ResponseDTO { Status = "Error", Message = "User Not Found" };
             }
         }
 
-        public async Task ResetPassword(string email, string token, string password)
+        public async Task<ResponseDTO> ResetPasswordAsync(ResetPasswordRequestDTO body)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(body.Email);
             if (user != null)
             {
-                var passwordResetToken = UtilityService.FromUrlSafeBase64(token);
-                var result = await _userManager.ResetPasswordAsync(user, passwordResetToken, password);
+                var passwordResetToken = UtilityService.FromUrlSafeBase64(body.Token!);
+                var currentPassword = await _userManager.CheckPasswordAsync(user, body.Password);
+                if (currentPassword)
+                {
+                    return new ResponseDTO { Status = "Error", Message = "New password cannot match current password" };
+                }
+                var result = await _userManager.ResetPasswordAsync(user, passwordResetToken, body.Password);
                 UtilityService.ValidateIdentityResult(result);
+                return new ResponseDTO { Status = "Success", Message = "Password Reset Successful" };
             }
+            else
+            {
+                return new ResponseDTO { Status = "Error", Message = "User Not Found" };
+            }
+
         }
 
         public async Task ConfirmEmailAsync(string userId, string token)

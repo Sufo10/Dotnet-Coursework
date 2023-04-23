@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33424.131
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coursework.API", "Coursework.API\Coursework.API.csproj", "{B8AA101D-C400-4772-AA6A-A09AB5625AE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coursework.API", "Coursework.API\Coursework.API.csproj", "{B8AA101D-C400-4772-AA6A-A09AB5625AE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coursework.Infrastructure", "Coursework.Infrastructure\Coursework.Infrastructure.csproj", "{B0E7AFFF-6AD5-423E-8E6C-F03B1E80A975}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coursework.Infrastructure", "Coursework.Infrastructure\Coursework.Infrastructure.csproj", "{B0E7AFFF-6AD5-423E-8E6C-F03B1E80A975}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coursework.Domain", "Coursework.Domain\Coursework.Domain.csproj", "{4F1796DC-E480-4BC0-AEE5-62BE1F423225}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coursework.Domain", "Coursework.Domain\Coursework.Domain.csproj", "{4F1796DC-E480-4BC0-AEE5-62BE1F423225}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coursework.Application", "Coursework.Application\Coursework.Application.csproj", "{24416EBD-18AC-4700-AA03-E983CB9DA266}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coursework.Application", "Coursework.Application\Coursework.Application.csproj", "{24416EBD-18AC-4700-AA03-E983CB9DA266}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coursework.Presentation", "Coursework.Presentation\Coursework.Presentation.csproj", "{9B0AD6E3-F921-4909-B67E-D0F2A9DEE7FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coursework.Presentation", "Coursework.Presentation\Coursework.Presentation.csproj", "{9B0AD6E3-F921-4909-B67E-D0F2A9DEE7FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
