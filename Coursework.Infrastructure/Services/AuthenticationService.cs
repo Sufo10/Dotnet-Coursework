@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 //using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Coursework.Infrastructure.Services
 {
@@ -115,7 +116,6 @@ namespace Coursework.Infrastructure.Services
             {
                 return new ResponseDTO { Status = "Error", Message = err.ToString() };
             }
-
         }
 
         public async Task<LoginResponseDTO> TokenLoginAsync(LoginRequestDTO model)
@@ -126,12 +126,16 @@ namespace Coursework.Infrastructure.Services
                 if (user == null) { return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" }; }
                 else
                 {
-                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
-                    if (!result.Succeeded) return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" };
-
                     var roles = await _userManager.GetRolesAsync(user);
                     var role = roles.FirstOrDefault();
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
+                    if (!result.Succeeded) return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" };
                     var token = _tokenService.GenerateToken(user, role!);
+                    if (role == "Customer")
+                    {
+                        var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == user.Id.ToString());
+                        return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName, IsVerified = customer.IsVerified };
+                    }
                     return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName };
                 }
             }

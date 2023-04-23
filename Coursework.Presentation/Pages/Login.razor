@@ -89,10 +89,18 @@
             {
                 string username = jsonResponse.userName; // Replace with the actual username from the login response
                 string role = jsonResponse.role;
+                
                 Console.WriteLine(username);
                 Console.WriteLine(role);
-                await AuthenticationService.SetLoggedInUserAsync(username, role);
-
+                if (jsonResponse.HasProperty("isVerified"))
+                {
+                    bool isVerified = jsonResponse.isVerified;
+                    await AuthenticationService.SetLoggedInUserAsync(username, role, jsonResponse.isVerified);
+                }
+                else
+                {
+                    await AuthenticationService.SetLoggedInUserAsync(username, role);
+                }
                 //await AuthenticationService.SetLoggedInUserAsync(username, role);
                 // Access props from the response obj
                 Console.WriteLine($"status: {jsonResponse.status}");
