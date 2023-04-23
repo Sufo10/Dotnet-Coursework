@@ -15,5 +15,7 @@ namespace Coursework.Application.DTO
         public string? Data { get; set; }
 
         public string? Role { get; set; }
+
+        public string? UserName { get; set; }
     }
 }

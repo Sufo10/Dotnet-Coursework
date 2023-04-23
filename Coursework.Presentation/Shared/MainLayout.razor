@@ -1,62 +1,88 @@
 ﻿@inherits LayoutComponentBase
+@inject AuthenticationStateService AuthenticationService
+@*@inject UserState*@ 
 
 <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="MyCustomTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudLayout>
-    <MudAppBar Elevation="0">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudSpacer />
-        @if (_isDarkMode)
-        {
-            <MudSwitch @bind-Checked="@_isDarkMode"  ThumbIcon="@Icons.Material.Outlined.LightMode" ThumbIconColor="Color.Info"></MudSwitch>
-        }
-        else
-        {
-            <MudSwitch @bind-Checked="@_isDarkMode" ThumbIcon="@Icons.Material.Outlined.DarkMode" ThumbIconColor="Color.Info"></MudSwitch>
-        }
-    </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h6">Cars Rental</MudText>
-        </MudDrawerHeader>
-        <NavMenu />
-    </MudDrawer>
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
-            @Body
-        </MudContainer>
-    </MudMainContent>
-</MudLayout>
+<CascadingValue Value="@User">
+        <MudLayout>
+            <MudAppBar Elevation="0">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                <MudSpacer />
+                @if (_isDarkMode)
+                {
+                    <MudSwitch @bind-Checked="@_isDarkMode" ThumbIcon="@Icons.Material.Outlined.LightMode" ThumbIconColor="Color.Info"></MudSwitch>
+                }
+                else
+                {
+                    <MudSwitch @bind-Checked="@_isDarkMode" ThumbIcon="@Icons.Material.Outlined.DarkMode" ThumbIconColor="Color.Info"></MudSwitch>
+                }
+            </MudAppBar>
+            <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
+                <MudDrawerHeader>
+                    <MudText Typo="Typo.h6">Cars Rental</MudText>
+                </MudDrawerHeader>
+                <NavMenu />
+            </MudDrawer>
+            <MudMainContent>
+                <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
+                    @Body
+                </MudContainer>
+            </MudMainContent>
+        </MudLayout>
 
-@code {
-    bool _drawerOpen = true;
-    private bool _isDarkMode;
-    private MudThemeProvider _mudThemeProvider;
-    MudTheme MyCustomTheme = new MudTheme()
-    {
-        Palette = new Palette()
+    </CascadingValue>
+
+    @code {
+        bool _drawerOpen = true;
+        private bool _isDarkMode;
+        private UserInfo User { get; set; } = new UserInfo();
+
+        private MudThemeProvider _mudThemeProvider;
+        MudTheme MyCustomTheme = new MudTheme()
         {
-            Primary = Colors.Teal.Darken1,
-            Secondary = Colors.Green.Accent4,
-            AppbarBackground = Colors.Teal.Lighten1,
-        },
-        PaletteDark = new PaletteDark()
+            Palette = new Palette()
+            {
+                Primary = Colors.Teal.Darken1,
+                Secondary = Colors.Green.Accent4,
+                AppbarBackground = Colors.Teal.Lighten1,
+            },
+            PaletteDark = new PaletteDark()
+            {
+                Primary = Colors.Teal.Darken1,
+            },
+        };
+
+
+        protected override async Task OnInitializedAsync()
         {
-            Primary = Colors.Teal.Darken1,
-        },
-    };
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
+            (User.Username, User.Role) = await AuthenticationService.GetLoggedInUserAsync();
+            AuthenticationService.OnUserStateChanged += UpdateUserState;
+        }
+
+        private async void UpdateUserState()
         {
-            _isDarkMode = await _mudThemeProvider.GetSystemPreference();
+            (User.Username, User.Role) = await AuthenticationService.GetLoggedInUserAsync();
             StateHasChanged();
         }
+
+        public void Dispose()
+        {
+            AuthenticationService.OnUserStateChanged -= UpdateUserState;
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                _isDarkMode = await _mudThemeProvider.GetSystemPreference();
+                StateHasChanged();
+            }
+        }
+        void DrawerToggle()
+        {
+            _drawerOpen = !_drawerOpen;
+        }
     }
-    void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
-}

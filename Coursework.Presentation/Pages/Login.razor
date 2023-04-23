@@ -1,15 +1,16 @@
 ﻿@using System.Text;
 @using Newtonsoft.Json;
 @page "/login"
+@inject AuthenticationStateService AuthenticationService;
 @inject NavigationManager NavManager
 
 <PageTitle>Login</PageTitle>
 <div class="row min-vh-100">
-   <div class="col-12 d-flex justify-content-center align-item-center">
+    <div class="col-12 d-flex justify-content-center align-item-center">
         <MudPaper Width="350px" Height="400px" Class="pa-5 mx-auto ma-2 mt-15" Outlined="true" Square="true">
             <div class="text-center mx-auto">
                 <MudText Class="mt-1 mx-auto" Typo="Typo.h5">Login</MudText>
-                
+
             </div>
             <div class="mt-3">
                 <MudTextField Class="mt-7" @bind-Value="UserName" Label="Username" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
@@ -17,22 +18,22 @@
                 @*<MudAlert id="err" style="display: none; margin-top: 10px;" Severity="Severity.Warning" Variant="Variant.Outlined">@Emessage</MudAlert>*@
                 <p style="color: red;">@Emessage</p>
                 <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" Disabled="@_processing" OnClick="ProcessLogin" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">
-            @if (_processing)
-            {
-                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                <MudText Class="ms-2">Processing</MudText>
-            }
-            else
-            {
-                <MudText>Login</MudText>
-            }
-        </MudButton>
-            <div class="d-flex justify-content-center">
-            <MudLink Href="register" Class="mt-5 mx-auto text-center text-primary" Typo="Typo.body2">Not a member? Register Now</MudLink>
-        </div>
-    </div>
+                    @if (_processing)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                        <MudText Class="ms-2">Processing</MudText>
+                    }
+                    else
+                    {
+                        <MudText>Login</MudText>
+                    }
+                </MudButton>
+                <div class="d-flex justify-content-center">
+                    <MudLink Href="register" Class="mt-5 mx-auto text-center text-primary" Typo="Typo.body2">Not a member? Register Now</MudLink>
+                </div>
+            </div>
         </MudPaper>
-   </div>
+    </div>
 </div>
 
 @code {
@@ -70,7 +71,8 @@
             Console.WriteLine("Empty Fields Found");
             await Task.Delay(1000);
             _processing = false;
-        }else
+        }
+        else
         {
             var client = new HttpClient();
             var data = new { userName = UserName, password = Password };
@@ -81,9 +83,16 @@
             // Process the response...
             dynamic jsonResponse = JsonConvert.DeserializeObject(result);
             Console.WriteLine($"status: {jsonResponse.status}");
-
+            Console.WriteLine($"data:{jsonResponse.role}");
             if (jsonResponse.status == "Success")
             {
+                string username = jsonResponse.userName; // Replace with the actual username from the login response
+                string role = jsonResponse.role;
+                Console.WriteLine(username);
+                Console.WriteLine(role);
+                await AuthenticationService.SetLoggedInUserAsync(username, role);
+
+                //await AuthenticationService.SetLoggedInUserAsync(username, role);
                 // Access props from the response obj
                 Console.WriteLine($"status: {jsonResponse.status}");
 

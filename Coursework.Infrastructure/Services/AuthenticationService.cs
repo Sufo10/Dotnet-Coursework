@@ -81,7 +81,7 @@ namespace Coursework.Infrastructure.Services
                     Address = model.Address,
                     IsVerified = false,
                     Phone = model.Phone,
-                    UserId = new Guid(user.Id)
+                    UserId = user.Id
                 };
                 var customerID = customer.Id;
                 var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -99,7 +99,7 @@ namespace Coursework.Infrastructure.Services
                     var customerUpload = new CustomerFileUpload
                     {
                         FileName = uploadedFile,
-                        UserID = customerID,
+                        UserId = user.Id,
                         DocumentType = model.FileType,
                         CreatedBy = customerID
                     };
@@ -132,7 +132,7 @@ namespace Coursework.Infrastructure.Services
                     var roles = await _userManager.GetRolesAsync(user);
                     var role = roles.FirstOrDefault();
                     var token = _tokenService.GenerateToken(user, role!);
-                    return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role };
+                    return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName };
                 }
             }
             catch (Exception err)
@@ -199,13 +199,13 @@ namespace Coursework.Infrastructure.Services
                 if (model.EmployeeType.ToUpper() == "ADMIN" || model.EmployeeType.ToUpper() == "STAFF")
                 {
 
-                    var roleExists = await _roleManager.RoleExistsAsync(model.EmployeeType.ToUpper());
+                    var roleExists = await _roleManager.RoleExistsAsync(model.EmployeeType);
                     if (!roleExists)
                     {
-                        await _roleManager.CreateAsync(new IdentityRole { Name = model.EmployeeType.ToUpper() });
+                        await _roleManager.CreateAsync(new IdentityRole { Name = model.EmployeeType });
                     }
 
-                    await _userManager.AddToRoleAsync(user, model.EmployeeType.ToUpper());
+                    await _userManager.AddToRoleAsync(user, model.EmployeeType);
                     var employee = new CompanyEmployee
                     {
                         Name = model.Name,
@@ -230,6 +230,46 @@ namespace Coursework.Infrastructure.Services
             catch (Exception err)
             {
                 return new ResponseDTO { Status = "Error", Message = err.ToString() };
+            }
+        }
+
+        public async Task<ResponseDTO> ChangePassword(UserChangePasswordDTO model, Guid userID)
+        {
+            try
+            {
+                var currentUser = await _userManager.FindByIdAsync(userID.ToString());
+
+                var passwordIsValid = await _userManager.CheckPasswordAsync(currentUser, model.Password);
+                if (!passwordIsValid)
+                {
+                    return new ResponseDTO { Status = "Error", Message = "Invalid current password" };
+                }
+
+                if (model.Password.Equals(model.NewPassword))
+                {
+                    return new ResponseDTO { Status = "Error", Message = "New Password cannot be same as current password" };
+
+                }
+
+                if (!model.NewPassword.Equals(model.ConfirmPassword))
+                {
+                    return new ResponseDTO { Status = "Error", Message = "Confirm Password doesnot match" };
+                }
+
+                // Attempt to change the password
+                var result = await _userManager.ChangePasswordAsync(currentUser, model.Password, model.NewPassword);
+                if (!result.Succeeded)
+                {
+                    return new ResponseDTO { Status = "Error", Message = $"{result.Errors.FirstOrDefault()?.Description}" };
+                }
+
+                return new ResponseDTO { Status = "Success", Message = "Password Changed Successfully!" };
+
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO { Status = "Error", Message = "Some Problem Occured" };
+
             }
         }
     }

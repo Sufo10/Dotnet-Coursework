@@ -5,48 +5,59 @@
 
 
 <PageTitle>Index</PageTitle>
-<MudText class="my-5 text-white" Typo="Typo.h5">Cars Available</MudText>
+
+<div class="d-flex justify-space-between">
+<MudText class="my-5 text-white" Typo="Typo.h5">Cars Available, @User.Username</MudText>
+@if(User.Role=="ADMIN" || User.Role == "STAFF")
+{
+<MudCardActions>
+    <MudButton OnClick="@((e) => OpenAddDialog(maxWidth))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Add Cars</MudButton>
+</MudCardActions>
+}
+</div>
 <MudGrid Spacing=2 Justify="Justify.FlexStart">
     @if (Servers.Count > 0)
-{
-
-    @foreach (var item in Servers)
     {
-        <MudItem>
 
-            <MudCard width="350px">
-                <div class="w-full h-full hover-card">
-                    <div class="container-fluid card-image mt-2">
-                        <img class="object-fit-contain hover-image rounded mt-3"
-                             src=@item.Image />
-                    </div>
-                    <MudCardContent>
-                        <div class="d-flex align-items-center justify-space-between">
-                            <MudText Typo="Typo.h5">@item.Name</MudText>
-                            <div>
-                                <span>Rs.</span>
-                                <span class="fw-bold fs-5">2000</span>
-                                <span class="fs-6 text-secondary">/ DAY</span>
+        @foreach (var item in Servers)
+        {
+            <MudItem>
+
+                <MudCard width="350px">
+                    <div class="w-full h-full hover-card">
+                        <div class="container-fluid card-image mt-2">
+                            <img class="object-fit-contain hover-image rounded mt-3"
+                                 src=@item.Image />
+                        </div>
+                        <MudCardContent>
+                            <div class="d-flex align-items-center justify-space-between">
+                                <MudText Typo="Typo.h5">@item.Name</MudText>
+                                <div>
+                                    <span>Rs.</span>
+                                    <span class="fw-bold fs-5">2000</span>
+                                    <span class="fs-6 text-secondary">/ DAY</span>
+                                </div>
                             </div>
-                        </div>
-                        <div Class="d-flex">
-                            <MudText class="mt-4" Typo="Typo.body2">@item.Description</MudText>
-                        </div>
-                    </MudCardContent>
-                    <MudCardActions>
-                        <MudButton OnClick="@((e) => OpenDialog(fullScreen,item))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Book Now</MudButton>
-                    </MudCardActions>
-                </div>
-            </MudCard>
-        </MudItem>
+                            <div Class="d-flex">
+                                <MudText class="mt-4" Typo="Typo.body2">@item.Description</MudText>
+                            </div>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton OnClick="@((e) => OpenDialog(fullScreen,item))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Book Now</MudButton>
+                        </MudCardActions>
+                    </div>
+                </MudCard>
+            </MudItem>
+        }
     }
-}
 </MudGrid>
 
 
 @code{
     DialogOptions fullScreen = new DialogOptions() { FullScreen = true, CloseButton = true };
-    public List<Cars> Servers { get; set; }=new List<Cars>();
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
+    [CascadingParameter] public UserInfo User { get; set; }
+    public List<Cars> Servers { get; set; } = new List<Cars>();
     async Task OpenDialog(DialogOptions options, Cars car)
     {
         var parameters = new DialogParameters { ["car"] = car };
@@ -59,9 +70,20 @@
         }
     }
 
+    async Task OpenAddDialog(DialogOptions options)
+    {
+        var dialog = await DialogService.ShowAsync<BookingConfirm>("Add New Car", options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            Console.WriteLine("Is Deleted");
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        var response =await _httpClient.GetFromJsonAsync<ResponseWithData<List<Cars>>>("https://localhost:7190/api/cars");
+
+        var response = await _httpClient.GetFromJsonAsync<ResponseWithData<List<Cars>>>("https://localhost:7190/api/cars");
 
         if (response != null && response.status == "Success")
         {
