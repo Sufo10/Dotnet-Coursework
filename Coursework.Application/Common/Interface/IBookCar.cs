@@ -9,7 +9,7 @@ namespace Coursework.Application.Common.Interface
 {
     public interface IBookCar
     {
-        Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model);
+        Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model, Guid userID);
 
     }
 }
