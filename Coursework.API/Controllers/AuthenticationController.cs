@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
 using Coursework.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
+//using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Coursework.API.Controllers
@@ -66,6 +69,16 @@ namespace Coursework.API.Controllers
         {
             await _authenticate.ConfirmEmailAsync(userId, token);
             return Redirect("https://www.google.com");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [Route("/api/admin/register-employee")]
+        public async Task<ResponseDTO> RegisterEmployee(EmployeeRegistrationRequestDTO model)
+        {
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var data = await _authenticate.EmployeeRegister(model, userID);
+            return data;
         }
     }
 }

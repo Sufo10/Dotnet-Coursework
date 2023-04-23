@@ -20,7 +20,7 @@ namespace Coursework.Infrastructure.Persistent
             _dateTime = dateTime;
 
         }
-
+        public DbSet<CompanyEmployee> Employee { get; set; }
         public DbSet<Customer> Customer { get; set; }
         public DbSet<CustomerFileUpload> CustomerFileUpload { get; set; }
         public DbSet<Car> Car { get; set; }
