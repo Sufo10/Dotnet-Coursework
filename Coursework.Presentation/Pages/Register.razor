@@ -1,6 +1,12 @@
 ﻿@page "/register"
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
+@using System.Text;
+@using Newtonsoft.Json;
+@inject NavigationManager NavManager
+using Microsoft.JSInterop;
+
+@inject ISnackbar Snackbar
 <PageTitle>Register</PageTitle>
 <div class="row min-vh-100">
     <div class="col-12 d-flex justify-content-center align-item-center">
@@ -11,7 +17,12 @@
                 <MudText Class="mt-1 mx-auto" Typo="Typo.h5">Register</MudText>
             </div>
             <div class="mt-3">
-                <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors" ReadOnly="false">
+                <MudForm @ref="form" @onsubmit="handleSubmit" @bind-IsValid="@success" @bind-Errors="@errors" ReadOnly="false">
+                    <MudGrid Spacing=3>
+                        <MudItem xs="12">
+                            <MudTextField Class="mt-3" @bind-Value="UserName" Required="true" RequiredError="Username is required" Label="UserName" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
+                        </MudItem>
+                    </MudGrid>
                     <MudGrid Spacing=3>
                         <MudItem xs="12">
                             <MudTextField Class="mt-3" @bind-Value="Name" Required="true" RequiredError="Name is required" Label="Name" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
@@ -25,7 +36,7 @@
                         </MudItem>
                         <MudItem xs="6">
                             <MudTextField T="string" Class="mt-3" @bind-Value="Email" Required="true" RequiredError="Email is required" Label="Email"
-                                          Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})"
+                                          Validation="@(new EmailAddressAttribute() { ErrorMessage = "The email address is invalid" })"
                                           Variant="Variant.Outlined" Clearable="true" Immediate="true" />
                         </MudItem>
                     </MudGrid>
@@ -57,6 +68,7 @@
                             </MudButton>
                         </ButtonTemplate>
                     </MudFileUpload>
+
                     @if (files != null)
                     {
                         <MudList>
@@ -64,19 +76,22 @@
                             <MudListItem Icon="@Icons.Material.Filled.AttachFile">
                                 @files.Name <code>@files.Size bytes</code>
                             </MudListItem>
-                            <MudRadioGroup Required="true" @bind-SelectedOption="Dense_Radio">
-                                <MudRadio Option="@("Citizenship")" Color="Color.Primary" Dense="true">Citizenship</MudRadio>
-                                <MudRadio Option="@("License")" Color="Color.Primary" Dense="false">Driving License</MudRadio>
+                            <MudRadioGroup @bind-SelectedOption="@FileType">
+                                <MudRadio Option="@("Citizenship")" Color="Color.Primary">Citizenship</MudRadio>
+                                <MudRadio Option="@("License")" Color="Color.Primary">License</MudRadio>
                             </MudRadioGroup>
-
                         </MudList>
                     }
-                    <MudText>
-                        Upload driving license or citizenship (Optional)
-                    </MudText>
+                    else
+                    {
+
+                        <MudText>
+                            Upload driving license or citizenship (Optional)
+                        </MudText>
+                    }
                     <MudCardActions>
-                        <MudButton Disabled="@(!success || _processing)"
-                                   Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" OnClick="ProcessSomething" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary"
+                        <MudButton Disabled="@(_processing || !success)"
+                                   Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary"
                                    ButtonType="ButtonType.Submit">
                             @if (_processing)
                             {
@@ -90,14 +105,10 @@
 
                         </MudButton>
                     </MudCardActions>
-                    </MudForm>
-                    @*<MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" Disabled="@_processing" OnClick="ProcessSomething" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">*@
-
-
-                    @*</MudButton>*@
-                    <div class="d-flex justify-content-center">
-                        <MudLink Href="login" Class="mt-5 mx-auto text-center text-primary" Typo="Typo.body2">Already a member? Login</MudLink>
-                    </div>
+                </MudForm>
+                <div class="d-flex justify-content-center">
+                    <MudLink Href="login" Class="mt-5 mx-auto text-center text-primary" Typo="Typo.body2">Already a member? Login</MudLink>
+                </div>
             </div>
         </MudPaper>
     </div>
@@ -106,11 +117,13 @@
 @code {
     public string Email { get; set; }
     public string Name { get; set; }
+    public string UserName { get; set; }
     public string Phone { get; set; }
     public string Password { get; set; }
     public string ConfirmPassword { get; set; }
     private bool _processing = false;
     private string Address { get; set; }
+    public string FileType { get; set; }
     public bool Dense_Radio { get; set; } = true;
     MudTextField<string> pwField1;
     MudForm form;
@@ -135,14 +148,6 @@
             PasswordInput = InputType.Text;
         }
     }
-
-    async Task ProcessSomething()
-    {
-        _processing = true;
-        await Task.Delay(2000);
-        _processing = false;
-    }
-
     private IEnumerable<string> PasswordStrength(string pw)
     {
         if (string.IsNullOrWhiteSpace(pw))
@@ -170,14 +175,73 @@
 
     private void UploadFiles2(IBrowserFile file)
     {
-        files= file;
+        files = file;
         //TODO upload the files to the server
 
     }
 
+
+    async Task handleSubmit()
+    {
+        _processing = true;
+        await Task.Delay(1000);
+        Console.WriteLine("Function Invoved");
+        var client = new HttpClient();
+        var formData = new MultipartFormDataContent();
+        //var formData = new FormData();
+
+        // Add string content
+        formData.Add(new StringContent(Name), "name");
+        formData.Add(new StringContent(Phone.ToString()), "phone");
+        formData.Add(new StringContent(UserName.ToString()), "username");
+        formData.Add(new StringContent(Email.ToString()), "email");
+        formData.Add(new StringContent(Password.ToString()), "password");
+        formData.Add(new StringContent(ConfirmPassword.ToString()), "confirmpassword");
+        formData.Add(new StringContent(Address.ToString()), "address");
+
+        // Add file content
+        if (files != null)
+        {
+            var fileContent = new StreamContent(files.OpenReadStream());
+            formData.Add(fileContent, "file", files.Name);
+            if (Dense_Radio == true)
+            {
+                formData.Add(new StringContent("Citizenship"), "filetype");
+            }
+            else
+            {
+                formData.Add(new StringContent("License"), "filetype");
+            }
+        }
+
+        // Send the request
+        var response = await client.PostAsync("https://localhost:7190/api/register", formData);
+        var result = await response.Content.ReadAsStringAsync();
+        dynamic jsonResponse = JsonConvert.DeserializeObject(result);
+        _processing = false;
+        Console.WriteLine(jsonResponse);
+        if (jsonResponse.status == "Success")
+        {
+            success = true;
+            Snackbar.Add("Confiramtion Mail has been sent to your email", Severity.Success);
+            NavManager.NavigateTo("/login");
+            StateHasChanged();
+        }
+        else if (jsonResponse.status == "Error")
+        {
+            Snackbar.Add($"{jsonResponse.message}", Severity.Error);
+            errors = new string[] { "Failed to upload file." };
+            StateHasChanged();
+        }
+        else
+        {
+            Snackbar.Add("Some Problem Occured", Severity.Error);
+            StateHasChanged();
+        }
+    }
     private void OnValidSubmit(EditContext context)
     {
         success = true;
         StateHasChanged();
     }
-    }
+}
