@@ -7,8 +7,10 @@ namespace Coursework.Domain.Entities
 	{
 		public Guid Id { get; set; } = new Guid();
 		public string FileName { get; set; }
-		public Guid UserID { get; set; }
-		public string DocumentType { get; set; } 
-	}
+		public string DocumentType { get; set; }
+
+        public string UserId { get; set; }
+		public virtual AppUser User { get; set; }
+    }
 }
 

@@ -14,6 +14,11 @@ namespace Coursework.Infrastructure.Persistent
 	public class ApplicationDBContext: IdentityDbContext<AppUser, IdentityRole, string>, IApplicationDBContext
 	{
                  private readonly IDateTime _dateTime;
+
+        //public ApplicationDBContext()
+        //{
+
+        //}
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options, IDateTime dateTime)
             : base(options)
         {
@@ -24,7 +29,7 @@ namespace Coursework.Infrastructure.Persistent
         public DbSet<Customer> Customer { get; set; }
         public DbSet<CustomerFileUpload> CustomerFileUpload { get; set; }
         public DbSet<Car> Car { get; set; }
-
+        public DbSet<CompanyEmployee> Employee { get; set; }
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             foreach (Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<BaseEntity> entry in ChangeTracker.Entries<BaseEntity>())

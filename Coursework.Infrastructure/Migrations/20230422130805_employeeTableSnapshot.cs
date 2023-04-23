@@ -6,26 +6,22 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Coursework.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class fileUploadSnapshot : Migration
+    public partial class employeeTableSnapshot : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Phone",
-                table: "Customer",
-                type: "text",
-                nullable: false,
-                defaultValue: "");
-
             migrationBuilder.CreateTable(
-                name: "CustomerFileUpload",
+                name: "Employee",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FileName = table.Column<string>(type: "text", nullable: false),
-                    UserID = table.Column<Guid>(type: "uuid", nullable: false),
-                    DocumentType = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Address = table.Column<string>(type: "text", nullable: false),
+                    IsVerified = table.Column<bool>(type: "boolean", nullable: false),
+                    PaymentFulfilled = table.Column<bool>(type: "boolean", nullable: false),
+                    Phone = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     LastModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -36,19 +32,26 @@ namespace Coursework.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CustomerFileUpload", x => x.Id);
+                    table.PrimaryKey("PK_Employee", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Employee_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Employee_UserId",
+                table: "Employee",
+                column: "UserId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CustomerFileUpload");
-
-            migrationBuilder.DropColumn(
-                name: "Phone",
-                table: "Customer");
+                name: "Employee");
         }
     }
 }

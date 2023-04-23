@@ -1,10 +1,10 @@
 ﻿using System;
 namespace Coursework.Domain.Models
 {
-	public enum CustomerType
+	public enum EmployeeType
 	{
-		REGULAR,
-		BASIC
+		STAFF,
+		ADMIN
 	}
 }
 

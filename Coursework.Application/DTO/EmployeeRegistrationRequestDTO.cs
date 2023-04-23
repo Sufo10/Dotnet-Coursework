@@ -4,11 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace Coursework.Application.DTO
 {
-    public class EmployeeRegistrationRequestDTO
-    {
+	public class EmployeeRegistrationRequestDTO
+	{
         [Required(ErrorMessage = "Username is required")]
         public string? UserName { get; set; }
         [Required(ErrorMessage = "Name is required")]
@@ -37,7 +38,8 @@ namespace Coursework.Application.DTO
 
         public string? Phone { get; set; }
 
-        [Required(ErrorMessage = "Employee Type is required")]
+        [Required(ErrorMessage ="Employee Type is required")]
         public string? EmployeeType { get; set; }
     }
 }
+
