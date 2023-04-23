@@ -25,6 +25,8 @@ namespace Coursework.Infrastructure.Persistent
         public DbSet<CustomerFileUpload> CustomerFileUpload { get; set; }
         public DbSet<Car> Car { get; set; }
 
+        public DbSet<CustomerBooking> CustomerBooking { get; set; } 
+
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             foreach (Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<BaseEntity> entry in ChangeTracker.Entries<BaseEntity>())

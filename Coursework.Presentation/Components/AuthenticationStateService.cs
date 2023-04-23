@@ -15,9 +15,9 @@ namespace Coursework.Presentation.Components
             _jsRuntime = jsRuntime;
         }
 
-        public async Task SetLoggedInUserAsync(string username, string role)
+        public async Task SetLoggedInUserAsync(string username, string role, bool? isVerified = null)
         {
-            var userObject = new LoggedInUser { Username = username, Role = role };
+            var userObject = new LoggedInUser { Username = username, Role = role, IsVerified  = isVerified};
             string userJson = JsonSerializer.Serialize(userObject);
             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "loggedInUser", userJson);
             OnUserStateChanged?.Invoke();
@@ -47,5 +47,6 @@ namespace Coursework.Presentation.Components
     {
         public string Username { get; set; }
         public string Role { get; set; }
+        public bool? IsVerified { get; set;}
     }
 }
