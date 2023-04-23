@@ -38,14 +38,14 @@ namespace Coursework.Infrastructure.Services
                     var bookCar = new CustomerBooking
                     {
                         customerId = userID.ToString(), 
-                        CarId = model.CarId.ToString(),
+                        CarId = model.CarId,
                         RentStartdate = model.RentStartdate,
                         RentEnddate = model.RentEnddate
                     };
 
                     var RequestInput = await _dbContext.CustomerBooking.AddAsync(bookCar);
                     await _dbContext.SaveChangesAsync(default(CancellationToken));
-
+                    Console.WriteLine();
                     return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
                 }
 
