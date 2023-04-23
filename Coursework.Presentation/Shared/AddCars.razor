@@ -1,1 +1,161 @@
-﻿
+﻿@using System.Text;
+@using Newtonsoft.Json;
+@inject ISnackbar Snackbar
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.CarRental" Class="mr-3 mb-n1" />
+            Add a New Car
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <div class="col-12 d-flex justify-content-center align-item-center">
+            <MudPaper Class="pa-5 mx-auto ma-2" Square="true">
+                <div class="mt-3">
+                    <MudForm @ref="form" @bind-IsValid="@isSuccess" @onsubmit="handleSubmit" @bind-Errors="@errors" ReadOnly="false">
+                        <MudGrid Spacing=3>
+                            <MudItem xs="12">
+                                <MudTextField Class="mt-3" @bind-Value="Name" Required="true" RequiredError="Name is required" Label="Name" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
+                            </MudItem>
+                        </MudGrid>
+                        <MudGrid Spacing=3>
+                            <MudGrid Class="mt-3 mx-1" Spacing=3>
+                                <MudItem xs="12">
+                                    <MudNumericField @bind-Value="ActualPrice" Label="Actual Price" RequiredError="Actual Price is required" Format="F1" Variant="Variant.Outlined" />
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Class="mt-3 mx-1" Spacing=3>
+                                <MudItem xs="12">
+                                    <MudNumericField @bind-Value="OfferPrice" Label="Offer Price" RequiredError="Offer Price is required" Format="F1" Variant="Variant.Outlined" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudGrid>
+                        <MudGrid Spacing=3>
+                            <MudItem xs="12">
+                                <MudTextField Class="mt-7" @bind-Value="Description" Required="true" RequiredError="Description is required" Label="Description" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
+                            </MudItem>
+                        </MudGrid>
+                        <MudFileUpload Class="mt-7" T="IBrowserFile" Accept=".png" FilesChanged="UploadFiles2" MaximumFileCount="1">
+                            <ButtonTemplate>
+                                <MudButton HtmlTag="label"
+                                           Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.CloudUpload"
+                                           for="@context">
+                                    Upload Documents
+                                </MudButton>
+                            </ButtonTemplate>
+                        </MudFileUpload>
+                        @if (files == null)
+                        {
+                            <MudText Class="mt-3">
+                                Upload car image
+                            </MudText>
+                        }
+                        else
+                        {
+                            <MudText Class="mt-3">
+                                @files.Name <code>@files.Size bytes</code>
+
+                            </MudText>
+                        }
+
+                        <MudCardActions>
+                            <MudButton Disabled="@(_processing || files==null)"
+                                       Size="Size.Large" StartIcon="@Icons.Material.Filled.CarRental" Class="mt-14" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary"
+                                       ButtonType="ButtonType.Submit">
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                    <MudText Class="ms-2">Processing</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Add</MudText>
+                                }
+
+                            </MudButton>
+                        </MudCardActions>
+                    </MudForm>
+                    @*<MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" Disabled="@_processing" OnClick="ProcessSomething" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">*@
+
+
+                    @*</MudButton>*@
+
+                </div>
+            </MudPaper>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+    MudForm form;
+    string[] errors = { };
+    bool isShow;
+    bool isSuccess;
+    bool success = false;
+    public string Name { get; set; }
+    public double ActualPrice;
+    public string Description { get; set; }
+    public double OfferPrice;
+    public bool _processing { get; set; }
+    IBrowserFile files { get; set; }
+
+    private void UploadFiles2(IBrowserFile file)
+    {
+        files = file;
+    }
+
+
+    async Task handleSubmit()
+    {
+        var client = new HttpClient();
+        var formData = new MultipartFormDataContent();
+        //var formData = new FormData();
+
+        // Add string content
+        formData.Add(new StringContent(Name), "name");
+        formData.Add(new StringContent(ActualPrice.ToString()), "actualprice");
+        formData.Add(new StringContent(OfferPrice.ToString()), "offerprice");
+        formData.Add(new StringContent(Description), "description");
+
+        // Add file content
+        if (files != null)
+        {
+            var fileContent = new StreamContent(files.OpenReadStream());
+            formData.Add(fileContent, "file", files.Name);
+        }
+        // Send the request
+
+        var response = await client.PostAsync("https://localhost:7190/api/cars", formData);
+        var result = await response.Content.ReadAsStringAsync();
+        dynamic jsonResponse = JsonConvert.DeserializeObject(result);
+
+        if (jsonResponse.status == "Success")
+        {
+            success = true;
+            Snackbar.Add("Car Uploaded Successfully", Severity.Success);
+            isShow = true;
+            StateHasChanged();
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add("Car Uploaded Failed", Severity.Error);
+            errors = new string[] { "Failed to upload file." };
+            isShow = true;
+            StateHasChanged();
+        }
+    }
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+    private bool _autoClose;
+}

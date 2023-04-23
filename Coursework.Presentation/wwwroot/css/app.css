@@ -42,3 +42,11 @@
 .text-decoration-none {
     text-decoration:none !important;
 }
+
+.card-image {
+    height: 60%;
+}
+
+.object-fit-cover {
+    object-fit: cover;
+}
