@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 //using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Coursework.Infrastructure.Services
 {
@@ -115,7 +116,6 @@ namespace Coursework.Infrastructure.Services
             {
                 return new ResponseDTO { Status = "Error", Message = err.ToString() };
             }
-
         }
 
         public async Task<LoginResponseDTO> TokenLoginAsync(LoginRequestDTO model)
@@ -126,12 +126,16 @@ namespace Coursework.Infrastructure.Services
                 if (user == null) { return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" }; }
                 else
                 {
-                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
-                    if (!result.Succeeded) return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" };
-
                     var roles = await _userManager.GetRolesAsync(user);
                     var role = roles.FirstOrDefault();
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
+                    if (!result.Succeeded) return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" };
                     var token = _tokenService.GenerateToken(user, role!);
+                    if (role == "Customer")
+                    {
+                        var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == user.Id.ToString());
+                        return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName, IsVerified = customer.IsVerified };
+                    }
                     return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName };
                 }
             }
@@ -141,7 +145,7 @@ namespace Coursework.Infrastructure.Services
             }
         }
 
-        public async Task ForgotPasswordAsync(string email)
+        public async Task<ResponseDTO> ForgotPasswordEmailAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
@@ -149,18 +153,34 @@ namespace Coursework.Infrastructure.Services
                 var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var token = UtilityService.ToUrlSafeBase64(passwordResetToken);
                 await _emailService.SendForgotPasswordEmailAsync(user.UserName, email, token);
+                return new ResponseDTO { Status = "Success", Message = "Email Sent Successful" };
+            }
+            else
+            {
+                return new ResponseDTO { Status = "Error", Message = "User Not Found" };
             }
         }
 
-        public async Task ResetPassword(string email, string token, string password)
+        public async Task<ResponseDTO> ResetPasswordAsync(ResetPasswordRequestDTO body)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(body.Email);
             if (user != null)
             {
-                var passwordResetToken = UtilityService.FromUrlSafeBase64(token);
-                var result = await _userManager.ResetPasswordAsync(user, passwordResetToken, password);
+                var passwordResetToken = UtilityService.FromUrlSafeBase64(body.Token!);
+                var currentPassword = await _userManager.CheckPasswordAsync(user, body.Password);
+                if (currentPassword)
+                {
+                    return new ResponseDTO { Status = "Error", Message = "New password cannot match current password" };
+                }
+                var result = await _userManager.ResetPasswordAsync(user, passwordResetToken, body.Password);
                 UtilityService.ValidateIdentityResult(result);
+                return new ResponseDTO { Status = "Success", Message = "Password Reset Successful" };
             }
+            else
+            {
+                return new ResponseDTO { Status = "Error", Message = "User Not Found" };
+            }
+
         }
 
         public async Task ConfirmEmailAsync(string userId, string token)

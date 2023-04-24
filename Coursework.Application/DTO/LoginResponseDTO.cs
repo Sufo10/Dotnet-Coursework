@@ -17,5 +17,7 @@ namespace Coursework.Application.DTO
         public string? Role { get; set; }
 
         public string? UserName { get; set; }
+
+        public bool? IsVerified { get; set; }
     }
 }

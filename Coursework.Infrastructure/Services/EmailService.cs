@@ -19,6 +19,7 @@ namespace Coursework.Infrastructure.Services
     {
         private readonly string _from;
         private readonly SmtpClient _client;
+        private readonly string _applicationUrl;
         public EmailService(IConfiguration configuration) {
             var userName = configuration.GetSection("EmailConfig:UserName").Value!;
             var password = configuration.GetSection("EmailConfig:Password").Value!;
@@ -29,6 +30,7 @@ namespace Coursework.Infrastructure.Services
                 UseDefaultCredentials = false,
                 EnableSsl = true
              };
+            _applicationUrl = configuration.GetSection("BaseUrl:Frontend").Value!;
         }
 
         public async Task SendEmailAsync(MessageModel message)
@@ -46,7 +48,7 @@ namespace Coursework.Infrastructure.Services
 
         public async Task SendForgotPasswordEmailAsync(string name, string toEmail, string passwordResetToken)
         {
-            var passwordRestUrl = $"https://localhost:7190/forgot-password?token={passwordResetToken}";
+            var passwordRestUrl = $"{_applicationUrl}reset-password?token={passwordResetToken}&email={toEmail}";
             var message = new MessageModel
             {
                 Subject = "Password Reset Request",

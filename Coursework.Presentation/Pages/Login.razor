@@ -28,8 +28,9 @@
                         <MudText>Login</MudText>
                     }
                 </MudButton>
-                <div class="d-flex justify-content-center">
+                <div class="d-flex flex-column align-items-center">
                     <MudLink Href="register" Class="mt-5 mx-auto text-center text-primary" Typo="Typo.body2">Not a member? Register Now</MudLink>
+                    <MudLink Href="forgot-password" Class="mt-3 mx-auto text-center text-primary" Typo="Typo.body2">Forgot Password?</MudLink>
                 </div>
             </div>
         </MudPaper>
@@ -88,10 +89,18 @@
             {
                 string username = jsonResponse.userName; // Replace with the actual username from the login response
                 string role = jsonResponse.role;
+                
                 Console.WriteLine(username);
                 Console.WriteLine(role);
-                await AuthenticationService.SetLoggedInUserAsync(username, role);
-
+                if (jsonResponse.HasProperty("isVerified"))
+                {
+                    bool isVerified = jsonResponse.isVerified;
+                    await AuthenticationService.SetLoggedInUserAsync(username, role, jsonResponse.isVerified);
+                }
+                else
+                {
+                    await AuthenticationService.SetLoggedInUserAsync(username, role);
+                }
                 //await AuthenticationService.SetLoggedInUserAsync(username, role);
                 // Access props from the response obj
                 Console.WriteLine($"status: {jsonResponse.status}");

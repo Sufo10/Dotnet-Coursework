@@ -55,11 +55,22 @@ namespace Coursework.API.Controllers
 
         //incomplete
         [HttpPost]
+        [AllowAnonymous]
         [Route("/api/forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] string email)
+        public async Task<ResponseDTO> ForgotPassword(ForgotPasswordRequestDTO body)
         {
-            await _authenticate.ForgotPasswordAsync(email);
-            return Ok();
+            var data = await _authenticate.ForgotPasswordEmailAsync(body.Email);
+            return data;
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("/api/reset-password")]
+        public async Task<ResponseDTO> ResetPassword(ResetPasswordRequestDTO body)
+        {
+            Console.WriteLine(body);
+            var data = await _authenticate.ResetPasswordAsync(body);
+            return data;
         }
 
         [HttpGet]
