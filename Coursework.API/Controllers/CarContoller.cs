@@ -40,5 +40,14 @@ namespace Coursework.API.Controllers
             var data = await _carDetails.AddCars(model);
             return data;
         }
+
+        [HttpPatch]
+        [Consumes("multipart/form-data")]
+        [Route("/api/editcar")]
+        public async Task<ResponseDTO> EditCar([FromForm] CarEditDTO model)
+        {
+            var data = await _carDetails.EditCar(model);
+            return data;
+        }
     }
 }
