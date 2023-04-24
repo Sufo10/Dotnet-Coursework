@@ -40,6 +40,7 @@ namespace Coursework.Infrastructure.DI
             services.ConfigureApplicationCookie(options => {
                 options.Cookie.SameSite = SameSiteMode.None;
                 options.Cookie.Name = "Access-Cookie";
+                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             });
             services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

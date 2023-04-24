@@ -23,16 +23,26 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+    options.CheckConsentNeeded = context => true;
+
+    // Also tried SameSiteMode.None
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+});
+
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy",
            builder =>
            {
 
-               builder.WithOrigins("https://localhost:5001", "https://localhost:44398")
+               builder.WithOrigins("*")
                    .AllowAnyMethod()
-                   .AllowAnyHeader()
-                   .AllowCredentials();
+                   .AllowAnyHeader();
            });
 });
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
@@ -63,7 +73,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 //app.UseSession();
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
@@ -75,10 +85,14 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseCors("MyPolicy");
 app.UseCookiePolicy(new CookiePolicyOptions
 {
-    Secure = CookieSecurePolicy.SameAsRequest
+    Secure = CookieSecurePolicy.SameAsRequest,
+    MinimumSameSitePolicy=SameSiteMode.None
 });
 app.UseAuthentication();
 app.UseRouting();
 app.UseAuthorization();
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 app.Run();
