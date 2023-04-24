@@ -28,26 +28,71 @@ namespace Coursework.Infrastructure.Services
         public async Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model, Guid userID)
         {
             try {
-                var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
-                if (customerDetails.IsVerified == false)
+
+   
+                //var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
+
+                var user = await _userManager.FindByIdAsync(userID.ToString());
+                var role = await _userManager.GetRolesAsync(user);
+                if (role.FirstOrDefault() == "Customer")
                 {
-                    return new ResponseDTO { Status = "Error", Message = "Customer not verified" };
+
+                    var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
+
+                    if (customerDetails.IsVerified == false)
+                    {
+                        return new ResponseDTO { Status = "Error", Message = "Customer not verified" };
+                    }
+                    else
+                    {
+                        var bookCar = new CustomerBooking
+                        {
+                            customerId = userID.ToString(),
+                            CarId = model.CarId,
+                            RentStartdate = model.RentStartdate,
+                            RentEnddate = model.RentEnddate
+                        };
+
+                        var RequestInput = await _dbContext.CustomerBooking.AddAsync(bookCar);
+                        await _dbContext.SaveChangesAsync(default(CancellationToken));
+                        return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
+                    }
+                }
+                else if (role.FirstOrDefault() == "employee")
+                {
+
+                    var customerDetails = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
+
+                    if (customerDetails.IsVerified == false)
+                    {
+                        return new ResponseDTO { Status = "Error", Message = "Customer not verified" };
+                    }
+                    else
+                    {
+                        var bookCar = new CustomerBooking
+                        {
+                            customerId = userID.ToString(),
+                            CarId = model.CarId,
+                            RentStartdate = model.RentStartdate,
+                            RentEnddate = model.RentEnddate
+                        };
+
+                        var RequestInput = await _dbContext.CustomerBooking.AddAsync(bookCar);
+                        await _dbContext.SaveChangesAsync(default(CancellationToken));
+                        return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
+                    }
+
                 }
                 else
                 {
-                    var bookCar = new CustomerBooking
-                    {
-                        customerId = userID.ToString(), 
-                        CarId = model.CarId,
-                        RentStartdate = model.RentStartdate,
-                        RentEnddate = model.RentEnddate
-                    };
-
-                    var RequestInput = await _dbContext.CustomerBooking.AddAsync(bookCar);
-                    await _dbContext.SaveChangesAsync(default(CancellationToken));
-                    Console.WriteLine();
-                    return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
+                    return new ResponseDTO { Status = "unsuccessful", Message = "something went wrong" };
                 }
+
+
+
+
+
+                //return new ResponseDTO { Status = "Success", Message = role.FirstOrDefault() };
 
             }
             catch (Exception ex) {
