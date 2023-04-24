@@ -8,39 +8,33 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Hosting;
 using System.Text.Json;
 using Coursework.Application.DTO;
-
-const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Learn more about configuring Swagger at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddAuthorization();
+builder.Services.AddAuthentication();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("MyPolicy",
-           builder =>
-           {
+builder.Services.AddCors(options => options.AddPolicy("SubdomainDefault", builder => builder
+     .WithOrigins("https://localhost:5001")
+     .AllowCredentials()
+     .AllowAnyHeader()
+     .Build()
+));
 
-               builder.WithOrigins("https://localhost:5001")
-                   .AllowAnyMethod()
-                   .AllowAnyHeader()
-                   .AllowCredentials();
-           });
-});
+
+
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -62,7 +56,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 100_000_000; // 100 MB limit
+    options.MultipartBodyLengthLimit = 1_500_000; // 1.5 MB limit
 });
 var serviceProvider = builder.Services.BuildServiceProvider();
 try
@@ -73,6 +67,7 @@ try
 catch
 {
 }
+
 
 //builder.Services.AddScoped<ICarTestDetails, CarTestDetails>();
 
@@ -85,8 +80,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 //app.UseSession();
-app.UseCors("MyPolicy");
+//app.UseCors(myAllowSpecificOrigins);
+
 app.UseHttpsRedirection();
+
+
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
@@ -95,6 +93,9 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseRouting();
+app.UseCors("SubdomainDefault");
+//app.UseCors(options => options.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+
 app.UseAuthentication();
 app.UseAuthorization();
     app.MapControllers();

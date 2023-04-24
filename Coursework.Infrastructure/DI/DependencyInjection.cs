@@ -37,11 +37,12 @@ namespace Coursework.Infrastructure.DI
             }).AddEntityFrameworkStores<ApplicationDBContext>().AddDefaultTokenProviders();
 
 
-            //services.ConfigureApplicationCookie(options => {
-            //    options.Cookie.SameSite = SameSiteMode.None;
-            //    options.Cookie.Name = "Access-Cookie";
-            //    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-            //});
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.Name = "Access-Cookie";
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        });
 
             services.AddScoped<IApplicationDBContext>(provider => provider.GetService<ApplicationDBContext>());
             services.AddTransient<IDateTime, DateTimeService>();
@@ -59,8 +60,8 @@ namespace Coursework.Infrastructure.DI
         }
         public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
         {
-            var jwtConfig = configuration.GetSection("JWT");
-            var secretKey = jwtConfig["key"];
+            var jwtConfig = configuration.GetSection("Jwt");
+            var secretKey = jwtConfig["Key"];
             services.AddAuthentication(opt =>
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

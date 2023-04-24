@@ -6,13 +6,38 @@
                 Dashboard
             </span>
         </MudNavLink>
+        @if (User.Username == null)
+        {
 
-        <MudNavLink Style="text-decoration:none" Href="/login" Class="text-decoration-none" Icon="@Icons.Material.Filled.Login">
-            <span class="text-decoration-none">
+            <MudNavLink Style="text-decoration:none" Href="/login" Class="text-decoration-none" Icon="@Icons.Material.Filled.Login">
+                <span class="text-decoration-none">
 
-                Login
-            </span>
-        </MudNavLink>
+                    Login
+                </span>
+            </MudNavLink>
+        }
+
+        @if (User.Username != null)
+        {
+            <MudNavLink Style="text-decoration:none" Href="/change-password" Class="text-decoration-none" Icon="@Icons.Material.Filled.Password">
+                <span class="text-decoration-none">
+
+                    Change Password
+                </span>
+            </MudNavLink>
+        }
+        @if (User.Role == "Admin")
+{
+<MudNavLink Style="text-decoration:none" Href="/employee" Class="text-decoration-none" Icon="@Icons.Material.Filled.SupervisedUserCircle">
+    <span class="text-decoration-none">
+
+        Employee
+    </span>
+</MudNavLink>
+}
     </MudNavMenu>
 </MudNavMenu>
 
+@code{
+    [CascadingParameter] public UserInfo User { get; set; }
+}
