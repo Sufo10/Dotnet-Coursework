@@ -65,6 +65,35 @@ namespace Coursework.Infrastructure.Services
 
             return new ResponseDataDTO<List<CarUserDTO>> { Status="Success",Message="Data Fetched Successully",Data=data};
         }
+
+        public async Task<ResponseDTO> EditCar(CarEditDTO model)
+        {
+            try
+            {
+                // Retrieve the car from the database
+                var car = await _dbContext.Car.FindAsync(model.Id);
+
+                if (car == null)
+                {
+                    // If car not found, return an error response
+                    return new ResponseDTO { Status = "Error", Message = "Car not found" };
+                }
+
+                // Update the car properties with values from the CarEditDTO object
+                car.Name = model.Name;
+                car.RatePerDay = model.RatePerDay;
+                car.Description = model.Description;
+
+                // Save the changes to the database
+                await _dbContext.SaveChangesAsync(default(CancellationToken));
+
+                return new ResponseDTO { Status = "Success", Message = "Car Edited successfully" };
+            }
+            catch (Exception err)
+            {
+                return new ResponseDTO { Status = "Error", Message = err.ToString() };
+            }
+        }
     }
 }
 

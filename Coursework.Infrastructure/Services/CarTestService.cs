@@ -17,12 +17,36 @@ namespace Coursework.Infrastructure.Services
         
         public async Task<ResponseDataDTO<List<CarTestDTO>>> GetCarTest()
         {
-            var data = _dbContext.Car.Select(e => new CarTestDTO()
+            try
             {
-                Name=e.Name,
-            }).ToList();
+                var data = _dbContext.Car.Select(e => new CarTestDTO()
+                {
+                    Name = e.Name,
+                }).ToList();
 
-            return new ResponseDataDTO<List<CarTestDTO>> { Status="Success",Message="Data Fetched Successully",Data=data};
+                //Console.WriteLine(data1);
+
+                //var data1 = _dbContext.CustomerBooking
+                //.Join(_dbContext.Car,
+                //      car => car.Id,
+                //      booking => booking.CarId,
+                //      (car, booking) => new
+                //      {
+                //          Car = car,
+                //          Booking = booking
+                //      })
+                //.Where(x => x.Booking.CustomerId == "04059dcc-d5cb-4378-97f6-edce0fa1930d" && x.Booking.IsApproved)
+                //.OrderByDescending(x => x.Booking.RentStartdate)
+                //.Select(x => x.Car)
+                //.ToList();
+
+                return new ResponseDataDTO<List<CarTestDTO>> { Status = "Success", Message = "Data Fetched Successully", Data = data };
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return new ResponseDataDTO<List<CarTestDTO>> { Status = "Failed", Message = "Data Fetch Failed", Data = { } };
+            }
         }
     }
 }
