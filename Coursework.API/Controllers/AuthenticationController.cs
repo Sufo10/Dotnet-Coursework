@@ -46,6 +46,7 @@ namespace Coursework.API.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("/api/login")]
         public async Task<LoginResponseDTO> Login([FromBody] LoginRequestDTO login)
         {

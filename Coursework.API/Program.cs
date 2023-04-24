@@ -13,6 +13,10 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Hosting;
+using System.Text.Json;
+using Coursework.Application.DTO;
+
+const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,16 +27,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructure(builder.Configuration);
-
-builder.Services.Configure<CookiePolicyOptions>(options =>
-{
-    // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-    options.CheckConsentNeeded = context => true;
-
-    // Also tried SameSiteMode.None
-    options.MinimumSameSitePolicy = SameSiteMode.None;
-});
-
+builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
 {
@@ -40,13 +35,30 @@ builder.Services.AddCors(options =>
            builder =>
            {
 
-               builder.WithOrigins("*")
+               builder.WithOrigins("https://localhost:5001")
                    .AllowAnyMethod()
-                   .AllowAnyHeader();
+                   .AllowAnyHeader()
+                   .AllowCredentials();
            });
 });
-var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
-builder.Services.AddAuthorization();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        var errorMessage = new ErrorMessageResponse { Message = "Forbidden" };
+        context.Response.StatusCode = 403;
+        context.Response.ContentType = "application/json";
+        return context.Response.WriteAsync(JsonSerializer.Serialize(errorMessage));
+    };
+    options.Events.OnRedirectToLogin = context =>
+    {
+        var errorMessage = new ErrorMessageResponse { Message = "Unauthorized" };
+        context.Response.StatusCode = 401;
+        context.Response.ContentType = "application/json";
+        return context.Response.WriteAsync(JsonSerializer.Serialize(errorMessage));
+    };
+});
 
 builder.Services.Configure<FormOptions>(options =>
 {
@@ -73,7 +85,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 //app.UseSession();
-//app.UseHttpsRedirection();
+app.UseCors("MyPolicy");
+app.UseHttpsRedirection();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
@@ -81,18 +94,8 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/images"
 });
 
-
-app.UseCors("MyPolicy");
-app.UseCookiePolicy(new CookiePolicyOptions
-{
-    Secure = CookieSecurePolicy.SameAsRequest,
-    MinimumSameSitePolicy=SameSiteMode.None
-});
-app.UseAuthentication();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+    app.MapControllers();
 app.Run();

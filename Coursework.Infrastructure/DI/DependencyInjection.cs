@@ -37,30 +37,11 @@ namespace Coursework.Infrastructure.DI
             }).AddEntityFrameworkStores<ApplicationDBContext>().AddDefaultTokenProviders();
 
 
-            services.ConfigureApplicationCookie(options => {
-                options.Cookie.SameSite = SameSiteMode.None;
-                options.Cookie.Name = "Access-Cookie";
-                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-            });
-            services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters()
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidAudience =  configuration["Jwt:Audience"],
-            ValidIssuer = configuration["Jwt:Issuer"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(configuration["Jwt:Key"])
-            )
-        };
-    });
-
-
+            //services.ConfigureApplicationCookie(options => {
+            //    options.Cookie.SameSite = SameSiteMode.None;
+            //    options.Cookie.Name = "Access-Cookie";
+            //    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            //});
 
             services.AddScoped<IApplicationDBContext>(provider => provider.GetService<ApplicationDBContext>());
             services.AddTransient<IDateTime, DateTimeService>();
@@ -75,6 +56,29 @@ namespace Coursework.Infrastructure.DI
             services.AddTransient<IBookCar, BookCarService>();
 
             return services;
+        }
+        public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
+        {
+            var jwtConfig = configuration.GetSection("JWT");
+            var secretKey = jwtConfig["key"];
+            services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtConfig["Issuer"],
+                        ValidAudience = jwtConfig["Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+                    };
+                });
         }
     }
 }
