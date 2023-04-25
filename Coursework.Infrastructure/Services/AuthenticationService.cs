@@ -292,6 +292,35 @@ namespace Coursework.Infrastructure.Services
 
             }
         }
+
+
+        public async Task<ResponseDataDTO<List<EmployeeResponseDTO>>> GetAllEmployee()
+        {
+            var employees = await _dbContext.Employee
+        .Include(e => e.User)
+        .ToListAsync();
+
+            var employeeDtos = new List<EmployeeResponseDTO>();
+
+            foreach (var employee in employees)
+            {
+                var user = await _userManager.FindByIdAsync(employee.UserId);
+
+                var role = await _userManager.GetRolesAsync(user);
+                var roleName = role.FirstOrDefault();
+
+                employeeDtos.Add(new EmployeeResponseDTO
+                {
+                    Id = employee.Id.ToString(),
+                    Name = employee.Name,
+                    Username = user.UserName,
+                    Email = user.Email,
+                    Roles = roleName
+                });
+            }
+
+            return new ResponseDataDTO<List<EmployeeResponseDTO>> { Status = "Success", Message = "Data Fetch Succesfully", Data = employeeDtos };
+        }
     }
 }
 

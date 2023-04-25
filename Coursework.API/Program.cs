@@ -8,49 +8,55 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Hosting;
+using System.Text.Json;
+using Coursework.Application.DTO;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Learn more about configuring Swagger at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddAuthentication();
 
-builder.Services.Configure<CookiePolicyOptions>(options =>
+builder.Services.AddCors(options => options.AddPolicy("SubdomainDefault", builder => builder
+     .WithOrigins("https://localhost:5001")
+     .AllowCredentials()
+     .AllowAnyHeader()
+     .Build()
+));
+
+
+
+
+builder.Services.ConfigureApplicationCookie(options =>
 {
-    // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-    options.CheckConsentNeeded = context => true;
-
-    // Also tried SameSiteMode.None
-    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        var errorMessage = new ErrorMessageResponse { Message = "Forbidden" };
+        context.Response.StatusCode = 403;
+        context.Response.ContentType = "application/json";
+        return context.Response.WriteAsync(JsonSerializer.Serialize(errorMessage));
+    };
+    options.Events.OnRedirectToLogin = context =>
+    {
+        var errorMessage = new ErrorMessageResponse { Message = "Unauthorized" };
+        context.Response.StatusCode = 401;
+        context.Response.ContentType = "application/json";
+        return context.Response.WriteAsync(JsonSerializer.Serialize(errorMessage));
+    };
 });
-
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("MyPolicy",
-           builder =>
-           {
-
-               builder.WithOrigins("*")
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
-           });
-});
-var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
-builder.Services.AddAuthorization();
 
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 100_000_000; // 100 MB limit
+    options.MultipartBodyLengthLimit = 1_500_000; // 1.5 MB limit
 });
 var serviceProvider = builder.Services.BuildServiceProvider();
 try
@@ -61,6 +67,7 @@ try
 catch
 {
 }
+
 
 //builder.Services.AddScoped<ICarTestDetails, CarTestDetails>();
 
@@ -73,7 +80,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 //app.UseSession();
-//app.UseHttpsRedirection();
+//app.UseCors(myAllowSpecificOrigins);
+
+app.UseHttpsRedirection();
+
+
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
@@ -81,18 +92,11 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/images"
 });
 
-
-app.UseCors("MyPolicy");
-app.UseCookiePolicy(new CookiePolicyOptions
-{
-    Secure = CookieSecurePolicy.SameAsRequest,
-    MinimumSameSitePolicy=SameSiteMode.None
-});
-app.UseAuthentication();
 app.UseRouting();
+app.UseCors("SubdomainDefault");
+//app.UseCors(options => options.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+
+app.UseAuthentication();
 app.UseAuthorization();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+    app.MapControllers();
 app.Run();

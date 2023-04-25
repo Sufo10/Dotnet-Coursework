@@ -26,12 +26,14 @@
 	  <Folder Include="Components\" />
 	  <Folder Include="Data\" />
 	  <Folder Include="Data\Models\" />
+	  <Folder Include="Data\Helper\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Remove="Components\" />
 	  <None Remove="bootstrap" />
 	  <None Remove="Data\" />
 	  <None Remove="Data\Models\" />
+	  <None Remove="Data\Helper\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Content Update="Pages\Index.razor">

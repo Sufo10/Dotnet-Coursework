@@ -37,7 +37,6 @@ namespace Coursework.API.Controllers
 
         [HttpPost]
         [Consumes("multipart/form-data")]
-        //[RequestSizeLimit(100_000_000)] // 100 MB limit
         [Route("/api/register")]
         public async Task<ResponseDTO> AddCustomer([FromForm] CustomerRegisterRequestDTO model)
         {
@@ -46,6 +45,7 @@ namespace Coursework.API.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("/api/login")]
         public async Task<LoginResponseDTO> Login([FromBody] LoginRequestDTO login)
         {
@@ -99,6 +99,14 @@ namespace Coursework.API.Controllers
             var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
             var data = await _authenticate.ChangePassword(model, userID);
+            return data;
+        }
+
+        [HttpGet]
+        [Route("/api/employees")]
+        public async Task<ResponseDataDTO<List<EmployeeResponseDTO>>> GetAllEmployee()
+        {
+            var data = await _authenticate.GetAllEmployee();
             return data;
         }
     }

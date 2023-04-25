@@ -78,6 +78,7 @@
             var client = new HttpClient();
             var data = new { userName = UserName, password = Password };
             var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+
             var response = await client.PostAsync("https://localhost:7190/api/login", content);
             var result = await response.Content.ReadAsStringAsync();
 

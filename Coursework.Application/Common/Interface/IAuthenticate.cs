@@ -13,6 +13,7 @@ namespace Coursework.Application.Common.Interface
         Task<ResponseDTO> EmployeeRegister(EmployeeRegistrationRequestDTO model, string userID);
         Task<ResponseDTO> ChangePassword(UserChangePasswordDTO model, Guid userID);
         Task<ResponseDTO> ResetPasswordAsync(ResetPasswordRequestDTO body);
+        Task<ResponseDataDTO<List<EmployeeResponseDTO>>> GetAllEmployee();
     }
 }
 
