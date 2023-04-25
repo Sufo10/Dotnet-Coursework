@@ -41,12 +41,12 @@ namespace Coursework.API.Controllers
             return data;
         }
 
-        [HttpPatch]
+        [HttpPatch("/api/editcar/{id}")]
         [Consumes("multipart/form-data")]
-        [Route("/api/editcar")]
-        public async Task<ResponseDTO> EditCar([FromForm] CarEditDTO model)
+        //[Route("/api/editcar")]
+        public async Task<ResponseDTO> EditCar(Guid id, [FromForm] CarEditDTO model)
         {
-            var data = await _carDetails.EditCar(model);
+            var data = await _carDetails.EditCar(id, model);
             return data;
         }
     }

@@ -8,7 +8,7 @@ namespace Coursework.Application.Common.Interface
 	{
 		Task<ResponseDTO> AddCars(EditCarRequestDTO model);
 		Task<ResponseDataDTO<List<CarUserDTO>>> GetActiveCars();
-		Task<ResponseDTO> EditCar(CarEditDTO model);
+		Task<ResponseDTO> EditCar(Guid Id, CarEditDTO model);
     }
 }
 

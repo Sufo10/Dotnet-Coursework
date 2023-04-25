@@ -32,7 +32,6 @@
     <None Remove="Microsoft.AspNet.Cors" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="images\" />
     <Folder Include="Uploads\" />
     <Folder Include="Uploads\Documents\" />
   </ItemGroup>

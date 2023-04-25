@@ -66,12 +66,12 @@ namespace Coursework.Infrastructure.Services
             return new ResponseDataDTO<List<CarUserDTO>> { Status="Success",Message="Data Fetched Successully",Data=data};
         }
 
-        public async Task<ResponseDTO> EditCar(CarEditDTO model)
+        public async Task<ResponseDTO> EditCar(Guid Id, CarEditDTO model)
         {
             try
             {
                 // Retrieve the car from the database
-                var car = await _dbContext.Car.FindAsync(model.Id);
+                var car = await _dbContext.Car.FindAsync(Id);
 
                 if (car == null)
                 {

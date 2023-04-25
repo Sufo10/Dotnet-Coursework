@@ -7,7 +7,23 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Coursework.Infrastructure.Services
 {
-	public class CarTestService: ICarTestDetails
+    public class CarDTO
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Image { get; set; }
+        public double RatePerDay { get; set; }
+    }
+    public class CarBookDTO
+    {
+        public Guid Id { get; set; }
+        public string customerId { get; set; }
+        public string CarId { get; set; }
+        public DateTime RentStartdate { get; set; }
+        public DateTime RentEnddate { get; set; }
+    }
+    public class CarTestService: ICarTestDetails
     {
         private readonly IApplicationDBContext _dbContext;
         public CarTestService(IApplicationDBContext dBContext)
@@ -24,7 +40,39 @@ namespace Coursework.Infrastructure.Services
                     Name = e.Name,
                 }).ToList();
 
-                //Console.WriteLine(data1);
+
+                var baseUrl = "https://localhost:7190/images/";
+                IList<CarDTO> car = _dbContext.Car.Select(e => new CarDTO()
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    Image = baseUrl + e.Image,
+                    Description = e.Description,
+                    RatePerDay = e.RatePerDay,
+                }).ToList();
+                IList<CarBookDTO> book = _dbContext.CustomerBooking.Select(e => new CarBookDTO()
+                {
+                    Id = e.Id,
+                    CarId = e.CarId,
+                    customerId = e.customerId,
+                    RentStartdate = e.RentStartdate,
+                    RentEnddate = e.RentEnddate,
+                }).ToList();
+
+                var innerJoin = book.Join(// outer sequence 
+                      car,  // inner sequence 
+                      b => b.CarId,    // outerKeySelector
+                      c => c.Id.ToString(),  // innerKeySelector
+                      (b, c) => new BookingHistoryResponseDTO()  // result selector
+                      {
+                          Id = b.Id,
+                          Name = c.Name,
+                          Image = c.Image,
+                          Description = c.Description,
+                          RentStartdate = b.RentStartdate,
+                          RentEnddate = b.RentEnddate,
+                      });
+                Console.WriteLine(innerJoin);
 
                 //var data1 = _dbContext.CustomerBooking
                 //.Join(_dbContext.Car,
