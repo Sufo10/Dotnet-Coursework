@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Mail;
+using System.Transactions;
 using System.Xml.Linq;
 using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
@@ -35,10 +36,21 @@ namespace Coursework.Infrastructure.Services
         {
             var fileName = file.FileName;
 
-            if (file.Length > 1 * 1024 * 1024) // 1MB
-                throw new Exception("File size exceeds the limit");
+            if (!IsFileExtensionValid(fileName))
+                throw new Exception("Only pdf and png is supported");
+
+            if (file.Length > 1.5 * 1024 * 1024) // 1MB
+                throw new Exception("File size exceeds the limit. Only file upto 1.5MB is supported");
 
             return await _fileStorage.SaveFileAsync(file);
+        }
+
+        private bool IsFileExtensionValid(string fileName)
+        {
+            var validExtensions = new[] { ".pdf", ".png" };
+            var fileExtension = Path.GetExtension(fileName);
+
+            return validExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase);
         }
 
 
@@ -55,6 +67,7 @@ namespace Coursework.Infrastructure.Services
                 {
                     return new ResponseDTO { Status = "Error", Message = "Password doesnot match" };
                 }
+                using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                 AppUser user = new()
                 {
                     Email = model.Email,
@@ -92,6 +105,7 @@ namespace Coursework.Infrastructure.Services
                 {
                     _dbContext.Customer.AddAsync(customer);
                     await _dbContext.SaveChangesAsync(default(CancellationToken));
+                    scope.Complete();
                     return new ResponseDTO { Status = "Success", Message = "Customer Created successfully" };
                 }
                 else
@@ -106,15 +120,18 @@ namespace Coursework.Infrastructure.Services
                     };
                     customer.IsVerified = true;
                     _dbContext.Customer.AddAsync(customer);
+
                     var customerInput = await _dbContext.CustomerFileUpload.AddAsync(customerUpload);
                     //if(customerInput)
                     await _dbContext.SaveChangesAsync(default(CancellationToken));
+
+                    scope.Complete();
                     return new ResponseDTO { Status = "Success", Message = "Customer Created successfully" };
                 }
             }
             catch (Exception err)
             {
-                return new ResponseDTO { Status = "Error", Message = err.ToString() };
+                return new ResponseDTO { Status = "Error", Message = err.Message.ToString() };
             }
         }
 
@@ -130,7 +147,7 @@ namespace Coursework.Infrastructure.Services
                     var role = roles.FirstOrDefault();
                     var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
                     if (!result.Succeeded) return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" };
-                    var token = _tokenService.GenerateToken(user, role!);
+                    var token = _tokenService.GenerateToken(user, role);
                     if (role == "Customer")
                     {
                         var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == user.Id.ToString());

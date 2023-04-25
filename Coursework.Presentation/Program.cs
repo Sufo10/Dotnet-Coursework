@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Components.Web;
+﻿using System.Net.NetworkInformation;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.AspNetCore.Authorization;
+//using Microsoft.AspNetCore.Components.Authorization;
 using Coursework.Presentation;
 using MudBlazor.Services;
 using Coursework.Presentation.Components;
@@ -13,8 +16,10 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 builder.Services.AddSingleton<AuthenticationStateService>();
+builder.Services.AddOptions();
+builder.Services.AddAuthorizationCore();
 
-
+builder.Services.AddSingleton<CookieInterop>();
 
 builder.Services.AddMudServices(config =>
 {

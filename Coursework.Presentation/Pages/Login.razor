@@ -1,9 +1,10 @@
 ﻿@using System.Text;
 @using Newtonsoft.Json;
+@inject CookieInterop ci;
+@using System.Text.RegularExpressions;
 @page "/login"
 @inject AuthenticationStateService AuthenticationService;
 @inject NavigationManager NavManager
-
 <PageTitle>Login</PageTitle>
 <div class="row min-vh-100">
     <div class="col-12 d-flex justify-content-center align-item-center">
@@ -62,7 +63,7 @@
         }
     }
 
-    // login user
+    //login user
     async Task ProcessLogin()
     {
         _processing = true;
@@ -76,6 +77,8 @@
         else
         {
             var client = new HttpClient();
+            // set the WithCredentials property to true to send cookies
+            //client.DefaultRequestHeaders.Credenti
             var data = new { userName = UserName, password = Password };
             var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
@@ -88,9 +91,9 @@
             {
                 string username = jsonResponse.userName; // Replace with the actual username from the login response
                 string role = jsonResponse.role;
-                bool isVerified = jsonResponse.isVerified==null ? false: jsonResponse.isVerified;
-                    await AuthenticationService.SetLoggedInUserAsync(username, role, isVerified);
-              
+                bool isVerified = jsonResponse.isVerified == null ? false : jsonResponse.isVerified;
+                await AuthenticationService.SetLoggedInUserAsync(username, role, isVerified);
+
                 Console.WriteLine($"status: {jsonResponse.status}");
 
                 _processing = false;
@@ -106,5 +109,7 @@
             }
         }
     }
+
+
 }
 

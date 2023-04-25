@@ -43,7 +43,6 @@ namespace Coursework.Infrastructure.DI
             options.Cookie.Name = "Access-Cookie";
             options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         });
-
             services.AddScoped<IApplicationDBContext>(provider => provider.GetService<ApplicationDBContext>());
             services.AddTransient<IDateTime, DateTimeService>();
             services.AddTransient<IFileStorage,ServerFileStorage>();
@@ -58,6 +57,7 @@ namespace Coursework.Infrastructure.DI
 
             return services;
         }
+
         public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
         {
             var jwtConfig = configuration.GetSection("Jwt");
