@@ -1,4 +1,5 @@
 ﻿using Coursework.Application.DTO;
+using Coursework.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,6 @@ namespace Coursework.Application.Common.Interface
 {
     public interface ITokenService
     {
-        public string GenerateToken(IdentityUser model, string role);
+        public string GenerateToken(AppUser model, IList<string> role);
     }
 }

@@ -25,6 +25,7 @@ namespace Coursework.API.Controllers
         }
 
         [HttpGet]
+        [Authorize (Roles = "Customer")]
         [Route("/api/cars")]
         public async Task<ResponseDataDTO<List<CarUserDTO>>> GetAllCars()
         {

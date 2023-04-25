@@ -128,9 +128,10 @@ namespace Coursework.Infrastructure.Services
                 {
                     var roles = await _userManager.GetRolesAsync(user);
                     var role = roles.FirstOrDefault();
-                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
-                    if (!result.Succeeded) return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" };
-                    var token = _tokenService.GenerateToken(user, role!);
+                    //var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
+                    var result = await _userManager.CheckPasswordAsync(user, model.Password);
+                    if (!result) return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" };
+                    var token = _tokenService.GenerateToken(user, roles);
                     if (role == "Customer")
                     {
                         var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == user.Id.ToString());
