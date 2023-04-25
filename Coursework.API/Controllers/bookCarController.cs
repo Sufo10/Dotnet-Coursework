@@ -23,5 +23,26 @@ namespace Coursework.API.Controllers
             var response = await _book.BookCarRequest(model, userID);
             return response;
         }
+
+
+        [HttpGet]
+        [Route("/api/car-request")]
+
+        public async Task<ResponseDataDTO<List<GetCarBookingRequestDTO>>> GetBookingList()
+        {
+            var data = await _book.GetBookCarRequests();
+            return data;
+        }
+
+
+        //[HttpPost]
+        //[Route("/api/verify_request")]
+
+        //public async Task<ResponseDTO> VerifyBooking(BookingApproveRequestDTO mode)
+        //{
+        //    var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        //}
+
+
     } 
 }

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Coursework.Infrastructure.Services
 {
@@ -24,6 +25,25 @@ namespace Coursework.Infrastructure.Services
             _userManager = userManager;
         }
 
+        public async Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model, Guid userID)
+        {
+            var entityToUpdate = await _dbContext.CustomerBooking.FindAsync(userID.ToString());
+            
+            if (entityToUpdate == null)
+            {
+                return new ResponseDTO() { Status = "Error", Message = "Entity not found" }; 
+            }
+
+            entityToUpdate.ApprovedBy = userID.ToString();
+            entityToUpdate.IsApproved = true;
+
+            _dbContext.CustomerBooking.Update(entityToUpdate);
+            await _dbContext.SaveChangesAsync(default(CancellationToken));
+
+            return new ResponseDTO() { Status = "Success", Message = "Booking request approved" };
+
+
+        }
 
         public async Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model, Guid userID)
         {
@@ -33,6 +53,7 @@ namespace Coursework.Infrastructure.Services
                 //var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
 
                 var user = await _userManager.FindByIdAsync(userID.ToString());
+
                 var role = await _userManager.GetRolesAsync(user);
                 if (role.FirstOrDefault() == "Customer")
                 {
@@ -99,5 +120,56 @@ namespace Coursework.Infrastructure.Services
                 return new ResponseDTO { Status = "Error", Message = ex.ToString() };
             }
         }
+
+
+        public async Task<ResponseDataDTO<List<GetCarBookingRequestDTO>>> GetBookCarRequests()
+        {
+
+
+            var bookingEmployee = _dbContext.CustomerBooking
+                .Join(
+                    _dbContext.Employee,
+                    b => b.customerId,
+                    e => e.UserId,
+
+                    (b, e) => new GetCarBookingRequestDTO
+                    {
+                        BookingId = b.Id.ToString(),
+                        CustomerId = b.customerId.ToString(),
+                        CustomerName = e.Name,
+                        CustomerPhone = e.Phone,
+                        CarId = b.CarId,
+                        RentStartdate = b.RentStartdate,
+                        RentEnddate = b.RentEnddate,
+                    }
+                );
+
+
+
+            var bookingCustomer = _dbContext.CustomerBooking
+                .Join(
+                    _dbContext.Customer,
+                    b => b.customerId,
+                    c => c.UserId,
+                    (b, c) => new GetCarBookingRequestDTO
+                    {
+                         BookingId = b.Id.ToString(), 
+                         CustomerId = b.customerId.ToString(),
+                         CustomerName = c.Name,
+                         CustomerPhone = c.Phone,
+                         CarId = b.CarId,
+                         RentStartdate = b.RentStartdate,
+                         RentEnddate = b.RentEnddate,
+                    }
+                );
+
+            var bookingRequests = Enumerable.Concat(bookingEmployee, bookingCustomer).ToList();
+
+            return new ResponseDataDTO<List<GetCarBookingRequestDTO>> { Status = "Success", Message = "Data Fetched Successully", Data = bookingRequests.ToList() };
+
+
+        }
+
+
     }
 }

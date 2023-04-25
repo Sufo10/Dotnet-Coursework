@@ -22,7 +22,7 @@ namespace Coursework.Application.DTO
 
         public string? Password { get; set; }
 
-		[Required(ErrorMessage ="Confirm Password if required")]
+		[Required(ErrorMessage ="Confirm Password is required")]
 
 		public string? ConfirmPassword { get; set; }
 
