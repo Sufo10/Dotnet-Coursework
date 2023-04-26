@@ -13,6 +13,6 @@ namespace Coursework.Application.Common.Interface
         Task<ResponseDataDTO<List<GetCarBookingRequestDTO>>>GetBookCarRequests();
 
         Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model,Guid userID);
-
+        public Task<ResponseDTO> RejectBookingRequest(string bookingId);
     }
 }
