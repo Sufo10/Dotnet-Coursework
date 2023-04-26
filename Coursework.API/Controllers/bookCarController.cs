@@ -1,5 +1,6 @@
 ﻿using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -43,13 +44,17 @@ namespace Coursework.API.Controllers
         }
 
 
-        //[HttpPost]
-        //[Route("/api/verify_request")]
+        [HttpPost]
+        [Authorize]
+        [Route("/api/verify_request")]
 
-        //public async Task<ResponseDTO> VerifyBooking(BookingApproveRequestDTO mode)
-        //{
-        //    var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        //}
+        public async Task<ResponseDTO> VerifyBooking(BookingApproveRequestDTO model)
+        {
+            
+            var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var verify = await _book.ApproveBookingRequest(model, userID);
+            return verify;
+        }
 
 
     } 
