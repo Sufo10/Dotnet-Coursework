@@ -34,6 +34,14 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [HttpDelete]
+        [Route("/api/car-request/reject")]
+        public async Task<ResponseDTO> RejectCarBooking(RejectBookingRequestDTO body)
+        {
+            var data = await _book.RejectBookingRequest(body.BookingId);
+            return data;
+        }
+
 
         //[HttpPost]
         //[Route("/api/verify_request")]
