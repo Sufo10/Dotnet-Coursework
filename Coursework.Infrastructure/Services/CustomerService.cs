@@ -25,10 +25,21 @@ namespace Coursework.Infrastructure.Services
         {
             var fileName = file.FileName;
 
-            if (file.Length > 1 * 1024 * 1024) // 1MB
+            if (!IsFileExtensionValid(fileName))
+                throw new Exception("Only pdf and png is supported");
+
+            if (file.Length > 1.5 * 1024 * 1024) // 1MB
                 throw new Exception("File size exceeds the limit");
 
             return await _fileStorage.SaveFileAsync(file);
+        }
+
+        private bool IsFileExtensionValid(string fileName)
+        {
+            var validExtensions = new[] { ".pdf", ".png" };
+            var fileExtension = Path.GetExtension(fileName);
+
+            return validExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase);
         }
 
         public async Task<List<Customer>> GetAllCustomerService()
@@ -78,7 +89,7 @@ namespace Coursework.Infrastructure.Services
             }
             catch (Exception err)
             {
-                return new ResponseDTO { Status = "Error", Message = err.ToString() };
+                return new ResponseDTO { Status = "Error", Message = err.Message.ToString() };
             }
         }
 

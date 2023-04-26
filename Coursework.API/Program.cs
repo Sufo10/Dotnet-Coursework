@@ -14,6 +14,8 @@ using System.Text.Json;
 using Coursework.Application.DTO;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Models;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,12 +24,52 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Student Teacher API",
+        Version = "v1",
+        Description = "Student Teacher API Services.",
+        Contact = new OpenApiContact
+        {
+            Name = "Ajide Habeeb."
+        },
+    });
+    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme."
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] {}
+                }
+            });
+});
+
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAuthentication();
 
 builder.Services.AddCors(options => options.AddPolicy("SubdomainDefault", builder => builder
-     .WithOrigins("https://localhost:5001")
+     .WithOrigins("https://localhost:5001","http://localhost:3000")
      .AllowCredentials()
      .AllowAnyHeader()
      .Build()
@@ -54,10 +96,25 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
-builder.Services.Configure<FormOptions>(options =>
+builder.Services.AddAuthentication(options =>
 {
-    options.MultipartBodyLengthLimit = 1_500_000; // 1.5 MB limit
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+  options.TokenValidationParameters = new TokenValidationParameters
+  {
+      ValidateIssuer = false,
+      ValidateAudience = false,
+      ValidateLifetime = false,
+      ValidateIssuerSigningKey = false,
+      ValidIssuer = builder.Configuration["Jwt:Issuer"],
+      ValidAudience = builder.Configuration["Jwt:Audience"],
+      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+  };
 });
+
 var serviceProvider = builder.Services.BuildServiceProvider();
 try
 {
@@ -98,5 +155,5 @@ app.UseCors("SubdomainDefault");
 
 app.UseAuthentication();
 app.UseAuthorization();
-    app.MapControllers();
+app.MapControllers();
 app.Run();
