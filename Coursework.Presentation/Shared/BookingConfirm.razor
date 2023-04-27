@@ -50,7 +50,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Error" OnClick="DeleteServer">Book Now</MudButton>
+        <MudButton Disabled="User.IsVerified==false" Color="Color.Error" OnClick="DeleteServer">Book Now</MudButton>
     </DialogActions>
 </MudDialog>
 

@@ -9,7 +9,7 @@
                 Dashboard
             </span>
         </MudNavLink>
-        @if (User.Username == null)
+        @if (User?.Username == null)
         {
 
             <MudNavLink Style="text-decoration:none" Href="/login" Class="text-decoration-none" Icon="@Icons.Material.Filled.Login">
@@ -20,7 +20,7 @@
             </MudNavLink>
         }
 
-        @if (User.Username != null)
+        @if (User?.Username != null)
         {
             <MudNavLink Style="text-decoration:none" Href="/change-password" Class="text-decoration-none" Icon="@Icons.Material.Filled.Password">
                 <span class="text-decoration-none">
@@ -29,12 +29,20 @@
                 </span>
             </MudNavLink>
         }
-        @if (User.Role == "Admin")
+        @if (User?.Role == "Admin")
         {
             <MudNavLink Style="text-decoration:none" Href="/user" Class="text-decoration-none" Icon="@Icons.Material.Filled.SupervisedUserCircle">
                 <span class="text-decoration-none">
 
                     Employee
+                </span>
+            </MudNavLink>
+        }
+        @if (User?.Role == "Admin" || User?.Role=="Staff")
+        {
+            <MudNavLink Style="text-decoration:none" Href="/" Class="text-decoration-none" Icon="@Icons.Material.Filled.Redeem">
+                <span class="text-decoration-none">
+                    Booking Requests
                 </span>
             </MudNavLink>
         }

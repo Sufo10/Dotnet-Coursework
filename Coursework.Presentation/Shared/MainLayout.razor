@@ -13,6 +13,13 @@
         <MudAppBar Elevation="0">
             <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
             <MudSpacer />
+
+            @if (_user?.Username != null)
+            {
+
+                <MudButton Class="mr-3" Color="Color.Inherit" Size="Size.Medium" StartIcon="@Icons.Material.Outlined.Logout" OnClick="@Logout">
+                </MudButton>
+            }
             @if (_isDarkMode)
             {
                 <MudSwitch @bind-Checked="@_isDarkMode" ThumbIcon="@Icons.Material.Outlined.LightMode" ThumbIconColor="Color.Info"></MudSwitch>
@@ -45,22 +52,19 @@
     protected override void OnInitialized()
     {
         _user = UserService.GetUser();
-        UserService.OnUserChanged += UpdateComponent;
+        UserService.OnUserChanged += OnUserChanged;
     }
 
-
-    private void UpdateComponent()
+    private void OnUserChanged()
     {
-        // Refresh the component when the user logs in
+        _user = UserService.GetUser();
         StateHasChanged();
     }
 
     public void Dispose()
     {
-        // Unsubscribe from the event when the component is disposed
-        UserService.OnUserChanged -= UpdateComponent;
+        UserService.OnUserChanged -= OnUserChanged;
     }
-
     private MudThemeProvider _mudThemeProvider;
     MudTheme MyCustomTheme = new MudTheme()
     {
@@ -76,6 +80,11 @@
         },
     };
 
+
+    private void Logout()
+    {
+        UserService.ClearUser();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

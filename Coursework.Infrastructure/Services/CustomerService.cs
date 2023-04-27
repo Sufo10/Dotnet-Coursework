@@ -53,10 +53,12 @@ namespace Coursework.Infrastructure.Services
             return data;
         }
 
-        public async Task<ResponseDTO> UploadDocument(CustomerFileUploadDTO model, Guid userID)
+        public async Task<ResponseDTO> UploadDocument(CustomerFileUploadDTO model, string userEmail)
         {
             try
             {
+                var currentUser = await _userManager.FindByEmailAsync(userEmail);
+                var userID = currentUser.Id;
                 var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
 
                 if (customerDetails == null)

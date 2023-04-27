@@ -22,8 +22,8 @@ namespace Coursework.API.Controllers
         [Route("/api/upload-document")]
         public async Task<ResponseDTO> UploadDocument([FromForm] CustomerFileUploadDTO model)
         {
-            var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var data = await _customerDetails.UploadDocument(model, userID);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var data = await _customerDetails.UploadDocument(model, userEmail);
             return data;
         }
     }

@@ -1,0 +1,136 @@
+﻿@using System.Text;
+@using Newtonsoft.Json;
+@inject ISnackbar Snackbar
+@inject HttpClient _httpClient
+@inject UserService UserService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+         Upload Required Document to verify account
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <div class="col-12 d-flex justify-content-center align-item-center">
+            <MudPaper Class="pa-5 mx-auto ma-2" Width="300px" Square="true">
+                <div class="mt-3">
+                    <MudForm @ref="form" @bind-IsValid="@isSuccess" @onsubmit="handleSubmit" @bind-Errors="@errors" ReadOnly="false">
+                        <MudFileUpload Class="mt-7" T="IBrowserFile" FilesChanged="UploadFiles2" MaximumFileCount="1">
+                            <ButtonTemplate>
+                                <MudButton HtmlTag="label"
+                                           Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.CloudUpload"
+                                           for="@context">
+                                    Upload Documents
+                                </MudButton>
+                            </ButtonTemplate>
+                        </MudFileUpload>
+                        @if (files == null)
+                        {
+                            <MudText Class="mt-3">
+                                Upload your Document
+                            </MudText>
+                        }
+                        else
+                        {
+                            <MudText Class="mt-3">
+                                @files.Name <code>@files.Size bytes</code>
+
+                            </MudText>
+                        }
+
+                        <MudRadioGroup Required="true" RequiredError="File type is required to verify your account" Class="mt-4" @bind-SelectedOption="@FileType">
+                            <MudRadio Option="@("Citizenship")" Color="Color.Primary">Citizenship</MudRadio>
+                            <MudRadio Option="@("License")" Color="Color.Primary">License</MudRadio>
+                        </MudRadioGroup>
+                        <MudCardActions>
+                            <MudButton Disabled="@(_processing || files==null || !isSuccess)"
+                                       Size="Size.Large" Class="mt-14" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary"
+                                       ButtonType="ButtonType.Submit">
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                    <MudText Class="ms-2">Processing</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Verify</MudText>
+                                }
+
+                            </MudButton>
+                        </MudCardActions>
+                    </MudForm>
+                </div>
+            </MudPaper>
+        </div>
+    </DialogContent>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+    MudForm form;
+
+    [Parameter]
+    public UserInfo User { get; set; }
+    string[] errors = { };
+    bool isShow;
+    bool isSuccess;
+    bool success = false;
+    public string FileType { get; set; }
+    public bool _processing { get; set; }
+    IBrowserFile files { get; set; }
+
+    private void UploadFiles2(IBrowserFile file)
+    {
+        files = file;
+    }
+
+
+    async Task handleSubmit()
+    {
+        var client = new HttpClient();
+        var formData = new MultipartFormDataContent();
+        var fileContent = new StreamContent(files.OpenReadStream(maxAllowedSize: 10485760));
+        formData.Add(fileContent, "file", files.Name);
+        formData.Add(new StringContent(FileType.ToString()), "fileType");
+        var response = await HttpClientExtension.AuthPostAsync<ApiResponse>(_httpClient, "https://localhost:7190/api/upload-document", formData, User?.Token.ToString() ?? "");
+        // Process the response as needed
+        if (response != null && response.Status == "Success")
+        {
+            UserInfo user = new UserInfo
+            {
+                Token = User.Token,
+                Username = User.Username,
+                Role = User.Role,
+                IsVerified = true
+            };
+            UserService.SetUser(user);
+            UserService.RaiseUserChanged();
+            Snackbar.Add("Account Verified Successfullly", Severity.Success);
+            MudDialog.Close();
+
+        }
+        else if (response.Status == "Error")
+        {
+            Snackbar.Add($"{response.Message}", Severity.Error);
+        }
+        else
+        {
+            Snackbar.Add($"Some Unknown Error Occurred!", Severity.Error);
+        }
+    }
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+    private bool _autoClose;
+
+    private void OnValidSubmit(EditContext context)
+    {
+        isSuccess = true;
+        StateHasChanged();
+    }
+}
