@@ -19,11 +19,13 @@ namespace Coursework.Infrastructure.Services
     {
         private readonly IApplicationDBContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IEmailService _emailService;
 
-        public BookCarService(IApplicationDBContext dBContext, UserManager<AppUser> userManager)
+        public BookCarService(IApplicationDBContext dBContext, UserManager<AppUser> userManager, IEmailService emailService)
         {
             _dbContext = dBContext;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         //public async Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model, Guid userID)
@@ -89,7 +91,6 @@ namespace Coursework.Infrastructure.Services
 
         //}
 
-
         public async Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model, Guid userID)
         {
             try
@@ -114,12 +115,27 @@ namespace Coursework.Infrastructure.Services
 
                 var rentDays = (latestBooking.RentEnddate - latestBooking.RentStartdate).TotalDays + 1;
                 var totalAmount = carRate * rentDays;
-                var totalAfterDiscount = regular ? totalAmount * 0.9 : totalAmount;
+                var totalAfterDiscount = (int) Math.Round(regular ? totalAmount * 0.9 : totalAmount);
+                var VAT = (int)Math.Round(totalAfterDiscount * 0.13);
 
                 entityToUpdate.IsApproved = true;
                 entityToUpdate.ApprovedBy = userID.ToString();
                 _dbContext.CustomerBooking.Update(entityToUpdate);
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
+                //var invoice = new GenerateInvoiceDTO
+                //{ 
+                //    CustomerName = customer.Name,
+                //    CustomerEmail = user.Email,
+                //    CarName = car.Name,
+                //    RatePerDay = car.RatePerDay,
+                //    RentStartDate = latestBooking.RentStartdate,
+                //    RentEndDate = latestBooking.RentEnddate,
+                //    RentalAmount = totalAfterDiscount,
+                //    VATAmount = VAT
+
+                //};
+                //await _emailService.SendPaymentInvoiceAsync(invoice);
+
                 return new ResponseDTO() { Status = "Success", Message = "Booking request approved" };
             }
             catch (Exception ex)
