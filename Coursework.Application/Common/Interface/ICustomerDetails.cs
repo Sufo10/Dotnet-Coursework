@@ -8,7 +8,7 @@ namespace Coursework.Application.Common.Interface
 	{
 		Task<List<Customer>> GetAllCustomerService();
 
-        Task<ResponseDTO> UploadDocument(CustomerFileUploadDTO model, Guid Id);
+        Task<ResponseDTO> UploadDocument(CustomerFileUploadDTO model, string userEmail);
     }
 }
 
