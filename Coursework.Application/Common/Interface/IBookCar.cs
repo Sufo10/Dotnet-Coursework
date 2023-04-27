@@ -11,7 +11,7 @@ namespace Coursework.Application.Common.Interface
     {
         Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model, string email);
         Task<ResponseDataDTO<List<GetCarBookingRequestDTO>>>GetBookCarRequests();
-        Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model,Guid userID);
+        Task<ResponseDTO> ApproveBookingRequest( String bookingId, string email);
         public Task<ResponseDTO> RejectBookingRequest(string bookingId);
     }
 }

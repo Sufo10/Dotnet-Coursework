@@ -10,6 +10,7 @@ namespace Coursework.Application.DTO
     public class BookingApproveRequestDTO
     {
         [Required (ErrorMessage = "customer id is required")]
+        public string BookingId { get; set; }  
         public string customerId { get; set; }  
     }
 }

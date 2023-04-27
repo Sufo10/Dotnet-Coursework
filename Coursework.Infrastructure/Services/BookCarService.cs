@@ -8,7 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Coursework.Infrastructure.Services;
 
 namespace Coursework.Infrastructure.Services
 {
@@ -18,30 +20,141 @@ namespace Coursework.Infrastructure.Services
     {
         private readonly IApplicationDBContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IEmailService _emailService;
 
-        public BookCarService(IApplicationDBContext dBContext, UserManager<AppUser> userManager)
+        public BookCarService(IApplicationDBContext dBContext, UserManager<AppUser> userManager, IEmailService emailService)
         {
             _dbContext = dBContext;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
-        public async Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model, Guid userID)
+        //public async Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model, Guid userID)
+        //{
+
+        //    try
+        //    {
+        //        var entityToUpdate = await _dbContext.CustomerBooking.SingleOrDefaultAsync(c => c.Id == Guid.Parse(model.BookingId));
+        //        string customerId = model.customerId; 
+        //        var latestBooking = await _dbContext.CustomerBooking
+        //            .Where(b => b.customerId == customerId && (bool)b.IsApproved)
+        //            .OrderByDescending(b => b.RentStartdate)
+        //            .FirstOrDefaultAsync();
+
+        //        DateTime today = DateTime.Today;
+        //        DateTime threeMonthsAgo = today.AddMonths(-3);
+
+        //        bool regular = false;
+
+        //        if (latestBooking.RentStartdate >= threeMonthsAgo)
+        //        {
+        //            regular = true;
+        //        }
+
+
+
+
+        //            if (entityToUpdate != null)
+        //        {
+        //            var carRate = await _dbContext.CustomerBooking
+        //                .Join(_dbContext.Car,
+        //                    c => c.CarId.ToString(),
+        //                    cr => cr.Id.ToString(),
+        //                    (c,cr) => new { rate = cr.RatePerDay }).ToListAsync();
+
+
+        //            if (regular = true)
+        //            {
+        //                var rentDays = (latestBooking.RentEnddate - latestBooking.RentStartdate).TotalDays + 1;
+        //                var totalAmount = carRate.FirstOrDefault().rate * rentDays;
+        //                var totalAfterDiscount = totalAmount * 0.9;
+
+        //            }
+
+        //            else
+        //            {
+        //                var rentDays = (latestBooking.RentEnddate - latestBooking.RentStartdate).TotalDays + 1;
+        //                var totalAmount = carRate.FirstOrDefault().rate * rentDays;
+        //                var totalAfterDiscount = totalAmount;
+        //            }
+
+
+        //        }
+
+
+        //        return new ResponseDTO() { Status = "Success", Message = "Booking request approved" };
+        //    }
+
+        //    catch (Exception ex) 
+        //    {
+        //        return new ResponseDTO() { Status = "unsuccessful", Message = ex.ToString() };
+        //    }
+
+        //}
+
+
+        public async Task<ResponseDTO> ApproveBookingRequest(String bookingId, string email)
         {
-            var entityToUpdate = await _dbContext.CustomerBooking.FindAsync(userID.ToString());
-
-            if (entityToUpdate == null)
+            try
             {
-                return new ResponseDTO() { Status = "Error", Message = "Entity not found" };
+                var user = await _userManager.FindByEmailAsync(email);
+                string userID = user.Id; //user Id of the staff who is 
+                var entityToUpdate = await _dbContext.CustomerBooking.SingleOrDefaultAsync(c => c.Id == Guid.Parse( bookingId));
+                var customerId = entityToUpdate.customerId;
+                var customerDetails1 = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerId.ToString());
+                var customerDetails = await _userManager.FindByIdAsync(customerDetails1.UserId);
+                var latestBooking = await _dbContext.CustomerBooking
+                    .Where(b => b.customerId == customerId && (bool)b.IsApproved)
+                    .OrderByDescending(b => b.RentStartdate)
+                    .FirstOrDefaultAsync();
+
+                var today = DateTime.Today;
+                var threeMonthsAgo = today.AddMonths(-3);
+
+                var regular = latestBooking.RentStartdate >= threeMonthsAgo;
+
+                var car = await _dbContext.Car
+                 .Where(c => c.Id == Guid.Parse(entityToUpdate.CarId))
+                 .Select(c => new { c.RatePerDay, c.Name })
+                 .FirstOrDefaultAsync();
+
+
+                var rentDays = (latestBooking.RentEnddate - latestBooking.RentStartdate).TotalDays + 1;
+                var totalAmount = car.RatePerDay * rentDays;
+                var totalAfterDiscount = regular ? totalAmount * 0.9 : totalAmount;
+                var vatAmount = totalAfterDiscount * 0.13;
+
+                entityToUpdate.IsApproved = true;
+                entityToUpdate.ApprovedBy = userID;
+                _dbContext.CustomerBooking.Update(entityToUpdate);
+                await _dbContext.SaveChangesAsync(default(CancellationToken));
+
+
+                var invoice = new GenerateInvoiceDTO()
+                {
+                    CustomerName = customerDetails1.Name,
+                    CustomerEmail = customerDetails.Email,
+                    CarName = car.Name,
+                    RatePerDay = car.RatePerDay,
+                    RentStartDate = entityToUpdate.RentStartdate,
+                    RentEndDate = entityToUpdate.RentEnddate,
+                    RentalAmount = totalAfterDiscount,
+                    VATAmount = vatAmount
+                };
+
+
+
+                _emailService.SendPaymentInvoiceAsync(invoice); 
+
+                return new ResponseDTO() { Status = "Success", Message = "Booking request approved" };
             }
-
-            entityToUpdate.ApprovedBy = userID.ToString();
-            entityToUpdate.IsApproved = true;
-
-            _dbContext.CustomerBooking.Update(entityToUpdate);
-            await _dbContext.SaveChangesAsync(default(CancellationToken));
-
-            return new ResponseDTO() { Status = "Success", Message = "Booking request approved" };
+            catch (Exception ex)
+            {
+                return new ResponseDTO() { Status = "unsuccessful", Message = ex.ToString() };
+            }
         }
+
+
 
         public async Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model,string email)
         {
@@ -49,6 +162,9 @@ namespace Coursework.Infrastructure.Services
                 var user =await _userManager.FindByEmailAsync(email);
                 var userID = user.Id;
                 //var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
+
+                
+
                 var role = await _userManager.GetRolesAsync(user);
                 if (role.FirstOrDefault() == "Customer")
                 {
@@ -113,66 +229,30 @@ namespace Coursework.Infrastructure.Services
         }
 
 
-        //public async Task<ResponseDataDTO<List<GetCarBookingRequestDTO>>> GetBookCarRequests()
-        //{
-
-
-        //    var bookingEmployee = _dbContext.CustomerBooking
-        //        .Join(
-        //            _dbContext.Employee,
-        //            b => b.customerId,
-        //            e => e.UserId,
-
-        //            (b, e) => new { Booking = b, Employee = e }
-        //            )
-        //             .Where(x => x.Booking.isDeleted == false || x.Booking.isDeleted == null)
-        //             .Select(x => new GetCarBookingRequestDTO
-        //             {
-
-        //                 BookingId = x.Booking.Id.ToString(),
-        //                 CustomerId = x.Booking.customerId.ToString(),
-        //                 CustomerName = x.Employee.Name,
-        //                 CustomerPhone = x.Employee.Phone,
-        //                 CarId = x.Booking.CarId,
-        //                 RentStartdate = x.Booking.RentStartdate,
-        //                 RentEnddate = x.Booking.RentEnddate,
-        //             });
-
-
-
-        //    var bookingCustomer = _dbContext.CustomerBooking
-        //            .Join(
-        //                _dbContext.Customer,
-        //                b => b.customerId,
-        //                c => c.UserId,
-        //                (b, c) => new { Booking = b, Customer = c }
-        //            )
-        //            .Where(x => x.Booking.isDeleted == false || x.Booking.isDeleted == null)
-        //            .Select(x => new GetCarBookingRequestDTO
-        //            {
-        //                BookingId = x.Booking.Id.ToString(),
-        //                CustomerId = x.Booking.customerId.ToString(),
-        //                CustomerName = x.Customer.Name,
-        //                CustomerPhone = x.Customer.Phone,
-        //                CarId = x.Booking.CarId,
-        //                RentStartdate = x.Booking.RentStartdate,
-        //                RentEnddate = x.Booking.RentEnddate,
-        //            });
-
-        //    var bookingRequests = Enumerable.Concat(bookingEmployee, bookingCustomer).ToList();
-
-        //    return new ResponseDataDTO<List<GetCarBookingRequestDTO>> { Status = "Success", Message = "Data Fetched Successully", Data = bookingRequests.ToList() };
-        //}
 
         public async Task<ResponseDataDTO<List<GetCarBookingRequestDTO>>> GetBookCarRequests()
         {
-            var bookingRequests = await (
+            try 
+            {
+                
+
+                //var car = await _dbContext.Car
+                //.Where(c => c.Id == _dbContext.CustomerBooking.)
+                //.Select(c => new { c.RatePerDay, c.Name })
+                //.FirstOrDefaultAsync();
+
+                var bookingRequests = await (
                 from booking in _dbContext.CustomerBooking
                 where booking.isDeleted == false || booking.isDeleted == null
                 let employee = _dbContext.Employee.FirstOrDefault(e => e.UserId == booking.customerId)
                 let customer = _dbContext.Customer.FirstOrDefault(c => c.UserId == booking.customerId)
+                let car = _dbContext.Car.FirstOrDefault(c => c.Id.ToString() == booking.CarId)
+
                 let customerName = employee != null ? employee.Name : customer.Name
                 let customerPhone = employee != null ? employee.Phone : customer.Phone
+
+
+
                 select new GetCarBookingRequestDTO
                 {
                     BookingId = booking.Id.ToString(),
@@ -180,33 +260,50 @@ namespace Coursework.Infrastructure.Services
                     CustomerName = customerName,
                     CustomerPhone = customerPhone,
                     CarId = booking.CarId,
+                    CarName = car.Name, 
+                    Image = car.Image,
                     RentStartdate = booking.RentStartdate,
                     RentEnddate = booking.RentEnddate,
                 }
-            ).ToListAsync();
+                ).ToListAsync();
 
-            if (bookingRequests.Count == 0)
-            {
-                return new ResponseDataDTO<List<GetCarBookingRequestDTO>> { Status = "Error", Message = "No booking requests found", Data = null };
+                if (bookingRequests.Count == 0)
+                {
+                    return new ResponseDataDTO<List<GetCarBookingRequestDTO>> { Status = "Error", Message = "No booking requests found", Data = null };
+                }
+
+                return new ResponseDataDTO<List<GetCarBookingRequestDTO>> { Status = "Success", Message = "Data Fetched Successfully", Data = bookingRequests };
             }
 
-            return new ResponseDataDTO<List<GetCarBookingRequestDTO>> { Status = "Success", Message = "Data Fetched Successfully", Data = bookingRequests };
+            catch (Exception ex)
+            {
+                return new ResponseDataDTO<List<GetCarBookingRequestDTO>> { Status = "Error", Message = ex.ToString(), Data = null };
+            }
+
         }
 
 
         public async Task<ResponseDTO> RejectBookingRequest(string bookingId)
         {
-            var entityToUpdate = await _dbContext.CustomerBooking.FindAsync(bookingId);
 
-            if (entityToUpdate == null)
+            try 
             {
-                return new ResponseDTO() { Status = "Error", Message = "Booking not found" };
-            }
+                var entityToUpdate = await _dbContext.CustomerBooking.FindAsync(bookingId);
 
-            entityToUpdate.isDeleted = true;
-            _dbContext.CustomerBooking.Update(entityToUpdate);
-            await _dbContext.SaveChangesAsync(default(CancellationToken));
-            return new ResponseDTO() { Status = "Success", Message = "Booking request disapproved." };
+                if (entityToUpdate == null)
+                {
+                    return new ResponseDTO() { Status = "Error", Message = "Booking not found" };
+                }
+
+                entityToUpdate.isDeleted = true;
+                _dbContext.CustomerBooking.Update(entityToUpdate);
+                await _dbContext.SaveChangesAsync(default(CancellationToken));
+                return new ResponseDTO() { Status = "Success", Message = "Booking request disapproved." };
+            }
+            
+            catch (Exception ex) {
+                return new ResponseDTO() { Status = "unsuccessful", Message = ex.ToString() };
+            }
         }
 
     }
