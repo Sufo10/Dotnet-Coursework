@@ -72,6 +72,7 @@ namespace Coursework.Infrastructure.DI
             services.AddTransient<IEmailService, EmailService>();
             services.AddTransient<ICarTestDetails, CarTestService>();
             services.AddTransient<IBookCar, BookCarService>();
+            services.AddTransient<ICarBookingHistory, CarBookHistoryService>();
 
             return services;
         }

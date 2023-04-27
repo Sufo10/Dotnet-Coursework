@@ -34,7 +34,6 @@
     <None Remove="System.IdentityModel.Tokens.Jwt" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="images\" />
     <Folder Include="Uploads\" />
     <Folder Include="Uploads\Documents\" />
   </ItemGroup>

@@ -11,22 +11,21 @@ using Microsoft.AspNetCore.Mvc;
 namespace Coursework.API.Controllers
 {
   [ApiController]
-    public class CarTestController : ControllerBase
+    public class CarHistoryController : ControllerBase
     {
-        private readonly ICarTestDetails _carDetails;
+        private readonly ICarBookingHistory _carDetails;
         private readonly IWebHostEnvironment _environment;
 
-        public CarTestController(ICarTestDetails carDetails, IWebHostEnvironment environment)
+        public CarHistoryController(ICarBookingHistory carDetails, IWebHostEnvironment environment)
         {
             _carDetails = carDetails;
             _environment = environment;
         }
 
-        [HttpGet]
-        [Route("/api/tcars")]
-        public async Task<ResponseDataDTO<List<CarTestDTO>>> GetTestCars()
+        [HttpGet("/api/car-booking-history/{id}")]
+        public async Task<ResponseDataDTO<IEnumerable<BookingHistoryResponseDTO>>> GetCarHistoryy(string id)
         {
-            var data = await _carDetails.GetCarTest();
+            var data = await _carDetails.GetCarHistory(id);
             return data;
         }
     }
