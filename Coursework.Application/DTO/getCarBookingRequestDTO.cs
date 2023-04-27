@@ -12,7 +12,10 @@ namespace Coursework.Application.DTO
         public string CustomerId {  get; set; } 
         public string CustomerName {  get; set; } 
         public string CustomerPhone { get; set; }
+        public string CarName { get; set; }
+        public string Image { get; set; }
         public string CarId { get; set; }
+        
         public DateTime RentStartdate { get; set; }
         public DateTime RentEnddate { get;  set; }
 

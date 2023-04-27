@@ -45,13 +45,17 @@ namespace Coursework.API.Controllers
         }
 
 
-        //[HttpPost]
-        //[Route("/api/verify_request")]
+        [HttpPost]
+        [Authorize]
+        [Route("/api/verify-request/{bookingId}")]
 
-        //public async Task<ResponseDTO> VerifyBooking(BookingApproveRequestDTO mode)
-        //{
-        //    var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        //}
+        public async Task<ResponseDTO> VerifyBooking(String bookingId)
+        {
+
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var verify = await _book.ApproveBookingRequest(bookingId, userEmail);
+            return verify;
+        }
 
 
     } 

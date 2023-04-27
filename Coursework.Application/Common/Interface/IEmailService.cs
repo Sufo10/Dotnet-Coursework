@@ -10,8 +10,10 @@ namespace Coursework.Application.Common.Interface
 {
     public interface IEmailService
     {
-        Task SendEmailAsync(MessageModel messageDTO);
-        Task SendForgotPasswordEmailAsync(string userName, string toEmail, string passwordResetToken);
-        Task SendEmailConfirmationAsync(string name, string userId, string toEmail, string token);
+        public Task SendEmailAsync(MessageModel messageDTO);
+        public Task SendForgotPasswordEmailAsync(string userName, string toEmail, string passwordResetToken);
+        public Task SendEmailConfirmationAsync(string name, string userId, string toEmail, string token);
+        public  Task SendPaymentInvoiceAsync(GenerateInvoiceDTO model);
+
     }
 }
