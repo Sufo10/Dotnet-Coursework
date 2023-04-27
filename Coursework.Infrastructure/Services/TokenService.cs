@@ -27,28 +27,6 @@ namespace Coursework.Infrastructure.Services
             _issuer = configuration.GetSection("JWT:Issuer").Value!;
             _audience = configuration.GetSection("JWT:Audience").Value!;
         }
-
-        //public string GenerateToken(IdentityUser user, string role)
-        //{
-        //    var tokenHandler = new JwtSecurityTokenHandler();
-        //    var key = Encoding.ASCII.GetBytes(_key);
-        //    var tokenDescriptor = new SecurityTokenDescriptor
-        //    {
-        //        Subject = new ClaimsIdentity(new[] {
-        //            new Claim(ClaimTypes.NameIdentifier, user.Id),
-        //            new Claim(ClaimTypes.Name, user.UserName),
-        //             new Claim(ClaimTypes.Role, role)
-        //        }),
-        //        Expires = DateTime.UtcNow.AddHours(12),
-        //        Issuer = _issuer,
-        //        Audience = _audience,
-        //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-        //    SecurityAlgorithms.HmacSha256Signature)
-        //    };
-        //    var securityToken = tokenHandler.CreateToken(tokenDescriptor);
-        //    return tokenHandler.WriteToken(securityToken);
-        //}
-
         public string GenerateToken(AppUser user,string role)
         {
             var claims = new List<Claim>
@@ -56,7 +34,8 @@ namespace Coursework.Infrastructure.Services
         new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         new Claim(ClaimTypes.NameIdentifier, user.Id),
-        new Claim(ClaimTypes.Role,role)
+        new Claim(ClaimTypes.Role,role),
+        new Claim(ClaimTypes.Email,user.Email)
     };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));

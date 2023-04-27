@@ -129,14 +129,15 @@ namespace Coursework.Infrastructure.Services
         }
 
 
-        public async Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model, Guid userID)
+
+        public async Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model,string email)
         {
-            try
-            {
+            try {
+                var user =await _userManager.FindByEmailAsync(email);
+                var userID = user.Id;
 
 
-                var user = await _userManager.FindByIdAsync(userID.ToString());
-
+     
                 var role = await _userManager.GetRolesAsync(user);
                 if (role.FirstOrDefault() == "Customer")
                 {

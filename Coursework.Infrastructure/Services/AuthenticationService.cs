@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Mail;
+using System.Security.Claims;
 using System.Transactions;
 using System.Xml.Linq;
 using Coursework.Application.Common.Interface;
@@ -208,10 +209,11 @@ namespace Coursework.Infrastructure.Services
             UtilityService.ValidateIdentityResult(result);
         }
 
-        public async Task<ResponseDTO> EmployeeRegister(EmployeeRegistrationRequestDTO model, string userID)
+        public async Task<ResponseDTO> EmployeeRegister(EmployeeRegistrationRequestDTO model, string userEmail)
         {
             try
             {
+               
                 var userExists = await _userManager.FindByEmailAsync(model.Email);
                 if (userExists != null)
                     return new ResponseDTO { Status = "Error", Message = "Email already exists" };
@@ -220,11 +222,14 @@ namespace Coursework.Infrastructure.Services
                 {
                     return new ResponseDTO { Status = "Error", Message = "Password doesnot match" };
                 }
+                var adminUser =await _userManager.FindByEmailAsync(userEmail);
+
                 AppUser user = new()
                 {
                     Email = model.Email,
                     UserName = model.UserName,
                     SecurityStamp = Guid.NewGuid().ToString(),
+                 
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (!result.Succeeded)
@@ -247,10 +252,11 @@ namespace Coursework.Infrastructure.Services
                     {
                         Name = model.Name,
                         Address = model.Address,
-                        IsVerified = false,
+                        IsVerified = true,
                         Phone = model.Phone,
                         UserId = user.Id,
                         PaymentFulfilled = true,
+                        CreatedBy = Guid.Parse(adminUser.Id)
 
                     };
                     var employeeID = employee.Id;
@@ -270,11 +276,11 @@ namespace Coursework.Infrastructure.Services
             }
         }
 
-        public async Task<ResponseDTO> ChangePassword(UserChangePasswordDTO model, Guid userID)
+        public async Task<ResponseDTO> ChangePassword(UserChangePasswordDTO model,string email)
         {
             try
             {
-                var currentUser = await _userManager.FindByIdAsync(userID.ToString());
+                var currentUser = await _userManager.FindByEmailAsync(email);
 
                 var passwordIsValid = await _userManager.CheckPasswordAsync(currentUser, model.Password);
                 if (!passwordIsValid)
@@ -338,6 +344,8 @@ namespace Coursework.Infrastructure.Services
 
             return new ResponseDataDTO<List<EmployeeResponseDTO>> { Status = "Success", Message = "Data Fetch Succesfully", Data = employeeDtos };
         }
+
+
     }
 }
 

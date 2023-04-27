@@ -17,11 +17,12 @@ namespace Coursework.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [Route("/api/bookcars")]
         public async Task<ResponseDTO> BookRequest(BookCarRequestDTO model)
         {
-            var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var response = await _book.BookCarRequest(model, userID);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var response = await _book.BookCarRequest(model, userEmail);
             return response;
         }
 
