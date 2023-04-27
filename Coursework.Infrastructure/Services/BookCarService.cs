@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Coursework.Infrastructure.Services;
 
 namespace Coursework.Infrastructure.Services
 {
@@ -19,11 +20,13 @@ namespace Coursework.Infrastructure.Services
     {
         private readonly IApplicationDBContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IEmailService _emailService;
 
-        public BookCarService(IApplicationDBContext dBContext, UserManager<AppUser> userManager)
+        public BookCarService(IApplicationDBContext dBContext, UserManager<AppUser> userManager, IEmailService emailService)
         {
             _dbContext = dBContext;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         //public async Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model, Guid userID)
@@ -90,14 +93,16 @@ namespace Coursework.Infrastructure.Services
         //}
 
 
-        public async Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model, string email)
+        public async Task<ResponseDTO> ApproveBookingRequest(String bookingId, string email)
         {
             try
             {
                 var user = await _userManager.FindByEmailAsync(email);
-                string userID = user.Id;
-                var entityToUpdate = await _dbContext.CustomerBooking.SingleOrDefaultAsync(c => c.Id == Guid.Parse(model.BookingId));
-                var customerId = model.customerId;
+                string userID = user.Id; //user Id of the staff who is 
+                var entityToUpdate = await _dbContext.CustomerBooking.SingleOrDefaultAsync(c => c.Id == Guid.Parse( bookingId));
+                var customerId = entityToUpdate.customerId;
+                var customerDetails1 = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerId.ToString());
+                var customerDetails = await _userManager.FindByIdAsync(customerDetails1.UserId);
                 var latestBooking = await _dbContext.CustomerBooking
                     .Where(b => b.customerId == customerId && (bool)b.IsApproved)
                     .OrderByDescending(b => b.RentStartdate)
@@ -117,11 +122,30 @@ namespace Coursework.Infrastructure.Services
                 var rentDays = (latestBooking.RentEnddate - latestBooking.RentStartdate).TotalDays + 1;
                 var totalAmount = car.RatePerDay * rentDays;
                 var totalAfterDiscount = regular ? totalAmount * 0.9 : totalAmount;
+                var vatAmount = totalAfterDiscount * 0.13;
 
                 entityToUpdate.IsApproved = true;
                 entityToUpdate.ApprovedBy = userID;
                 _dbContext.CustomerBooking.Update(entityToUpdate);
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
+
+
+                var invoice = new GenerateInvoiceDTO()
+                {
+                    CustomerName = customerDetails1.Name,
+                    CustomerEmail = customerDetails.Email,
+                    CarName = car.Name,
+                    RatePerDay = car.RatePerDay,
+                    RentStartDate = entityToUpdate.RentStartdate,
+                    RentEndDate = entityToUpdate.RentEnddate,
+                    RentalAmount = totalAfterDiscount,
+                    VATAmount = vatAmount
+                };
+
+
+
+                _emailService.SendPaymentInvoiceAsync(invoice); 
+
                 return new ResponseDTO() { Status = "Success", Message = "Booking request approved" };
             }
             catch (Exception ex)
@@ -137,9 +161,10 @@ namespace Coursework.Infrastructure.Services
             try {
                 var user =await _userManager.FindByEmailAsync(email);
                 var userID = user.Id;
+                //var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
 
+                
 
-     
                 var role = await _userManager.GetRolesAsync(user);
                 if (role.FirstOrDefault() == "Customer")
                 {
@@ -209,13 +234,25 @@ namespace Coursework.Infrastructure.Services
         {
             try 
             {
+                
+
+                //var car = await _dbContext.Car
+                //.Where(c => c.Id == _dbContext.CustomerBooking.)
+                //.Select(c => new { c.RatePerDay, c.Name })
+                //.FirstOrDefaultAsync();
+
                 var bookingRequests = await (
                 from booking in _dbContext.CustomerBooking
                 where booking.isDeleted == false || booking.isDeleted == null
                 let employee = _dbContext.Employee.FirstOrDefault(e => e.UserId == booking.customerId)
                 let customer = _dbContext.Customer.FirstOrDefault(c => c.UserId == booking.customerId)
+                let car = _dbContext.Car.FirstOrDefault(c => c.Id.ToString() == booking.CarId)
+
                 let customerName = employee != null ? employee.Name : customer.Name
                 let customerPhone = employee != null ? employee.Phone : customer.Phone
+
+
+
                 select new GetCarBookingRequestDTO
                 {
                     BookingId = booking.Id.ToString(),
@@ -223,6 +260,8 @@ namespace Coursework.Infrastructure.Services
                     CustomerName = customerName,
                     CustomerPhone = customerPhone,
                     CarId = booking.CarId,
+                    CarName = car.Name, 
+                    Image = car.Image,
                     RentStartdate = booking.RentStartdate,
                     RentEnddate = booking.RentEnddate,
                 }

@@ -47,13 +47,13 @@ namespace Coursework.API.Controllers
 
         [HttpPost]
         [Authorize]
-        [Route("/api/verify_request")]
+        [Route("/api/verify-request/{bookingId}")]
 
-        public async Task<ResponseDTO> VerifyBooking(BookingApproveRequestDTO model)
+        public async Task<ResponseDTO> VerifyBooking(String bookingId)
         {
 
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            var verify = await _book.ApproveBookingRequest(model, userEmail);
+            var verify = await _book.ApproveBookingRequest(bookingId, userEmail);
             return verify;
         }
 
