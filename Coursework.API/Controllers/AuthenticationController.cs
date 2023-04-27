@@ -96,9 +96,10 @@ namespace Coursework.API.Controllers
         [Route("/api/change-password")]
         public async Task<ResponseDTO> ChangePassword([FromBody] UserChangePasswordDTO model)
         {
-            var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
-            var data = await _authenticate.ChangePassword(model, userID);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string userId = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            var data = await _authenticate.ChangePassword(model, userEmail);
             return data;
         }
 

@@ -1,38 +1,58 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Coursework.Presentation.Data.Helper
 {
-	public static class HttpClientExtension
-	{
+    public static class HttpClientExtension
+    {
+        
 
-        private static readonly string baseURL = "https://localhost:7190/";
-        private static HttpContent Serialize(object data) => new StringContent(
-        JsonSerializer.Serialize(data, new JsonSerializerOptions(JsonSerializerDefaults.Web)), Encoding.UTF8,
-        "application/json");
-
-
-        public static Task<HttpResponseMessage> AuthGetAsync(this HttpClient httpClient, string requestUri)
+        private static HttpContent Serialize(object data)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, baseURL+requestUri);
-            return httpClient.SendAsync(request);
+            return new StringContent(System.Text.Json.JsonSerializer.Serialize(data, new JsonSerializerOptions(JsonSerializerDefaults.Web)),
+                Encoding.UTF8, "application/json");
         }
 
-        public static Task<HttpResponseMessage> AuthPostAsync(this HttpClient httpClient, string requestUri, HttpContent? content)
+        public static async Task<T> AuthGetAsync<T>(this HttpClient httpClient, string requestUri, string bearerToken)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, baseURL+requestUri);
-            request.Content = content;
-            return httpClient.SendAsync(request);
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(responseContent);
         }
 
 
-        public static Task<HttpResponseMessage> AuthPostAsJsonAsync<T>(this HttpClient httpClient, string requestUri, T data) where T : class
+        public static async Task<T> AuthPostAsync<T>(this HttpClient httpClient, string requestUri, HttpContent? content, string bearerToken)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+            request.Content = content;
+            httpClient.SendAsync(request);
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(responseContent);
+        }
+
+        public static async Task<T>  AuthPostAsJsonAsync<T>(this HttpClient httpClient, string requestUri, T data, string bearerToken) where T : class
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
             request.Content = Serialize(data);
-            return httpClient.SendAsync(request);
+            httpClient.SendAsync(request);
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(responseContent);
         }
     }
 }
-

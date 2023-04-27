@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Mail;
+using System.Security.Claims;
 using System.Transactions;
 using System.Xml.Linq;
 using Coursework.Application.Common.Interface;
@@ -270,11 +271,11 @@ namespace Coursework.Infrastructure.Services
             }
         }
 
-        public async Task<ResponseDTO> ChangePassword(UserChangePasswordDTO model, Guid userID)
+        public async Task<ResponseDTO> ChangePassword(UserChangePasswordDTO model,string email)
         {
             try
             {
-                var currentUser = await _userManager.FindByIdAsync(userID.ToString());
+                var currentUser = await _userManager.FindByEmailAsync(email);
 
                 var passwordIsValid = await _userManager.CheckPasswordAsync(currentUser, model.Password);
                 if (!passwordIsValid)
@@ -338,6 +339,8 @@ namespace Coursework.Infrastructure.Services
 
             return new ResponseDataDTO<List<EmployeeResponseDTO>> { Status = "Success", Message = "Data Fetch Succesfully", Data = employeeDtos };
         }
+
+
     }
 }
 

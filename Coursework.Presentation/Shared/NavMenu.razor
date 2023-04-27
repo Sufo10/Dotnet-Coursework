@@ -39,5 +39,6 @@
 </MudNavMenu>
 
 @code{
-    [CascadingParameter] public UserInfo User { get; set; }
+    [CascadingParameter(Name = "UserInfo")]
+    public UserInfo User { get; set; }
 }

@@ -2,18 +2,19 @@
 @inject IDialogService DialogService
 @inject IConfiguration _config
 @inject HttpClient _httpClient
-
+@using Newtonsoft.Json;
+@using Newtonsoft.Json.Linq;
 
 <PageTitle>Index</PageTitle>
 
 <div class="d-flex justify-space-between">
-<MudText class="my-5 text-white" Typo="Typo.h5">Cars Available, @User.Username</MudText>
-@if(User.Role=="ADMIN" || User.Role == "STAFF")
-{
-<MudCardActions>
-    <MudButton OnClick="@((e) => OpenAddDialog(maxWidth))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Add Cars</MudButton>
-</MudCardActions>
-}
+    <MudText class="my-5 text-white" Typo="Typo.h5">Cars Available, @User.Username</MudText>
+    @if (User.Role == "Admin" || User.Role == "Staff")
+    {
+        <MudCardActions>
+            <MudButton OnClick="@((e) => OpenAddDialog(maxWidth))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Add Cars</MudButton>
+        </MudCardActions>
+    }
 </div>
 <MudGrid Spacing=2 Justify="Justify.FlexStart">
     @if (Cars.Count > 0)
@@ -56,7 +57,8 @@
 @code{
     DialogOptions fullScreen = new DialogOptions() { FullScreen = true, CloseButton = true };
     DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
-    [CascadingParameter] public UserInfo User { get; set; }
+    [CascadingParameter(Name = "UserInfo")]
+    public UserInfo User { get; set; }
     public List<Cars> Cars { get; set; } = new List<Cars>();
     async Task OpenDialog(DialogOptions options, Cars car)
     {
@@ -76,22 +78,24 @@
         var result = await dialog.Result;
         if (!result.Canceled)
         {
-            var response = await _httpClient.GetFromJsonAsync<ResponseWithData<List<Cars>>>("https://localhost:7190/api/cars");
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User.Token);
+            Console.WriteLine(JsonConvert.SerializeObject(jsonResponse, Formatting.Indented));
 
-            if (response != null && response.status == "Success")
+            if (jsonResponse != null && jsonResponse.Status == "Success")
             {
-                Cars = response.data;
+                Cars = jsonResponse.Data;
             }
         }
     }
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await _httpClient.GetFromJsonAsync<ResponseWithData<List<Cars>>>("https://localhost:7190/api/cars");
+        var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User.Token);
+        Console.WriteLine(JsonConvert.SerializeObject(jsonResponse, Formatting.Indented));
 
-        if (response != null && response.status == "Success")
+        if (jsonResponse != null && jsonResponse.Status == "Success")
         {
-            Cars = response.data;
+            Cars = jsonResponse.Data;
         }
     }
 }

@@ -57,6 +57,9 @@
 @code {
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; }
+
+    [CascadingParameter(Name = "UserInfo")]
+    public UserInfo User { get; set; }
     private MudDateRangePicker _picker;
     private DateRange _dateRange = new DateRange(DateTime.Now.Date.AddDays(5), DateTime.Now.AddDays(8).Date);
     private bool _autoClose;
@@ -76,22 +79,25 @@
         DateTime endDateString = _dateRange.End ?? DateTime.Now;
         string endDate = endDateString.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.fff'Z'");
 
-        var data = new { carId = car.Id.ToString(), rentStartdate =startDate, rentEnddate = endDate };
-        var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-        var response = await client.PostAsync("https://localhost:7190/api/bookcars",content);
-        var result = await response.Content.ReadAsStringAsync();
+        var data = new
+        { CarId = car.Id.ToString(), RentStartDate =startDate, RentEndDate = endDate };
+        // Serialize the data object to a JSON string
+        var json = JsonConvert.SerializeObject(data);
 
-        dynamic jsonResponse = JsonConvert.DeserializeObject(result);
-        if (jsonResponse.status == "Success")
+        // Create a new StringContent object with the JSON string and media type
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        // Call the AuthPostAsJsonAsync method and pass in the data object
+        var response = await client.AuthPostAsync<ApiResponse>("https://localhost:7190/api/bookcars", content, User.Token);
+
+        // Process the response as needed
+        if (response != null && response.Status == "Success")
         {
             Snackbar.Add("Car Booked Successfully", Severity.Success);
         }
         else
         {
-            Snackbar.Add($"Couldnot Book Car!", Severity.Error);
-
+            Snackbar.Add($"Could not Book Car!", Severity.Error);
         }
-        MudDialog.Close(DialogResult.Ok(car.Id));
     }
 
 }
