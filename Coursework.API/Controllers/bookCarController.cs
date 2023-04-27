@@ -51,9 +51,9 @@ namespace Coursework.API.Controllers
 
         public async Task<ResponseDTO> VerifyBooking(BookingApproveRequestDTO model)
         {
-            
-            var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var verify = await _book.ApproveBookingRequest(model, userID);
+
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var verify = await _book.ApproveBookingRequest(model, userEmail);
             return verify;
         }
 

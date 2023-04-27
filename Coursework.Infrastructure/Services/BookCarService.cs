@@ -19,13 +19,11 @@ namespace Coursework.Infrastructure.Services
     {
         private readonly IApplicationDBContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
-        private readonly IEmailService _emailService;
 
-        public BookCarService(IApplicationDBContext dBContext, UserManager<AppUser> userManager, IEmailService emailService)
+        public BookCarService(IApplicationDBContext dBContext, UserManager<AppUser> userManager)
         {
             _dbContext = dBContext;
             _userManager = userManager;
-            _emailService = emailService;
         }
 
         //public async Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model, Guid userID)
@@ -91,10 +89,13 @@ namespace Coursework.Infrastructure.Services
 
         //}
 
-        public async Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model, Guid userID)
+
+        public async Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model, string email)
         {
             try
             {
+                var user = await _userManager.FindByEmailAsync(email);
+                string userID = user.Id;
                 var entityToUpdate = await _dbContext.CustomerBooking.SingleOrDefaultAsync(c => c.Id == Guid.Parse(model.BookingId));
                 var customerId = model.customerId;
                 var latestBooking = await _dbContext.CustomerBooking
@@ -107,35 +108,20 @@ namespace Coursework.Infrastructure.Services
 
                 var regular = latestBooking.RentStartdate >= threeMonthsAgo;
 
-                var carRate = await _dbContext.Car
+                var car = await _dbContext.Car
                  .Where(c => c.Id == Guid.Parse(entityToUpdate.CarId))
-                 .Select(c => c.RatePerDay)
+                 .Select(c => new { c.RatePerDay, c.Name })
                  .FirstOrDefaultAsync();
 
 
                 var rentDays = (latestBooking.RentEnddate - latestBooking.RentStartdate).TotalDays + 1;
-                var totalAmount = carRate * rentDays;
-                var totalAfterDiscount = (int) Math.Round(regular ? totalAmount * 0.9 : totalAmount);
-                var VAT = (int)Math.Round(totalAfterDiscount * 0.13);
+                var totalAmount = car.RatePerDay * rentDays;
+                var totalAfterDiscount = regular ? totalAmount * 0.9 : totalAmount;
 
                 entityToUpdate.IsApproved = true;
-                entityToUpdate.ApprovedBy = userID.ToString();
+                entityToUpdate.ApprovedBy = userID;
                 _dbContext.CustomerBooking.Update(entityToUpdate);
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
-                //var invoice = new GenerateInvoiceDTO
-                //{ 
-                //    CustomerName = customer.Name,
-                //    CustomerEmail = user.Email,
-                //    CarName = car.Name,
-                //    RatePerDay = car.RatePerDay,
-                //    RentStartDate = latestBooking.RentStartdate,
-                //    RentEndDate = latestBooking.RentEnddate,
-                //    RentalAmount = totalAfterDiscount,
-                //    VATAmount = VAT
-
-                //};
-                //await _emailService.SendPaymentInvoiceAsync(invoice);
-
                 return new ResponseDTO() { Status = "Success", Message = "Booking request approved" };
             }
             catch (Exception ex)
