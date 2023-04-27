@@ -43,10 +43,11 @@ namespace Coursework.Infrastructure.Services
             return new ResponseDTO() { Status = "Success", Message = "Booking request approved" };
         }
 
-        public async Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model, Guid userID)
+        public async Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model,string email)
         {
-            try
-            {
+            try {
+                var user =await _userManager.FindByEmailAsync(email);
+                var userID = user.Id;
                 //var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
 
                 var user = await _userManager.FindByIdAsync(userID.ToString());

@@ -4,6 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>4a35682c-dbf6-4025-a85d-3ac43f0ac196</UserSecretsId>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(RunConfiguration)' == 'Mudblazor.Template' ">
@@ -15,6 +16,7 @@
 		<PackageReference Include="MudBlazor" Version="6.2.0" />
 		<PackageReference Include="bootstrap" Version="5.0.2" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
 	</ItemGroup>
 	
 	
@@ -34,6 +36,7 @@
 	  <None Remove="Data\" />
 	  <None Remove="Data\Models\" />
 	  <None Remove="Data\Helper\" />
+	  <None Remove="Blazored.LocalStorage" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Content Update="Pages\Index.razor">

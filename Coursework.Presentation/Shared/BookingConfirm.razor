@@ -1,7 +1,7 @@
 ﻿@using System.Text;
 @using Newtonsoft.Json;
 @inject ISnackbar Snackbar
-
+@inject HttpClient _httpClient
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
@@ -63,6 +63,8 @@
     [Parameter]
     public Cars car { get; set; } = new Cars();
 
+    [Parameter]
+    public UserInfo User { get; set; }
     private void Cancel()
     {
         MudDialog.Cancel();
@@ -70,28 +72,33 @@
 
     async Task DeleteServer()
     {
-        var client = new HttpClient();
         DateTime startDateString = _dateRange.Start ?? DateTime.Now;
         string startDate = startDateString.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.fff'Z'");
         DateTime endDateString = _dateRange.End ?? DateTime.Now;
         string endDate = endDateString.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.fff'Z'");
 
-        var data = new { carId = car.Id.ToString(), rentStartdate =startDate, rentEnddate = endDate };
+        var data = new
+        { CarId = car.Id.ToString(), RentStartDate = startDate, RentEndDate = endDate };
+        var json = JsonConvert.SerializeObject(data);
         var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-        var response = await client.PostAsync("https://localhost:7190/api/bookcars",content);
-        var result = await response.Content.ReadAsStringAsync();
-
-        dynamic jsonResponse = JsonConvert.DeserializeObject(result);
-        if (jsonResponse.status == "Success")
+        if (content != null)
         {
-            Snackbar.Add("Car Booked Successfully", Severity.Success);
+            var response = await HttpClientExtension.AuthPostAsync<ApiResponse>(_httpClient,"https://localhost:7190/api/bookcars", content, User.Token.ToString());
+            // Process the response as needed
+            if (response != null && response.Status == "Success")
+            {
+                Snackbar.Add("Car Booked Successfully", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Could not Book Car!", Severity.Error);
+            }
         }
         else
         {
-            Snackbar.Add($"Couldnot Book Car!", Severity.Error);
-
+            Snackbar.Add($"Content object is null!", Severity.Error);
         }
-        MudDialog.Close(DialogResult.Ok(car.Id));
     }
+
 
 }

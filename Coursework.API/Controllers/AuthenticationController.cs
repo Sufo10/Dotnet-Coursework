@@ -81,13 +81,14 @@ namespace Coursework.API.Controllers
             return Redirect("https://www.google.com");
         }
 
-        [Authorize]
+        [Authorize(Roles ="Admin")]
         [HttpPost]
         [Route("/api/admin/register-employee")]
         public async Task<ResponseDTO> RegisterEmployee(EmployeeRegistrationRequestDTO model)
         {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var data = await _authenticate.EmployeeRegister(model, userID);
+            var data = await _authenticate.EmployeeRegister(model, userEmail);
             return data;
         }
 
@@ -96,9 +97,8 @@ namespace Coursework.API.Controllers
         [Route("/api/change-password")]
         public async Task<ResponseDTO> ChangePassword([FromBody] UserChangePasswordDTO model)
         {
-            var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
-            var data = await _authenticate.ChangePassword(model, userID);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var data = await _authenticate.ChangePassword(model, userEmail);
             return data;
         }
 

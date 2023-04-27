@@ -10,8 +10,8 @@ namespace Coursework.Application.Common.Interface
         Task<LoginResponseDTO> TokenLoginAsync(LoginRequestDTO model);
         Task<ResponseDTO> ForgotPasswordEmailAsync(string email);
         Task ConfirmEmailAsync(string userId, string token);
-        Task<ResponseDTO> EmployeeRegister(EmployeeRegistrationRequestDTO model, string userID);
-        Task<ResponseDTO> ChangePassword(UserChangePasswordDTO model, Guid userID);
+        Task<ResponseDTO> EmployeeRegister(EmployeeRegistrationRequestDTO model, string userEmail);
+        Task<ResponseDTO> ChangePassword(UserChangePasswordDTO model, string email);
         Task<ResponseDTO> ResetPasswordAsync(ResetPasswordRequestDTO body);
         Task<ResponseDataDTO<List<EmployeeResponseDTO>>> GetAllEmployee();
     }

@@ -1,9 +1,9 @@
 ﻿@using System.Text;
 @using Newtonsoft.Json;
-@inject CookieInterop ci;
+@inject UserService UserService
 @using System.Text.RegularExpressions;
 @page "/login"
-@inject AuthenticationStateService AuthenticationService;
+
 @inject NavigationManager NavManager
 <PageTitle>Login</PageTitle>
 <div class="row min-vh-100">
@@ -91,8 +91,17 @@
             {
                 string username = jsonResponse.userName; // Replace with the actual username from the login response
                 string role = jsonResponse.role;
+                string token = jsonResponse.data;
                 bool isVerified = jsonResponse.isVerified == null ? false : jsonResponse.isVerified;
-                await AuthenticationService.SetLoggedInUserAsync(username, role, isVerified);
+                UserInfo user = new UserInfo
+                {
+                    Token = token,
+                    Username = username,
+                    Role = role,
+                    IsVerified = isVerified
+                };
+                UserService.SetUser(user);
+                UserService.RaiseUserChanged();
 
                 Console.WriteLine($"status: {jsonResponse.status}");
 
