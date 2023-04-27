@@ -1,7 +1,7 @@
 ﻿@using System.Text;
 @using Newtonsoft.Json;
 @inject ISnackbar Snackbar
-
+@inject HttpClient _httpClient
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
@@ -57,15 +57,14 @@
 @code {
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; }
-
-    [CascadingParameter(Name = "UserInfo")]
-    public UserInfo User { get; set; }
     private MudDateRangePicker _picker;
     private DateRange _dateRange = new DateRange(DateTime.Now.Date.AddDays(5), DateTime.Now.AddDays(8).Date);
     private bool _autoClose;
     [Parameter]
     public Cars car { get; set; } = new Cars();
 
+    [Parameter]
+    public UserInfo User { get; set; }
     private void Cancel()
     {
         MudDialog.Cancel();
@@ -73,31 +72,33 @@
 
     async Task DeleteServer()
     {
-        var client = new HttpClient();
         DateTime startDateString = _dateRange.Start ?? DateTime.Now;
         string startDate = startDateString.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.fff'Z'");
         DateTime endDateString = _dateRange.End ?? DateTime.Now;
         string endDate = endDateString.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss.fff'Z'");
 
         var data = new
-        { CarId = car.Id.ToString(), RentStartDate =startDate, RentEndDate = endDate };
-        // Serialize the data object to a JSON string
+        { CarId = car.Id.ToString(), RentStartDate = startDate, RentEndDate = endDate };
         var json = JsonConvert.SerializeObject(data);
-
-        // Create a new StringContent object with the JSON string and media type
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        // Call the AuthPostAsJsonAsync method and pass in the data object
-        var response = await client.AuthPostAsync<ApiResponse>("https://localhost:7190/api/bookcars", content, User.Token);
-
-        // Process the response as needed
-        if (response != null && response.Status == "Success")
+        var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+        if (content != null)
         {
-            Snackbar.Add("Car Booked Successfully", Severity.Success);
+            var response = await HttpClientExtension.AuthPostAsync<ApiResponse>(_httpClient,"https://localhost:7190/api/bookcars", content, User.Token.ToString());
+            // Process the response as needed
+            if (response != null && response.Status == "Success")
+            {
+                Snackbar.Add("Car Booked Successfully", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Could not Book Car!", Severity.Error);
+            }
         }
         else
         {
-            Snackbar.Add($"Could not Book Car!", Severity.Error);
+            Snackbar.Add($"Content object is null!", Severity.Error);
         }
     }
+
 
 }

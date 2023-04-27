@@ -31,17 +31,30 @@ namespace Coursework.Presentation.Data.Helper
         }
 
 
-        public static async Task<T> AuthPostAsync<T>(this HttpClient httpClient, string requestUri, HttpContent? content, string bearerToken)
+        public static async Task<TResponse> AuthPostAsync<TResponse>(HttpClient httpClient, string url, HttpContent content, string token)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
-            request.Content = content;
-            httpClient.SendAsync(request);
-            var response = await httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            var responseContent = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<T>(responseContent);
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = content,
+                Headers =
+        {
+            Authorization = new AuthenticationHeaderValue("Bearer", token),
+        },
+            };
+
+            using var response = await httpClient.SendAsync(requestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<TResponse>(jsonResponse);
+            }
+            else
+            {
+                throw new HttpRequestException($"Failed to send request: {response.ReasonPhrase}");
+            }
         }
+
 
         public static async Task<T>  AuthPostAsJsonAsync<T>(this HttpClient httpClient, string requestUri, T data, string bearerToken) where T : class
         {

@@ -101,6 +101,8 @@
                     IsVerified = isVerified
                 };
                 UserService.SetUser(user);
+                UserService.RaiseUserChanged();
+
                 Console.WriteLine($"status: {jsonResponse.status}");
 
                 _processing = false;

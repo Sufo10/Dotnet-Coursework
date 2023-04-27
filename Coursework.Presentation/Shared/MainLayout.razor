@@ -45,6 +45,20 @@
     protected override void OnInitialized()
     {
         _user = UserService.GetUser();
+        UserService.OnUserChanged += UpdateComponent;
+    }
+
+
+    private void UpdateComponent()
+    {
+        // Refresh the component when the user logs in
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe from the event when the component is disposed
+        UserService.OnUserChanged -= UpdateComponent;
     }
 
     private MudThemeProvider _mudThemeProvider;

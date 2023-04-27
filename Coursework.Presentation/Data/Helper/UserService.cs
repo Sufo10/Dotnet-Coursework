@@ -10,13 +10,16 @@ public class UserService
     {
         _localStorage = localStorage;
     }
+    public event Action OnUserChanged;
 
     public void SetUser(UserInfo user)
     {
         var jsonString = JsonSerializer.Serialize(user);
         _localStorage.SetItem("user", jsonString);
+        NotifyUserChanged();
     }
 
+    private void NotifyUserChanged() => OnUserChanged?.Invoke();
     public UserInfo GetUser()
     {
         var jsonString = _localStorage.GetItem<string>("user");
@@ -27,5 +30,16 @@ public class UserService
         }
 
         return JsonSerializer.Deserialize<UserInfo>(jsonString);
+    }
+
+    public void RaiseUserChanged()
+    {
+        OnUserChanged?.Invoke();
+    }
+
+    public void ClearUser()
+    {
+        _localStorage.RemoveItem("user");
+        NotifyUserChanged();
     }
 }

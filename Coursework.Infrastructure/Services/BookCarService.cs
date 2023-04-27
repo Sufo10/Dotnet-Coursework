@@ -28,7 +28,8 @@ namespace Coursework.Infrastructure.Services
         public async Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model,string email)
         {
             try {
-                var userID = _userManager.FindByEmailAsync(email).Id;
+                var user =await _userManager.FindByEmailAsync(email);
+                var userID = user.Id;
                 var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
                 if (customerDetails.IsVerified == false)
                 {

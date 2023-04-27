@@ -62,7 +62,7 @@
     public List<Cars> Cars { get; set; } = new List<Cars>();
     async Task OpenDialog(DialogOptions options, Cars car)
     {
-        var parameters = new DialogParameters { ["car"] = car };
+        var parameters = new DialogParameters { ["car"] = car, ["User"]=User };
 
         var dialog = await DialogService.ShowAsync<BookingConfirm>("Book a Car", parameters, options);
         var result = await dialog.Result;
@@ -79,7 +79,6 @@
         if (!result.Canceled)
         {
             var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User.Token);
-            Console.WriteLine(JsonConvert.SerializeObject(jsonResponse, Formatting.Indented));
 
             if (jsonResponse != null && jsonResponse.Status == "Success")
             {
@@ -91,7 +90,6 @@
     protected override async Task OnInitializedAsync()
     {
         var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User.Token);
-        Console.WriteLine(JsonConvert.SerializeObject(jsonResponse, Formatting.Indented));
 
         if (jsonResponse != null && jsonResponse.Status == "Success")
         {

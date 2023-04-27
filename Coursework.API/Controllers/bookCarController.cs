@@ -22,7 +22,6 @@ namespace Coursework.API.Controllers
         public async Task<ResponseDTO> BookRequest(BookCarRequestDTO model)
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var response = await _book.BookCarRequest(model, userEmail);
             return response;
         }
