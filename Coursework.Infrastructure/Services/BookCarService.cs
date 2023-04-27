@@ -49,9 +49,6 @@ namespace Coursework.Infrastructure.Services
                 var user =await _userManager.FindByEmailAsync(email);
                 var userID = user.Id;
                 //var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
-
-                var user = await _userManager.FindByIdAsync(userID.ToString());
-
                 var role = await _userManager.GetRolesAsync(user);
                 if (role.FirstOrDefault() == "Customer")
                 {
