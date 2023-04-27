@@ -111,7 +111,7 @@ namespace Coursework.Infrastructure.Services
                 var today = DateTime.Today;
                 var threeMonthsAgo = today.AddMonths(-3);
 
-                var regular = latestBooking.RentStartdate >= threeMonthsAgo;
+                var regular = latestBooking?.RentStartdate >= threeMonthsAgo;
 
                 var car = await _dbContext.Car
                  .Where(c => c.Id == Guid.Parse(entityToUpdate.CarId))
@@ -150,7 +150,7 @@ namespace Coursework.Infrastructure.Services
             }
             catch (Exception ex)
             {
-                return new ResponseDTO() { Status = "unsuccessful", Message = ex.ToString() };
+                return new ResponseDTO() { Status = "Error", Message = ex.Message.ToString() };
             }
         }
 

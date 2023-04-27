@@ -1,0 +1,71 @@
+﻿@using System.Text;
+@using Newtonsoft.Json;
+@inject HttpClient _httpClient
+
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudText>@ContentText</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="@Color" Disabled="_processing" Variant="Variant.Filled" OnClick="Submit">
+            @if (_processing)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">Processing</MudText>
+            }
+            else
+            {
+                <MudText> @ButtonText</MudText>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public string ContentText { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public Color Color { get; set; }
+
+    [Parameter] public string BookingId { get; set; }
+
+    [Parameter]
+    public UserInfo User { get; set; }
+
+    public bool _processing { get; set; }
+
+
+    async Task Submit()
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(""), Encoding.UTF8, "application/json");
+        if (content != null)
+        {
+            var response = await HttpClientExtension.AuthPostAsync<ApiResponse>(_httpClient, $"https://localhost:7190/api/verify-request/{BookingId}", content, User.Token.ToString());
+            // Process the response as needed
+            if (response != null && response.Status == "Success")
+            {
+                Snackbar.Add("Booking Approved!", Severity.Success);
+                _processing = false;
+                StateHasChanged();
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                // Handle error responses
+                Snackbar.Add($"{response.Message}", Severity.Error);
+                _processing = false;
+            }
+        }
+        else
+        {
+            Snackbar.Add("Some Problem Occured", Severity.Error);
+        }
+    }
+    void Cancel() => MudDialog.Cancel();
+}
+
