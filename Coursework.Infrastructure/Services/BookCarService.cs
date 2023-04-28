@@ -29,68 +29,7 @@ namespace Coursework.Infrastructure.Services
             _emailService = emailService;
         }
 
-        //public async Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model, Guid userID)
-        //{
-
-        //    try
-        //    {
-        //        var entityToUpdate = await _dbContext.CustomerBooking.SingleOrDefaultAsync(c => c.Id == Guid.Parse(model.BookingId));
-        //        string customerId = model.customerId; 
-        //        var latestBooking = await _dbContext.CustomerBooking
-        //            .Where(b => b.customerId == customerId && (bool)b.IsApproved)
-        //            .OrderByDescending(b => b.RentStartdate)
-        //            .FirstOrDefaultAsync();
-
-        //        DateTime today = DateTime.Today;
-        //        DateTime threeMonthsAgo = today.AddMonths(-3);
-
-        //        bool regular = false;
-
-        //        if (latestBooking.RentStartdate >= threeMonthsAgo)
-        //        {
-        //            regular = true;
-        //        }
-
-
-
-
-        //            if (entityToUpdate != null)
-        //        {
-        //            var carRate = await _dbContext.CustomerBooking
-        //                .Join(_dbContext.Car,
-        //                    c => c.CarId.ToString(),
-        //                    cr => cr.Id.ToString(),
-        //                    (c,cr) => new { rate = cr.RatePerDay }).ToListAsync();
-
-
-        //            if (regular = true)
-        //            {
-        //                var rentDays = (latestBooking.RentEnddate - latestBooking.RentStartdate).TotalDays + 1;
-        //                var totalAmount = carRate.FirstOrDefault().rate * rentDays;
-        //                var totalAfterDiscount = totalAmount * 0.9;
-
-        //            }
-
-        //            else
-        //            {
-        //                var rentDays = (latestBooking.RentEnddate - latestBooking.RentStartdate).TotalDays + 1;
-        //                var totalAmount = carRate.FirstOrDefault().rate * rentDays;
-        //                var totalAfterDiscount = totalAmount;
-        //            }
-
-
-        //        }
-
-
-        //        return new ResponseDTO() { Status = "Success", Message = "Booking request approved" };
-        //    }
-
-        //    catch (Exception ex) 
-        //    {
-        //        return new ResponseDTO() { Status = "unsuccessful", Message = ex.ToString() };
-        //    }
-
-        //}
+       
 
 
         public async Task<ResponseDTO> ApproveBookingRequest(String bookingId, string email)
@@ -102,16 +41,24 @@ namespace Coursework.Infrastructure.Services
                 var entityToUpdate = await _dbContext.CustomerBooking.SingleOrDefaultAsync(c => c.Id == Guid.Parse( bookingId));
                 var customerId = entityToUpdate.customerId;
                 var customerDetails1 = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerId.ToString());
-                var customerDetails = await _userManager.FindByIdAsync(customerDetails1.UserId);
+                var customerDetails =  await _userManager.FindByIdAsync(customerDetails1.UserId);
                 var latestBooking = await _dbContext.CustomerBooking
                     .Where(b => b.customerId == customerId && (bool)b.IsApproved)
                     .OrderByDescending(b => b.RentStartdate)
                     .FirstOrDefaultAsync();
 
+
+
                 var today = DateTime.Today;
                 var threeMonthsAgo = today.AddMonths(-3);
 
-                var regular = latestBooking?.RentStartdate >= threeMonthsAgo;
+                var regular = false;
+
+                if (latestBooking != null && latestBooking.RentStartdate >= threeMonthsAgo)
+                {
+                    regular = true;
+                }
+
 
                 var car = await _dbContext.Car
                  .Where(c => c.Id == Guid.Parse(entityToUpdate.CarId))
@@ -119,7 +66,8 @@ namespace Coursework.Infrastructure.Services
                  .FirstOrDefaultAsync();
 
 
-                var rentDays = (latestBooking.RentEnddate - latestBooking.RentStartdate).TotalDays + 1;
+
+                var rentDays = regular ? (latestBooking.RentEnddate - latestBooking.RentStartdate).TotalDays + 1 : (entityToUpdate.RentEnddate - entityToUpdate.RentStartdate).TotalDays + 1 ;
                 var totalAmount = car.RatePerDay * rentDays;
                 var totalAfterDiscount = regular ? totalAmount * 0.9 : totalAmount;
                 var vatAmount = totalAfterDiscount * 0.13;
@@ -161,65 +109,77 @@ namespace Coursework.Infrastructure.Services
             try {
                 var user =await _userManager.FindByEmailAsync(email);
                 var userID = user.Id;
-                //var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
+                var carId = model.CarId;
+
+                var overlappingBookings = _dbContext.CustomerBooking
+                .Where(cb => cb.CarId == carId
+                && cb.RentEnddate >= model.RentStartdate
+                && cb.RentStartdate <= model.RentEnddate);
+
+                var isAvailable = !overlappingBookings.Any();
+
+                if (isAvailable == false) {
+                    return new ResponseDTO { Status = "Error", Message = "car is not available for the requested date" };
+                }
+                else {
+                    var role = await _userManager.GetRolesAsync(user);
+                    if (role.FirstOrDefault() == "Customer")
+                    {
+
+                        var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
+
+                        if (customerDetails.IsVerified == false)
+                        {
+                            return new ResponseDTO { Status = "Error", Message = "Customer not verified" };
+                        }
+                        else
+                        {
+                            var bookCar = new CustomerBooking
+                            {
+                                customerId = userID.ToString(),
+                                CarId = model.CarId,
+                                RentStartdate = model.RentStartdate,
+                                RentEnddate = model.RentEnddate
+                            };
+
+                            var RequestInput = await _dbContext.CustomerBooking.AddAsync(bookCar);
+                            await _dbContext.SaveChangesAsync(default(CancellationToken));
+                            return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
+                        }
+                    }
+                    else if (role.FirstOrDefault() == "employee")
+                    {
+
+                        var customerDetails = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
+
+                        if (customerDetails.IsVerified == false)
+                        {
+                            return new ResponseDTO { Status = "Error", Message = "Customer not verified" };
+                        }
+                        else
+                        {
+                            var bookCar = new CustomerBooking
+                            {
+                                customerId = userID.ToString(),
+                                CarId = model.CarId,
+                                RentStartdate = model.RentStartdate,
+                                RentEnddate = model.RentEnddate
+                            };
+
+                            var RequestInput = await _dbContext.CustomerBooking.AddAsync(bookCar);
+                            await _dbContext.SaveChangesAsync(default(CancellationToken));
+                            return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
+                        }
+
+                    }
+                    else
+                    {
+                        return new ResponseDTO { Status = "unsuccessful", Message = "something went wrong" };
+                    }
+                }
 
                 
 
-                var role = await _userManager.GetRolesAsync(user);
-                if (role.FirstOrDefault() == "Customer")
-                {
-
-                    var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
-
-                    if (customerDetails.IsVerified == false)
-                    {
-                        return new ResponseDTO { Status = "Error", Message = "Customer not verified" };
-                    }
-                    else
-                    {
-                        var bookCar = new CustomerBooking
-                        {
-                            customerId = userID.ToString(),
-                            CarId = model.CarId,
-                            RentStartdate = model.RentStartdate,
-                            RentEnddate = model.RentEnddate
-                        };
-
-                        var RequestInput = await _dbContext.CustomerBooking.AddAsync(bookCar);
-                        await _dbContext.SaveChangesAsync(default(CancellationToken));
-                        return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
-                    }
-                }
-                else if (role.FirstOrDefault() == "employee")
-                {
-
-                    var customerDetails = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
-
-                    if (customerDetails.IsVerified == false)
-                    {
-                        return new ResponseDTO { Status = "Error", Message = "Customer not verified" };
-                    }
-                    else
-                    {
-                        var bookCar = new CustomerBooking
-                        {
-                            customerId = userID.ToString(),
-                            CarId = model.CarId,
-                            RentStartdate = model.RentStartdate,
-                            RentEnddate = model.RentEnddate
-                        };
-
-                        var RequestInput = await _dbContext.CustomerBooking.AddAsync(bookCar);
-                        await _dbContext.SaveChangesAsync(default(CancellationToken));
-                        return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
-                    }
-
-                }
-                else
-                {
-                    return new ResponseDTO { Status = "unsuccessful", Message = "something went wrong" };
-                }
-                //return new ResponseDTO { Status = "Success", Message = role.FirstOrDefault() };
 
             }
             catch (Exception ex)
@@ -235,11 +195,6 @@ namespace Coursework.Infrastructure.Services
             try 
             {
                 
-
-                //var car = await _dbContext.Car
-                //.Where(c => c.Id == _dbContext.CustomerBooking.)
-                //.Select(c => new { c.RatePerDay, c.Name })
-                //.FirstOrDefaultAsync();
 
                 var bookingRequests = await (
                 from booking in _dbContext.CustomerBooking
@@ -288,7 +243,7 @@ namespace Coursework.Infrastructure.Services
 
             try 
             {
-                var entityToUpdate = await _dbContext.CustomerBooking.FindAsync(bookingId);
+                var entityToUpdate = await _dbContext.CustomerBooking.FindAsync(Guid.Parse(bookingId));
 
                 if (entityToUpdate == null)
                 {
@@ -302,7 +257,7 @@ namespace Coursework.Infrastructure.Services
             }
             
             catch (Exception ex) {
-                return new ResponseDTO() { Status = "unsuccessful", Message = ex.ToString() };
+                return new ResponseDTO() { Status = "unsuccessful", Message = ex.Message.ToString()};
             }
         }
 
