@@ -38,11 +38,21 @@
                 </span>
             </MudNavLink>
         }
-        @if (User?.Role == "Admin" || User?.Role=="Staff")
+        @if (User?.Role == "Admin" || User?.Role == "Staff")
         {
-            <MudNavLink Style="text-decoration:none" Href="/" Class="text-decoration-none" Icon="@Icons.Material.Filled.Redeem">
+            <MudNavLink Style="text-decoration:none" Href="/booking-request" Class="text-decoration-none" Icon="@Icons.Material.Filled.Redeem">
                 <span class="text-decoration-none">
                     Booking Requests
+                </span>
+            </MudNavLink>
+        }
+
+        @if (User?.Username != null)
+        {
+            <MudNavLink Style="text-decoration:none" Href="/my-booking-request" Class="text-decoration-none" Icon="@Icons.Material.Filled.CarRepair">
+                <span class="text-decoration-none">
+
+                    My Booking Request
                 </span>
             </MudNavLink>
         }

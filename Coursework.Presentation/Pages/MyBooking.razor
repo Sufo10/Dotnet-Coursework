@@ -1,4 +1,4 @@
-﻿@page "/booking-request"
+﻿@page "/my-booking-request"
 @using System.Net.Http.Json
 @using MudBlazor
 @inject HttpClient _httpClient
@@ -7,11 +7,11 @@
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
 
-<PageTitle>Booking Request</PageTitle>
-<MudTable Class="mt-5" Items="@Elements" Dense="false" Hover="true" ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info" Filter="new Func<AdminBooking,bool>(FilterFunc)"
+<PageTitle>My Booking Request</PageTitle>
+<MudTable Class="mt-5" Items="@Elements" Dense="false" Hover="true" ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info" Filter="new Func<MyBookingDetails,bool>(FilterFunc)"
           @bind-SelectedItem="selectedItem1" SortLabel="Sort By" CommitEditTooltip="Commit Edit">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Booking Request</MudText>
+        <MudText Typo="Typo.h6">My Booking Request</MudText>
         <MudSpacer />
         <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
@@ -33,22 +33,39 @@
         }
     </ColGroup>
     <HeaderContent>
-        <MudTh><MudTableSortLabel Class="text-center" InitialDirection="SortDirection.Ascending" SortBy="new Func<AdminBooking, object>(x=>x.CustomerName)">Customer Name</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.CarName)">Car Name</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.CustomerPhone)">Customer Phone</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.RentStartDate)">Start-Date</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.RentEndDate)">End-Date</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel Class="text-center" InitialDirection="SortDirection.Ascending" SortBy="new Func<MyBookingDetails, object>(x=>x.Name)"> Name</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.Image)">Image</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.RentStartDate)">Start-Date</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.RentEndDate)">End-Date</MudTableSortLabel></MudTh>
+        <MudTh>Status</MudTh>
         <MudTh>Actions</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd Class="text-center" DataLabel="Customer Name">@context.CustomerName</MudTd>
-        <MudTd Class="text-center" DataLabel="Car Name">@context.CarName</MudTd>
-        <MudTd Class="text-center" DataLabel="Customer Phone">@context.CustomerPhone</MudTd>
+        <MudTd Class="text-center" DataLabel="Customer Name">@context.Name</MudTd>
+        <MudTd Class="text-center" DataLabel="Car Name">
+            <MudImage Width="60" Height="60" Src=@context.Image Alt="Mony the dog" Elevation="25" Class="rounded-lg" />
+        </MudTd>
         <MudTd Class="text-center" DataLabel="Start Date">@context.RentStartDate</MudTd>
         <MudTd Class="text-center" DataLabel="End Date">@context.RentEndDate</MudTd>
+        <MudTd Class="text-center">
+            @if (context.IsDeleted == true)
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Error">Cancelled</MudChip>
+            }
+            else if (context.IsApproved == null)
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Warning">Pending</MudChip>
+
+            }
+            else if (context.IsApproved == true)
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Success">Approved</MudChip>
+
+            }
+        </MudTd>
         <MudTd>
             <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                <MudMenuItem @onclick="@((e)=>ApproveRequest(context.BookingId))">
+                <MudMenuItem @onclick="@((e)=>ApproveRequest(context.Id))">
                     <MudIcon Icon="@Icons.Material.Filled.Approval" Title="Add" />
                     Approve Request
                 </MudMenuItem>
@@ -82,30 +99,12 @@
     private bool canCancelEdit = false;
     private bool blockSwitch = false;
     private string searchString = "";
-    private AdminBooking selectedItem1 = null;
-    private HashSet<AdminBooking> selectedItems1 = new HashSet<AdminBooking>();
+    private MyBookingDetails selectedItem1 = null;
+    private HashSet<MyBookingDetails> selectedItems1 = new HashSet<MyBookingDetails>();
     private TableApplyButtonPosition applyButtonPosition = TableApplyButtonPosition.End;
     private TableEditButtonPosition editButtonPosition = TableEditButtonPosition.End;
     private TableEditTrigger editTrigger = TableEditTrigger.RowClick;
-    private IEnumerable<AdminBooking> Elements = new List<AdminBooking>();
-
-    async Task OpenUserAddDialog(DialogOptions options)
-    {
-        var parameters = new DialogParameters { ["User"] = User };
-        var dialog = await DialogService.ShowAsync<AddUser>("Add New User", parameters, options);
-        var result = await dialog.Result;
-        if (!result.Canceled)
-        {
-            _loading = true;
-            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdminBooking>>>("https://localhost:7190/api/car-request", User.Token??"");
-
-            if (jsonResponse != null && jsonResponse.Status == "Success")
-            {
-                Elements = jsonResponse.Data;
-                _loading = false;
-            }
-        }
-    }
+    private IEnumerable<MyBookingDetails> Elements = new List<MyBookingDetails>();
 
     async Task ApproveRequest(string BookingId)
     {
@@ -118,11 +117,11 @@
 
         var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
 
-        var dialog= DialogService.Show<ConfirmationBox>("Approve", parameters, options);
+        var dialog = DialogService.Show<ConfirmationBox>("Approve", parameters, options);
         var result = await dialog.Result;
         if (!result.Canceled)
         {
-            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdminBooking>>>("https://localhost:7190/api/car-request", User.Token);
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<MyBookingDetails>>>("https://localhost:7190/api/car-request", User.Token);
 
             if (jsonResponse != null && jsonResponse.Status == "Success")
             {
@@ -135,9 +134,9 @@
     protected override async Task OnInitializedAsync()
     {
         var currentUrl = NavigationManager.Uri;
-        if (currentUrl.Contains("/booking-request"))
+        if (currentUrl.Contains("/my-booking-request"))
         {
-            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdminBooking>>>("https://localhost:7190/api/car-request", User.Token);
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<MyBookingDetails>>>("https://localhost:7190/api/my-booking", User.Token);
 
             if (jsonResponse != null && jsonResponse.Status == "Success")
             {
@@ -148,17 +147,12 @@
     }
 
 
-    //private void ApproveRequest(string BookingId)
-    //{
-
-    //}
-    private bool FilterFunc(AdminBooking element)
+    
+    private bool FilterFunc(MyBookingDetails element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-        if (element.CustomerName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (element.CarName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
     }

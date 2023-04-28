@@ -95,7 +95,39 @@ namespace Coursework.Infrastructure.Services
             }
         }
 
+        public async Task<ResponseDataDTO<IEnumerable<BookingHistoryResponseDTO>>> GetCarHistory(string userEmail)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                var baseUrl = "https://localhost:7190/images/";
 
+                var innerJoin = _dbContext.CustomerBooking
+                  .Where(b => b.customerId == user.Id.ToString())
+                  .Join(// outer sequence 
+                   _dbContext.Car,  // inner sequence 
+                   b => b.CarId,    // outerKeySelector
+                   c => c.Id.ToString(),  // innerKeySelector
+                   (b, c) => new BookingHistoryResponseDTO()  // result selector
+                   {
+                       Id = b.Id,
+                       Name = c.Name,
+                       Image = baseUrl + c.Image,
+                       Description = c.Description,
+                       RentStartdate = b.RentStartdate,
+                       RentEnddate = b.RentEnddate,
+                       IsDeleted=b.isDeleted,
+                       IsApproved=b.IsApproved
+                   });
+
+                return new ResponseDataDTO<IEnumerable<BookingHistoryResponseDTO>> { Status = "Success", Message = "Data Fetched Successully", Data = innerJoin };
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return new ResponseDataDTO<IEnumerable<BookingHistoryResponseDTO>> { Status = "Failed", Message = "Data Fetch Failed", Data = { } };
+            }
+        }
     }
 }
 

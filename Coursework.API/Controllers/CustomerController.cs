@@ -26,5 +26,17 @@ namespace Coursework.API.Controllers
             var data = await _customerDetails.UploadDocument(model, userEmail);
             return data;
         }
+
+
+        [HttpGet]
+        [Authorize]
+        [Route("/api/my-booking")]
+        public async Task<ResponseDataDTO<IEnumerable<BookingHistoryResponseDTO>>> GetCarHistory()
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var data = await _customerDetails.GetCarHistory(userEmail);
+            return data;
+        }
+
     }
 }

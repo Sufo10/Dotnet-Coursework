@@ -31,5 +31,7 @@ namespace Coursework.Application.DTO
         public string Description { get; set; }
         public DateTime RentStartdate { get; set; }
         public DateTime RentEnddate { get; set; }
+        public bool? IsDeleted { get; set; }
+        public bool? IsApproved { get; set; }
     }
 }

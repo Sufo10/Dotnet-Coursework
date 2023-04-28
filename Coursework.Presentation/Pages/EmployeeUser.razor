@@ -57,7 +57,7 @@
 @code {
     [CascadingParameter(Name = "UserInfo")]
     public UserInfo User { get; set; }
-    public bool _loading { get; set; }=true
+    public bool _loading { get; set; } = true;
     DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
     private List<string> editEvents = new();
     private bool dense = false;
