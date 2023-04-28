@@ -91,7 +91,6 @@ namespace Coursework.Infrastructure.Services
             sb.Append("<style>");
             sb.Append("table { border-collapse: collapse; width: 100%; }");
             sb.Append("th, td { text-align: center; padding: 8px; }");
-            //sb.Append("tr:nth-child(even) { background-color: #f2f2f2; }");
             sb.Append("th { background-color: #4CAF50; color: white; }");
             sb.Append("td { border: 1px solid black; }");
             sb.Append("</style>");
@@ -99,6 +98,7 @@ namespace Coursework.Infrastructure.Services
 
             sb.Append("<body>");
             sb.AppendFormat("<h1>{0}</h1>", "Hajur Ko Car Rental");
+            sb.AppendFormat("<p>{0}</p>", model.Message);
             sb.AppendFormat("<p>Invoice Date: {0}</p>", DateTime.Now.ToString("yyyy-MM-dd"));
             sb.AppendFormat("<p>Customer Name: {0}</p>", model.CustomerName);
             sb.AppendFormat("<p>Customer Email: {0}</p>", model.CustomerEmail);
@@ -110,7 +110,7 @@ namespace Coursework.Infrastructure.Services
 
             sb.AppendFormat("<p>Rental Amount: Rs.{0}</p>", model.RentalAmount);
             sb.AppendFormat("<p>VAT: Rs.{0}</p>", model.VATAmount);
-            sb.AppendFormat("<p>Total Amount To Paid: Rs.{0}</p>", model.RentalAmount + model.VATAmount);
+            sb.AppendFormat("<p>Total Amount: Rs.{0}</p>", model.RentalAmount + model.VATAmount);
 
             sb.Append("</body>");
             sb.Append("</html>");
