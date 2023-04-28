@@ -10,7 +10,7 @@ namespace Coursework.Application.Common.Interface
     public interface IKhaltiPaymentService
     {
         public Task<ResponseDataDTO<KhaltiResponseDTO>> InitializePayment(KhaltiPaymentDTO model, string email);
-        public Task<ResponseDataDTO<KhaltiResponseDTO>> CheckPaymentSuccess(KhaltiPaymentCheckDTO model);
-
+        public Task<ResponseDataDTO<KhaltiResponseDTO>> CheckPaymentSuccess(string pidx, string bookingId, int amount);
+        public Task<ResponseDataDTO<KhaltiResponseDTO>> OfflinePayment(KhaltiPaymentDTO model);
     }
 }
