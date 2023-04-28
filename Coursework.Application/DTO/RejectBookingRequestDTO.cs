@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 
 namespace Coursework.Application.DTO
 {
-    public class BookingApproveRequestDTO
+    public class RejectBookingRequestDTO
     {
-        [Required (ErrorMessage = "customer id is required")]
-        public string BookingId { get; set; }  
-        public string customerId { get; set; }  
+        [Required(ErrorMessage = "booking id is required")]
+        public string BookingId { get; set; }
     }
 }

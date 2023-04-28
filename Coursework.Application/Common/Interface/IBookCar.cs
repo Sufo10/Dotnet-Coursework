@@ -9,10 +9,9 @@ namespace Coursework.Application.Common.Interface
 {
     public interface IBookCar
     {
-        Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model, Guid userID);
+        Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model, string email);
         Task<ResponseDataDTO<List<GetCarBookingRequestDTO>>>GetBookCarRequests();
-
-        Task<ResponseDTO> ApproveBookingRequest(BookingApproveRequestDTO model,Guid userID);
-
+        Task<ResponseDTO> ApproveBookingRequest( string bookingId, string email);
+        public Task<ResponseDTO> RejectBookingRequest(string bookingId);
     }
 }

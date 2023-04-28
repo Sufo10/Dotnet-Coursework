@@ -1,5 +1,6 @@
 ﻿using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -16,11 +17,12 @@ namespace Coursework.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [Route("/api/bookcars")]
         public async Task<ResponseDTO> BookRequest(BookCarRequestDTO model)
         {
-            var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var response = await _book.BookCarRequest(model, userID);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var response = await _book.BookCarRequest(model, userEmail);
             return response;
         }
 
@@ -34,14 +36,26 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [HttpDelete]
+        [Route("/api/car-request/{BookingId}")]
+        public async Task<ResponseDTO> RejectCarBooking(String BookingId)
+        {
+            var data = await _book.RejectBookingRequest(BookingId);
+            return data;
+        }
 
-        //[HttpPost]
-        //[Route("/api/verify_request")]
 
-        //public async Task<ResponseDTO> VerifyBooking(BookingApproveRequestDTO mode)
-        //{
-        //    var userID = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        //}
+        [HttpPost]
+        [Authorize]
+        [Route("/api/verify-request/{bookingId}")]
+
+        public async Task<ResponseDTO> VerifyBooking(String bookingId)
+        {
+
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var verify = await _book.ApproveBookingRequest(bookingId, userEmail);
+            return verify;
+        }
 
 
     } 

@@ -1,4 +1,7 @@
-﻿<MudNavMenu>
+﻿@inject UserService UserService
+@inject NavigationManager NavigationManager
+@implements IDisposable
+<MudNavMenu>
     <MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Primary" Class="pa-2">
         <MudNavLink Href="/" Class="text-decoration-none" Icon="@Icons.Material.Filled.Dashboard">
             <span class="text-decoration-none">
@@ -6,7 +9,7 @@
                 Dashboard
             </span>
         </MudNavLink>
-        @if (User.Username == null)
+        @if (User?.Username == null)
         {
 
             <MudNavLink Style="text-decoration:none" Href="/login" Class="text-decoration-none" Icon="@Icons.Material.Filled.Login">
@@ -17,7 +20,7 @@
             </MudNavLink>
         }
 
-        @if (User.Username != null)
+        @if (User?.Username != null)
         {
             <MudNavLink Style="text-decoration:none" Href="/change-password" Class="text-decoration-none" Icon="@Icons.Material.Filled.Password">
                 <span class="text-decoration-none">
@@ -26,18 +29,60 @@
                 </span>
             </MudNavLink>
         }
-        @if (User.Role == "Admin")
-{
-<MudNavLink Style="text-decoration:none" Href="/employee" Class="text-decoration-none" Icon="@Icons.Material.Filled.SupervisedUserCircle">
-    <span class="text-decoration-none">
+        @if (User?.Role == "Admin")
+        {
+            <MudNavLink Style="text-decoration:none" Href="/user" Class="text-decoration-none" Icon="@Icons.Material.Filled.SupervisedUserCircle">
+                <span class="text-decoration-none">
 
-        Employee
-    </span>
-</MudNavLink>
-}
+                    Employee
+                </span>
+            </MudNavLink>
+        }
+        @if (User?.Role == "Admin" || User?.Role == "Staff")
+        {
+            <MudNavLink Style="text-decoration:none" Href="/booking-request" Class="text-decoration-none" Icon="@Icons.Material.Filled.Redeem">
+                <span class="text-decoration-none">
+                    Booking Requests
+                </span>
+            </MudNavLink>
+        }
+
+        @if (User?.Username != null)
+        {
+            <MudNavLink Style="text-decoration:none" Href="/my-booking-request" Class="text-decoration-none" Icon="@Icons.Material.Filled.CarRepair">
+                <span class="text-decoration-none">
+
+                    My Booking Request
+                </span>
+            </MudNavLink>
+        }
     </MudNavMenu>
 </MudNavMenu>
 
 @code{
-    [CascadingParameter] public UserInfo User { get; set; }
+    [CascadingParameter(Name = "UserInfo")]
+    public UserInfo User { get; set; }
+
+    private void Logout()
+    {
+        UserService.ClearUser();
+        NavigationManager.NavigateTo("/login");
+    }
+
+    protected override void OnInitialized()
+    {
+        UserService.OnUserChanged += UpdateNavMenu;
+    }
+
+    private void UpdateNavMenu()
+    {
+        // Refresh the NavMenu when the user logs in or out
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe from the event when the component is disposed
+        UserService.OnUserChanged -= UpdateNavMenu;
+    }
 }

@@ -30,13 +30,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Student Teacher API",
+        Title = "Hajur Ko Car Rental API",
         Version = "v1",
-        Description = "Student Teacher API Services.",
-        Contact = new OpenApiContact
-        {
-            Name = "Ajide Habeeb."
-        },
+        Description = "Hajur Ko Car Rental API Services.",
     });
     c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -100,20 +96,20 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-  options.TokenValidationParameters = new TokenValidationParameters
-  {
-      ValidateIssuer = false,
-      ValidateAudience = false,
-      ValidateLifetime = false,
-      ValidateIssuerSigningKey = false,
-      ValidIssuer = builder.Configuration["Jwt:Issuer"],
-      ValidAudience = builder.Configuration["Jwt:Audience"],
-      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-  };
 });
+//.AddJwtBearer(options =>
+//{
+//  options.TokenValidationParameters = new TokenValidationParameters
+//  {
+//      ValidateIssuer = false,
+//      ValidateAudience = false,
+//      ValidateLifetime = true,
+//      ValidateIssuerSigningKey = true,
+//      ValidIssuer = builder.Configuration["Jwt:Issuer"],
+//      ValidAudience = builder.Configuration["Jwt:Audience"],
+//      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+//  };
+//});
 
 var serviceProvider = builder.Services.BuildServiceProvider();
 try

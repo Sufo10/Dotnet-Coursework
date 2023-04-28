@@ -36,6 +36,24 @@ namespace Coursework.Infrastructure.DI
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@.";
             }).AddEntityFrameworkStores<ApplicationDBContext>().AddDefaultTokenProviders();
 
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = configuration["Jwt:Issuer"],
+                    ValidAudience = configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+                };
+            });
 
             services.ConfigureApplicationCookie(options =>
             {
@@ -55,6 +73,7 @@ namespace Coursework.Infrastructure.DI
             services.AddTransient<ICarTestDetails, CarTestService>();
             services.AddTransient<IBookCar, BookCarService>();
             services.AddTransient<ICarBookingHistory, CarBookHistoryService>();
+            services.AddTransient<IKhaltiPaymentService, KhaltiPaymentService>();
 
             return services;
         }

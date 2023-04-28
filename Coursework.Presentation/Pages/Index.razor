@@ -2,96 +2,182 @@
 @inject IDialogService DialogService
 @inject IConfiguration _config
 @inject HttpClient _httpClient
-
+@using Newtonsoft.Json;
+@using Newtonsoft.Json.Linq;
+@inject NavigationManager NavManager
+@inject ISnackbar Snackbar
 
 <PageTitle>Index</PageTitle>
 
 <div class="d-flex justify-space-between">
-<MudText class="my-5 text-white" Typo="Typo.h5">Cars Available, @User.Username</MudText>
-@if(User.Role=="ADMIN" || User.Role == "STAFF")
-{
-<MudCardActions>
-    <MudButton OnClick="@((e) => OpenAddDialog(maxWidth))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Add Cars</MudButton>
-</MudCardActions>
-}
+    <MudText class="my-5 text-white" Typo="Typo.h5">Cars Available, @User?.Username</MudText>
+    @if (User?.Role == "Admin" || User?.Role == "Staff")
+    {
+        <MudCardActions>
+            <MudButton OnClick="@((e) => OpenAddDialog(maxWidth))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Add Cars</MudButton>
+        </MudCardActions>
+    }
 </div>
+@if (IsLoading)
+{
 <MudGrid Spacing=2 Justify="Justify.FlexStart">
-    @if (Cars.Count > 0)
+
+    @for(int i = 0; i < 10; i++)
     {
+            <MudItem xs="3">
 
-        @foreach (var item in Cars)
-        {
-            <MudItem>
-
-                <MudCard width="350px">
-                    <div class="w-full h-full hover-card">
-                        <div class="container-fluid card-image mt-2">
-                            <img height="200" class="object-fit-contain overflow-hidden hover-image rounded mt-3"
-                                 src=@item.Image />
-                        </div>
-                        <MudCardContent>
-                            <div class="d-flex align-items-center justify-space-between">
-                                <MudText Typo="Typo.h5">@item.Name</MudText>
-                                <div>
-                                    <span>Rs.</span>
-                                    <span class="fw-bold fs-5">2000</span>
-                                    <span class="fs-6 text-secondary">/ DAY</span>
-                                </div>
-                            </div>
-                            <div Class="d-flex">
-                                <MudText class="mt-4" Typo="Typo.body2">@item.Description</MudText>
-                            </div>
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudButton OnClick="@((e) => OpenDialog(fullScreen,item))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Book Now</MudButton>
-                        </MudCardActions>
-                    </div>
-                </MudCard>
+    <MudCard >
+        <MudSkeleton Width="350px" SkeletonType="SkeletonType.Rectangle" Height="200px" />
+        <MudCardContent>
+            <MudSkeleton Width="100%" Height="42px;" />
+            <MudSkeleton Width="80%" />
+            <MudSkeleton Width="100%" />
+        </MudCardContent>
+        <MudCardActions>
+            <MudSkeleton Width="64px" Height="40px" Class="ml-2" />
+            <MudSkeleton Width="105px" Height="40px" Class="ml-3" />
+        </MudCardActions>
+    </MudCard>
             </MudItem>
-        }
-    }
-</MudGrid>
-
-
-@code{
-    DialogOptions fullScreen = new DialogOptions() { FullScreen = true, CloseButton = true };
-    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
-    [CascadingParameter] public UserInfo User { get; set; }
-    public List<Cars> Cars { get; set; } = new List<Cars>();
-    async Task OpenDialog(DialogOptions options, Cars car)
-    {
-        var parameters = new DialogParameters { ["car"] = car };
-
-        var dialog = await DialogService.ShowAsync<BookingConfirm>("Book a Car", parameters, options);
-        var result = await dialog.Result;
-        if (!result.Canceled)
-        {
-            Console.WriteLine("Is Deleted");
-        }
     }
 
-    async Task OpenAddDialog(DialogOptions options)
+    </MudGrid>
+    }
+    else
     {
-        var dialog = await DialogService.ShowAsync<AddCars>("Add New Car", options);
-        var result = await dialog.Result;
-        if (!result.Canceled)
-        {
-            var response = await _httpClient.GetFromJsonAsync<ResponseWithData<List<Cars>>>("https://localhost:7190/api/cars");
 
-            if (response != null && response.status == "Success")
+    <MudGrid Spacing=2 Justify="Justify.FlexStart">
+        @if (Cars.Count > 0)
+        {
+
+            @foreach (var item in Cars)
             {
-                Cars = response.data;
+                <MudItem>
+
+                    <MudCard width="350px">
+                        <div class="w-full h-full hover-card">
+                            <div class="container-fluid card-image mt-2">
+                                <img height="200" class="object-fit-contain overflow-hidden hover-image rounded mt-3"
+                                     src=@item.Image />
+                            </div>
+                            <MudCardContent>
+                                <div class="d-flex align-items-center justify-space-between">
+                                    <MudText Typo="Typo.h5">@item.Name</MudText>
+                                    <div>
+                                        <span>Rs.</span>
+                                        <span class="fw-bold fs-5">2000</span>
+                                        <span class="fs-6 text-secondary">/ DAY</span>
+                                    </div>
+                                </div>
+                                <div Class="d-flex">
+                                    <MudText class="mt-4" Typo="Typo.body2">@item.Description</MudText>
+                                </div>
+                            </MudCardContent>
+                            <MudCardActions>
+                                @if (User?.IsVerified == true)
+                                {
+
+                                    <MudButton OnClick="@((e) => OpenDialog(fullScreen,item))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Book Now</MudButton>
+                                }
+                                else if (User?.Username == null)
+                                {
+                                    <MudButton OnClick="@((e) => RedirectLogin())" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Book Now</MudButton>
+                                }
+                                else
+                                {
+                                    <MudButton OnClick="@((e) => OpenVerificationModel(fullScreen))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Verfiy Account Now</MudButton>
+                                }
+                            </MudCardActions>
+                        </div>
+                    </MudCard>
+                </MudItem>
+            }
+        }
+    </MudGrid>
+    }
+
+
+    @code{
+        DialogOptions fullScreen = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+        DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+        [CascadingParameter(Name = "UserInfo")]
+        public UserInfo User { get; set; }
+
+        public List<Cars> Cars { get; set; } = new List<Cars>();
+        public bool IsLoading { get; set; } = true;
+        async Task OpenDialog(DialogOptions options, Cars car)
+        {
+            if (User?.Token == null)
+            {
+                Snackbar.Add("Please Login to book a car", Severity.Warning);
+                NavManager.NavigateTo("/login");
+            }
+
+            if (User?.IsVerified == false)
+            {
+                Snackbar.Add("Please Upload Required document to continue booking", Severity.Error);
+            }
+
+            var parameters = new DialogParameters { ["car"] = car, ["User"] = User };
+            var dialog = await DialogService.ShowAsync<BookingConfirm>("Book a Car", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                Console.WriteLine("Is Deleted");
+            }
+        }
+
+        public void RedirectLogin()
+        {
+            Snackbar.Add("Please Login to book a car", Severity.Warning);
+            NavManager.NavigateTo("/login");
+        }
+
+        async Task OpenAddDialog(DialogOptions options)
+        {
+            var dialog = await DialogService.ShowAsync<AddCars>("Add New Car", options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                IsLoading = true;
+                var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
+
+                if (jsonResponse != null && jsonResponse.Status == "Success")
+                {
+                    Cars = jsonResponse.Data;
+                    IsLoading = false;
+
+                }
+            }
+        }
+
+        async Task OpenVerificationModel(DialogOptions options)
+        {
+            var parameters = new DialogParameters {["User"] = User };
+            var dialog = await DialogService.ShowAsync<VerifyAccount>("Verify Account",parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                IsLoading = true;
+                var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
+
+                if (jsonResponse != null && jsonResponse.Status == "Success")
+                {
+                    Cars = jsonResponse.Data;
+                    IsLoading = false;
+
+                }
+            }
+        }
+
+        protected override async Task OnInitializedAsync()
+        {
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
+
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                Cars = jsonResponse.Data;
+                IsLoading = false;
             }
         }
     }
-
-    protected override async Task OnInitializedAsync()
-    {
-        var response = await _httpClient.GetFromJsonAsync<ResponseWithData<List<Cars>>>("https://localhost:7190/api/cars");
-
-        if (response != null && response.status == "Success")
-        {
-            Cars = response.data;
-        }
-    }
-}
