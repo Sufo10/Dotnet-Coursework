@@ -65,7 +65,7 @@ namespace Coursework.Infrastructure.Services
         public async Task<ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>>> GetSalesRecord(DateTime startDate, DateTime endDate)
         {
             try
-            {
+            { // sales record for admin (if request is approved and is not deleted, it counts as sales)
                 var innerJoin = _dbContext.CustomerBooking
                   .Where(b => b.IsApproved == true && b.isDeleted == null && b.RentStartdate >= startDate && b.RentStartdate <= endDate) // data filters 
                   .Join(// outer sequence 
@@ -84,9 +84,9 @@ namespace Coursework.Infrastructure.Services
                                from c in cGroup.DefaultIfEmpty()
                                select new SalesRecordResponseDTO()
                                {
-                                   Id = b.Id,
-                                   Name = b.Name,
-                                   ApprovedBy = c != null ? c.Name : string.Empty
+                                   Id = b.Id, // sales id (id of CustomerBooking)
+                                   Name = b.Name, // name of the car
+                                   ApprovedBy = c != null ? c.Name : string.Empty, // staff name that approved the request
                                };
 
 

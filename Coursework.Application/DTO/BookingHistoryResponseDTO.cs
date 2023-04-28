@@ -32,6 +32,8 @@ namespace Coursework.Application.DTO
         public DateTime RentStartdate { get; set; }
         public DateTime RentEnddate { get; set; }
         public string ApprovedBy { get; set; }
+        public bool? IsDeleted { get; set; }
+        public bool? IsApproved { get; set; }
     }
 
     public class SalesRecordResponseDTO
@@ -39,7 +41,5 @@ namespace Coursework.Application.DTO
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string ApprovedBy { get; set; }
-        public bool? IsDeleted { get; set; }
-        public bool? IsApproved { get; set; }
     }
 }
