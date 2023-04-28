@@ -30,13 +30,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Student Teacher API",
+        Title = "Hajur Ko Car Rental API",
         Version = "v1",
-        Description = "Student Teacher API Services.",
-        Contact = new OpenApiContact
-        {
-            Name = "Ajide Habeeb."
-        },
+        Description = "Hajur Ko Car Rental API Services.",
     });
     c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
