@@ -65,7 +65,7 @@
         </MudTd>
         <MudTd>
             <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                <MudMenuItem @onclick="@((e)=>ApproveRequest(context.Id))">
+                <MudMenuItem @onclick="@((e)=>CancelRequest(context.Id))">
                     <MudIcon Icon="@Icons.Material.Filled.Approval" Title="Add" />
                     Approve Request
                 </MudMenuItem>
@@ -106,12 +106,12 @@
     private TableEditTrigger editTrigger = TableEditTrigger.RowClick;
     private IEnumerable<MyBookingDetails> Elements = new List<MyBookingDetails>();
 
-    async Task ApproveRequest(string BookingId)
+    async Task CancelRequest(string BookingId)
     {
         var parameters = new DialogParameters();
-        parameters.Add("ContentText", "Do you really want to approve the request?.");
-        parameters.Add("ButtonText", "Approve");
-        parameters.Add("Color", Color.Success);
+        parameters.Add("ContentText", "Do you really want to cancel the request?.");
+        parameters.Add("ButtonText", "Cancel");
+        parameters.Add("Color", Color.Error);
         parameters.Add("BookingId", BookingId);
         parameters.Add("User", User);
 
