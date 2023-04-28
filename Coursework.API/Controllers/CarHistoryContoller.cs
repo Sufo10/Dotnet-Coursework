@@ -22,10 +22,19 @@ namespace Coursework.API.Controllers
             _environment = environment;
         }
 
+
+        // API to 
         [HttpGet("/api/car-booking-history/{id}")]
         public async Task<ResponseDataDTO<IEnumerable<BookingHistoryResponseDTO>>> GetCarHistoryy(string id)
         {
             var data = await _carDetails.GetCarHistory(id);
+            return data;
+        }
+
+        [HttpGet("/api/sales-record/{startDate}/{endDate}")]
+        public async Task<ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>>> GetCarHistoryy(DateTime startDate, DateTime endDate)
+        {
+            var data = await _carDetails.GetSalesRecord(startDate, endDate);
             return data;
         }
     }
