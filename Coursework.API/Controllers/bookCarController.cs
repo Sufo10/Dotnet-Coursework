@@ -37,10 +37,10 @@ namespace Coursework.API.Controllers
         }
 
         [HttpDelete]
-        [Route("/api/car-request/reject")]
-        public async Task<ResponseDTO> RejectCarBooking(RejectBookingRequestDTO body)
+        [Route("/api/car-request/{BookingId}")]
+        public async Task<ResponseDTO> RejectCarBooking(String BookingId)
         {
-            var data = await _book.RejectBookingRequest(body.BookingId);
+            var data = await _book.RejectBookingRequest(BookingId);
             return data;
         }
 
