@@ -15,10 +15,9 @@ namespace Coursework.Application.DTO
         public string CarName { get; set; }
         public string Image { get; set; }
         public string CarId { get; set; }
-        
         public DateTime RentStartdate { get; set; }
         public DateTime RentEnddate { get;  set; }
         public int TotalAmount { get;  set; }
-
+        public bool IsPaid { get; set; }
     }
 }

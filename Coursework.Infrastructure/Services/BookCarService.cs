@@ -261,7 +261,8 @@ namespace Coursework.Infrastructure.Services
                     Image = car.Image,
                     RentStartdate = booking.RentStartdate,
                     RentEnddate = booking.RentEnddate,
-                    TotalAmount = booking.TotalAmount,  
+                    TotalAmount = booking.TotalAmount, 
+                    IsPaid = booking.payment == true,
                 }
                 ).ToListAsync();
 
