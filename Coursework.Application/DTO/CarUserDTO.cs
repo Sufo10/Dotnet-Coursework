@@ -11,6 +11,7 @@ namespace Coursework.Application.DTO
         public string Image { get; set; }
         public Double RatePerDay { get; set; }
         public Double ActualPrice { get; set; }
+        public int NumberOfRentals { get; set; }
     }
 }
 
