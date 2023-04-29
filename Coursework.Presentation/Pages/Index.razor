@@ -69,34 +69,6 @@
     {
         @foreach (var item in Cars)
         {
-            @*<div class="product-card">
-                <div class="product-tumb">
-                    <img src=@item.Image alt="">
-                </div>
-                <div class="product-details">
-                    <h4><a href="">@item.Name</a></h4>
-                    <p>@item?.Description</p>
-                    <div class="product-bottom-details">
-                        <div class="product-price"><small>NPR 12</small>NPR 10</div>
-                        <div class="product-links">
-                            @if (User?.IsVerified == true)
-                            {
-
-                                <MudButton OnClick="@((e) => OpenDialog(fullScreen,item))" Variant="Variant.Filled" Color="Color.Primary">Book Now</MudButton>
-                            }
-                            else if (User?.Username == null)
-                            {
-                                <MudButton OnClick="@((e) => RedirectLogin())" Variant="Variant.Filled" Color="Color.Primary">Book Now</MudButton>
-                            }
-                            else
-                            {
-                                <MudButton OnClick="@((e) => OpenVerificationModel(fullScreen))" Variant="Variant.Filled" Color="Color.Primary">Verfiy</MudButton>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>*@
-
             <MudCard width="380" class="product-card">
                  <div class="product-tumb">
                     <img src=@item.Image alt="">
@@ -105,24 +77,33 @@
                             <div class="product-details">
                                 <MudText Class="car-heading" Typo="Typo.h6">@item.Name</MudText>
                                 <MudText class="mt-4 car-description" Typo="Typo.body2">@item.Description</MudText>
-                        <div class="product-bottom-details">
-                        <div class="product-price"><small>NPR 12</small>NPR 10</div>
-                        <div class="product-links">
-                            @if (User?.IsVerified == true)
-                            {
+                                <div class="product-bottom-details">
+                                    @if (item.ActualPrice != item.RatePerDay)
+{
 
-                                <MudButton OnClick="@((e) => OpenDialog(fullScreen,item))" Variant="Variant.Filled" Color="Color.Primary">Book Now</MudButton>
-                            }
-                            else if (User?.Username == null)
-                            {
-                                <MudButton OnClick="@((e) => RedirectLogin())" Variant="Variant.Filled" Color="Color.Primary">Book Now</MudButton>
-                            }
-                            else
-                            {
-                                <MudButton OnClick="@((e) => OpenVerificationModel(fullScreen))" Variant="Variant.Filled" Color="Color.Primary">Verfiy</MudButton>
-                            }
-                        </div>
-                    </div>
+                                    <div class="product-price"><small>NPR @item.ActualPrice</small>NPR @item.RatePerDay</div>
+}
+else
+{
+
+                                    <div class="product-price">NPR @item.RatePerDay</div>
+}
+                                    <div class="product-links">
+                                        @if (User?.IsVerified == true)
+                                        {
+
+                                            <MudButton OnClick="@((e) => OpenDialog(fullScreen,item))" Variant="Variant.Filled" Color="Color.Primary">Book Now</MudButton>
+                                        }
+                                        else if (User?.Username == null)
+                                        {
+                                            <MudButton OnClick="@((e) => RedirectLogin())" Variant="Variant.Filled" Color="Color.Primary">Book Now</MudButton>
+                                        }
+                                        else
+                                        {
+                                            <MudButton OnClick="@((e) => OpenVerificationModel(fullScreen))" Variant="Variant.Filled" Color="Color.Primary">Verfiy</MudButton>
+                                        }
+                                    </div>
+                                </div>
 </div>
                             </MudCardContent>
 

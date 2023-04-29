@@ -26,7 +26,7 @@
                             </MudGrid>
                             <MudGrid Class="mt-3 mx-1" Spacing=3>
                                 <MudItem xs="12">
-                                    <MudNumericField @bind-Value="OfferPrice" Label="Offer Price" RequiredError="Offer Price is required" Format="F1" Variant="Variant.Outlined" />
+                                    <MudNumericField @bind-Value="OfferPrice" Label="Offer Price" Format="F1" Variant="Variant.Outlined" />
                                 </MudItem>
                             </MudGrid>
                         </MudGrid>
@@ -122,7 +122,7 @@
         // Add string content
         formData.Add(new StringContent(Name), "name");
         formData.Add(new StringContent(ActualPrice.ToString()), "actualprice");
-        formData.Add(new StringContent(OfferPrice.ToString()), "offerprice");
+        formData.Add(new StringContent(OfferPrice.ToString()), "rateperday");
         formData.Add(new StringContent(Description), "description");
 
         // Add file content

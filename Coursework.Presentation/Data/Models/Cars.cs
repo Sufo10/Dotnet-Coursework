@@ -8,10 +8,9 @@ namespace Coursework.Presentation.Data.Models
 		public Guid Id { get; set; }
 		public string Name { get; set; }
 		public string Image { get; set; }
-		public string Rate { get; set; }
+		public Double RatePerDay { get; set; }
 		public string Description { get; set; }
-		public string ActualPrice { get; set; }
-		public string OfferPrice { get; set; }
+		public Double ActualPrice { get; set; }
     }
 }
 

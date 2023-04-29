@@ -54,11 +54,8 @@ namespace Coursework.Infrastructure.Services
                     phone = "9815091234",
                 };
 
-<<<<<<< HEAD
                 var rentalAmount = (int)Math.Round((customerBooking.RentEnddate - customerBooking.RentStartdate).Days * car.RatePerDay*100); //amount in paisa
-=======
-                var rentalAmount = (int)Math.Round((customerBooking.RentEnddate - customerBooking.RentStartdate).Days * car.RatePerDay * 100); //amount in paisa
->>>>>>> origin/main
+
                 var VAT = (int)Math.Round(0.13 * rentalAmount); // 13% Vat
                 var totalAmount = rentalAmount + VAT;
 
@@ -70,11 +67,8 @@ namespace Coursework.Infrastructure.Services
                        name = car.Name,
                        total_price = totalAmount,
                        quantity = 1,
-<<<<<<< HEAD
-                       unit_price = car.RatePerDay*100
-=======
+
                        unit_price = car.RatePerDay * 100 //amount in paisa
->>>>>>> origin/main
                    }
                 };
 
