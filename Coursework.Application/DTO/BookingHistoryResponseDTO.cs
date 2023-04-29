@@ -25,6 +25,9 @@ namespace Coursework.Application.DTO
         public bool? IsDeleted { get; set; }
         public bool? IsApproved { get; set; }
         public bool? IsPaid { get; set; }
+        public Double? TotalAmount { get; set; }
+        public bool? OnRent { get; set; }
+        public bool? IsCompleted { get; set; }
     }
 
     public class SalesRecordResponseDTO

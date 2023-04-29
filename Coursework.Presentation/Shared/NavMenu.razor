@@ -3,12 +3,21 @@
 @implements IDisposable
 <MudNavMenu>
     <MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Primary" Class="pa-2">
-        <MudNavLink Href="/" Class="text-decoration-none" Icon="@Icons.Material.Filled.Dashboard">
+        <MudNavLink Href="/" Class="text-decoration-none" Icon="@Icons.Material.Filled.Home">
             <span class="text-decoration-none">
 
-                Dashboard
+                Home
             </span>
         </MudNavLink>
+
+        @if (User?.Role == "Admin" || User?.Role == "Staff")
+        {
+            <MudNavLink Style="text-decoration:none" Href="/dashboard" Class="text-decoration-none" Icon="@Icons.Material.Filled.Dashboard">
+                <span class="text-decoration-none">
+                    Dashboard
+                </span>
+            </MudNavLink>
+        }
         @if (User?.Username == null)
         {
 
@@ -16,16 +25,6 @@
                 <span class="text-decoration-none">
 
                     Login
-                </span>
-            </MudNavLink>
-        }
-
-        @if (User?.Username != null)
-        {
-            <MudNavLink Style="text-decoration:none" Href="/change-password" Class="text-decoration-none" Icon="@Icons.Material.Filled.Password">
-                <span class="text-decoration-none">
-
-                    Change Password
                 </span>
             </MudNavLink>
         }
@@ -60,6 +59,15 @@
                 <span class="text-decoration-none">
 
                     My Booking Request
+                </span>
+            </MudNavLink>
+        }
+        @if (User?.Username != null)
+        {
+            <MudNavLink Style="text-decoration:none" Href="/change-password" Class="text-decoration-none" Icon="@Icons.Material.Filled.Password">
+                <span class="text-decoration-none">
+
+                    Change Password
                 </span>
             </MudNavLink>
         }

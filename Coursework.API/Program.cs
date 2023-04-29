@@ -68,6 +68,7 @@ builder.Services.AddCors(options => options.AddPolicy("SubdomainDefault", builde
      .WithOrigins("https://localhost:5001","http://localhost:3000")
      .AllowCredentials()
      .AllowAnyHeader()
+     .AllowAnyMethod()
      .Build()
 ));
 
