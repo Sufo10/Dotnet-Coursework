@@ -34,6 +34,7 @@ namespace Coursework.Application.DTO
         public string ApprovedBy { get; set; }
         public bool? IsDeleted { get; set; }
         public bool? IsApproved { get; set; }
+        public bool? IsPaid { get; set; }
     }
 
     public class SalesRecordResponseDTO

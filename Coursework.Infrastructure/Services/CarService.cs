@@ -36,10 +36,10 @@ namespace Coursework.Infrastructure.Services
                 {
                     Name = model.Name,
                     IsAvailable = true,
-                    RatePerDay = model.RatePerDay,
+                    RatePerDay = model.RatePerDay ?? model.ActualPrice,
                     Image = uploadedFile,
                     Description=model.Description,
-
+                    ActualPrice=model.ActualPrice
                 };
                 _dbContext.Car.AddAsync(newCar);
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
@@ -61,6 +61,10 @@ namespace Coursework.Infrastructure.Services
                 Name=e.Name,
                 Image = baseUrl + e.Image,
                 IsAvailable=e.IsAvailable,
+                Description=e.Description,
+                RatePerDay=e.RatePerDay,
+                ActualPrice=e.ActualPrice
+                
             }).ToList();
 
             return new ResponseDataDTO<List<CarUserDTO>> { Status="Success",Message="Data Fetched Successully",Data=data};

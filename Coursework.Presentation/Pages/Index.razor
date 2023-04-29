@@ -9,8 +9,26 @@
 
 <PageTitle>Index</PageTitle>
 
-<div class="d-flex justify-space-between">
-    <MudText class="my-5 text-white" Typo="Typo.h5">Cars Available, @User?.Username</MudText>
+<div class="hero">
+    @*<div>
+
+            <MudImage Src="landing.png" Alt="Mony the dog" Class="" />
+    </div>*@
+    <div>
+                    <MudText Typo="Typo.h2">
+                        The best way <br /> to rent a car
+                    </MudText>
+                    <MudText Class="mt-10" Typo="Typo.h5">
+                        Car Rental with special discount
+                    </MudText>
+                    <MudButton Class="mt-10" Variant="Variant.Filled" Color="Color.Primary">Get Started</MudButton>
+    </div>
+</div>
+        <div class="flex-1">
+        </div>
+
+<div class="d-flex justify-space-between mt-10">
+    <MudText class="my-5 text-center text-white" Typo="Typo.h5">Cars We Offer</MudText>
     @if (User?.Role == "Admin" || User?.Role == "Staff")
     {
         <MudCardActions>
@@ -46,54 +64,55 @@
     else
     {
 
-    <MudGrid Spacing=2 Justify="Justify.FlexStart">
-        @if (Cars.Count > 0)
+<div class="d-flex flex-wrap">
+    @if (Cars.Count > 0)
+    {
+        @foreach (var item in Cars)
         {
+            <MudCard width="380" class="product-card">
+                 <div class="product-tumb">
+                    <img src=@item.Image alt="">
+                </div>
+                        <MudCardContent>
+                            <div class="product-details">
+                                <MudText Class="car-heading" Typo="Typo.h6">@item.Name</MudText>
+                                <MudText class="mt-4 car-description" Typo="Typo.body2">@item.Description</MudText>
+                                <div class="product-bottom-details">
+                                    @if (item.ActualPrice != item.RatePerDay)
+{
 
-            @foreach (var item in Cars)
-            {
-                <MudItem>
+                                    <div class="product-price"><small>NPR @item.ActualPrice</small>NPR @item.RatePerDay</div>
+}
+else
+{
 
-                    <MudCard width="350px">
-                        <div class="w-full h-full hover-card">
-                            <div class="container-fluid card-image mt-2">
-                                <img height="200" class="object-fit-contain overflow-hidden hover-image rounded mt-3"
-                                     src=@item.Image />
-                            </div>
-                            <MudCardContent>
-                                <div class="d-flex align-items-center justify-space-between">
-                                    <MudText Typo="Typo.h5">@item.Name</MudText>
-                                    <div>
-                                        <span>Rs.</span>
-                                        <span class="fw-bold fs-5">2000</span>
-                                        <span class="fs-6 text-secondary">/ DAY</span>
+                                    <div class="product-price">NPR @item.RatePerDay</div>
+}
+                                    <div class="product-links">
+                                        @if (User?.IsVerified == true)
+                                        {
+
+                                            <MudButton OnClick="@((e) => OpenDialog(fullScreen,item))" Variant="Variant.Filled" Color="Color.Primary">Book Now</MudButton>
+                                        }
+                                        else if (User?.Username == null)
+                                        {
+                                            <MudButton OnClick="@((e) => RedirectLogin())" Variant="Variant.Filled" Color="Color.Primary">Book Now</MudButton>
+                                        }
+                                        else
+                                        {
+                                            <MudButton OnClick="@((e) => OpenVerificationModel(fullScreen))" Variant="Variant.Filled" Color="Color.Primary">Verfiy</MudButton>
+                                        }
                                     </div>
                                 </div>
-                                <div Class="d-flex">
-                                    <MudText class="mt-4" Typo="Typo.body2">@item.Description</MudText>
-                                </div>
+</div>
                             </MudCardContent>
-                            <MudCardActions>
-                                @if (User?.IsVerified == true)
-                                {
 
-                                    <MudButton OnClick="@((e) => OpenDialog(fullScreen,item))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Book Now</MudButton>
-                                }
-                                else if (User?.Username == null)
-                                {
-                                    <MudButton OnClick="@((e) => RedirectLogin())" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Book Now</MudButton>
-                                }
-                                else
-                                {
-                                    <MudButton OnClick="@((e) => OpenVerificationModel(fullScreen))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Verfiy Account Now</MudButton>
-                                }
-                            </MudCardActions>
-                        </div>
-                    </MudCard>
-                </MudItem>
-            }
+                </MudCard>
         }
-    </MudGrid>
+    }
+
+</div>
+       
     }
 
 

@@ -10,6 +10,7 @@ namespace Coursework.Presentation.Data.Models
 		public string RentEndDate { get; set; }
 		public bool? IsDeleted { get; set; }
 		public bool? IsApproved { get; set; }
-	}
+		public bool? IsPaid { get; set; }
+    }
 }
 
