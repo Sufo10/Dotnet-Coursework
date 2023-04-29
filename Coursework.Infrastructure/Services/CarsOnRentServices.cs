@@ -51,25 +51,24 @@ namespace Coursework.Infrastructure.Services
         {
             try
             {
-                var entityToUpdate = await _dbContext.CustomerBooking.FindAsync(Guid.Parse(BookingId));
+                var booking = await _dbContext.CustomerBooking.FindAsync(Guid.Parse(BookingId));
 
-                if (entityToUpdate == null)
-                {
-                    return new ResponseDTO() { Status = "Error", Message = "Booking not found" };
-                }
+                if (booking == null)
+                    return new ResponseDTO { Status = "Error", Message = "Booking not found" };
 
-                entityToUpdate.OnRent = true;
-                _dbContext.CustomerBooking.Update(entityToUpdate);
+                if (booking.OnRent != true || booking.IsComplete != false)
+                    return new ResponseDTO { Status = "Error", Message = "Car is already on rent or completed" };
+
+                booking.OnRent = true;
+                booking.IsComplete = true;
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
-                return new ResponseDTO() { Status = "Success", Message = "Car is now on rent" };
+                return new ResponseDTO { Status = "Success", Message = "Car is now on rent" };
             }
-
             catch (Exception ex)
             {
-                return new ResponseDTO() { Status = "error", Message = ex.Message.ToString() };
+                return new ResponseDTO { Status = "Error", Message = ex.Message };
             }
-
-
         }
+
     }
 }
