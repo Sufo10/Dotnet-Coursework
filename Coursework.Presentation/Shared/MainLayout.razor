@@ -87,6 +87,7 @@
     private void Logout()
     {
         UserService.ClearUser();
+        NavigationManager.NavigateTo("/login");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

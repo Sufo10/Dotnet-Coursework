@@ -46,7 +46,14 @@
                 </span>
             </MudNavLink>
         }
-
+        @if (User?.Role == "Admin" || User?.Role == "Staff")
+        {
+            <MudNavLink Style="text-decoration:none" Href="/car-reports" Class="text-decoration-none" Icon="@Icons.Material.Filled.PieChart">
+                <span class="text-decoration-none">
+                    Car Reports
+                </span>
+            </MudNavLink>
+        }
         @if (User?.Username != null)
         {
             <MudNavLink Style="text-decoration:none" Href="/my-booking-request" Class="text-decoration-none" Icon="@Icons.Material.Filled.CarRepair">
