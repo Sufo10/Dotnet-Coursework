@@ -33,7 +33,7 @@ namespace Coursework.Infrastructure.Services
             var threeMonthsAgo = today.AddMonths(-3).ToUniversalTime(); ;
 
             var inactiveUsers = await _dbContext.CustomerBooking
-                .Where(cb => cb.RentEnddate <= threeMonthsAgo && cb.rented == true && cb.payment == true && cb.IsApproved == true)
+                .Where(cb => cb.RentEnddate <= threeMonthsAgo && cb.OnRent == true && cb.payment == true && cb.IsApproved == true)
                 .ToListAsync();
 
             var inactiveUsersDTOs = new List<GetIInactiveUsersDTO>();
@@ -85,7 +85,7 @@ namespace Coursework.Infrastructure.Services
             try
             {
                 var bookings = await _dbContext.CustomerBooking
-                .Where(x => x.IsApproved == true && x.rented == true && x.payment == true)
+                .Where(x => x.IsApproved == true && x.OnRent == true && x.payment == true)
                 .ToListAsync();
 
                 var customerIds = bookings.Select(x => x.customerId).Distinct();
