@@ -14,7 +14,7 @@
     </TitleContent>
     <DialogContent>
         <div class="col-12 d-flex justify-content-center align-item-center">
-            <MudPaper Class="pa-5 mx-auto ma-2" Square="true">
+            <MudPaper Class="pa-5 mx-auto ma-2" Square="true" Style="box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;border-radius: 8px;">
                 <div class="mt-3">
                     <MudText>@User.Username</MudText>
                     <MudForm @ref="form" @bind-IsValid="@isSuccess" @onsubmit="handleSubmit" @bind-Errors="@errors" ReadOnly="false">
