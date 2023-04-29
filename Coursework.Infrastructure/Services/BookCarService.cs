@@ -268,7 +268,7 @@ namespace Coursework.Infrastructure.Services
                     OnRent = (bool)booking.OnRent,
                     payment = (bool)booking.payment,
 
-                    TotalAmount = booking.TotalAmount, 
+                    //TotalAmount = booking.TotalAmount, 
 
                 }
                 ).ToListAsync();
