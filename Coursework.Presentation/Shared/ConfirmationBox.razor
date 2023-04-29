@@ -9,8 +9,9 @@
         <MudText>@ContentText</MudText>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="@Color" Disabled="_processing" Variant="Variant.Filled" OnClick="Submit">
+        <MudButton Color="@Color" Disabled="_processing" Variant="Variant.Filled"
+                   OnClick="CheckConfirmation"
+                   >
             @if (_processing)
             {
                 <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
@@ -21,6 +22,7 @@
                 <MudText> @ButtonText</MudText>
             }
         </MudButton>
+
     </DialogActions>
 </MudDialog>
 @code {
@@ -39,6 +41,33 @@
 
     public bool _processing { get; set; }
 
+    async Task CheckConfirmation()
+    {
+        if (ButtonText == "Cancel")
+        {
+            CancelRequest();
+        }
+        else
+        {
+            Submit();
+        }
+    }
+
+    async Task CancelRequest()
+    {
+        _processing = true;
+        var jsonResponse = await _httpClient.AuthDeleteAsync<ApiResponse>($"https://localhost:7190/api/car-request/{BookingId}", User.Token);
+
+        if (jsonResponse != null && jsonResponse.Status == "Success")
+        {
+            _processing = false;
+            Snackbar.Add("Booking Cancelled Successfully!", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Some Problem Occured", Severity.Error);
+        }
+    }
 
     async Task Submit()
     {

@@ -10,6 +10,8 @@ namespace Coursework.Presentation.Data.Models
 		public string Image { get; set; }
 		public string Rate { get; set; }
 		public string Description { get; set; }
-	}
+		public string ActualPrice { get; set; }
+		public string OfferPrice { get; set; }
+    }
 }
 

@@ -2,6 +2,8 @@
 @using Newtonsoft.Json;
 @inject UserService UserService
 @using System.Text.RegularExpressions;
+@inject ISnackbar Snackbar
+
 @page "/login"
 
 @inject NavigationManager NavManager
@@ -112,8 +114,7 @@
             else
             {
                 // Handle error responses
-                Console.WriteLine($"Response body: {jsonResponse.message}");
-                Emessage = jsonResponse.message;
+                Snackbar.Add($"{jsonResponse.message}", Severity.Error);
                 _processing = false;
             }
         }

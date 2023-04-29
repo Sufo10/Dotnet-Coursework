@@ -116,6 +116,7 @@ namespace Coursework.Infrastructure.Services
                        Description = c.Description,
                        RentStartdate = b.RentStartdate,
                        RentEnddate = b.RentEnddate,
+                       IsPaid=b.payment,
                        IsDeleted=b.isDeleted,
                        IsApproved=b.IsApproved
                    });

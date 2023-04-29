@@ -31,6 +31,16 @@ namespace Coursework.Presentation.Data.Helper
         }
 
 
+        public static async Task<T> AuthDeleteAsync<T>(this HttpClient httpClient, string requestUri, string bearerToken)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(responseContent);
+        }
+
         public static async Task<TResponse> AuthPostAsync<TResponse>(HttpClient httpClient, string url, HttpContent content, string token)
         {
             using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url)
@@ -54,8 +64,6 @@ namespace Coursework.Presentation.Data.Helper
                 throw new HttpRequestException($"Failed to send request: {response.ReasonPhrase}");
             }
         }
-
-
         public static async Task<T>  AuthPostAsJsonAsync<T>(this HttpClient httpClient, string requestUri, T data, string bearerToken) where T : class
         {
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);

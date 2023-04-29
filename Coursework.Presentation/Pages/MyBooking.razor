@@ -1,11 +1,15 @@
 ﻿@page "/my-booking-request"
 @using System.Net.Http.Json
 @using MudBlazor
+@using System.Text;
+@using Newtonsoft.Json;
 @inject HttpClient _httpClient
 @inject IDialogService DialogService
 @inject IConfiguration _config
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@using Microsoft.JSInterop
 
 <PageTitle>My Booking Request</PageTitle>
 <MudTable Class="mt-5" Items="@Elements" Dense="false" Hover="true" ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info" Filter="new Func<MyBookingDetails,bool>(FilterFunc)"
@@ -20,13 +24,13 @@
         {
             <col style="width:50px;" />
         }
-        <col style="width:20%;" />
-        <col style="width:20%;" />
-        <col style="width:20%;" />
-        <col style="width:20%;" />
-        <col style="width:20%;" />
-        <col />
-        <col />
+        <col style="width:16%;" />
+        <col style="width:16%;" />
+        <col style="width:16%;" />
+        <col style="width:16%;" />
+        <col style="width:16%;" />
+        <col style="width:16%;" />
+        <col style="width:16%;" />
         @if (applyButtonPosition.DisplayApplyButtonAtEnd() || (editButtonPosition.DisplayEditButtonAtEnd() && editTrigger == TableEditTrigger.EditButton))
         {
             <col style="width:50px;" />
@@ -38,6 +42,7 @@
         <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.RentStartDate)">Start-Date</MudTableSortLabel></MudTh>
         <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.RentEndDate)">End-Date</MudTableSortLabel></MudTh>
         <MudTh>Status</MudTh>
+        <MudTh>Payment</MudTh>
         <MudTh>Actions</MudTh>
     </HeaderContent>
     <RowTemplate>
@@ -63,15 +68,22 @@
 
             }
         </MudTd>
+        <MudTd Class="text-center" DataLabel="IsPaid">
+            @if (context?.IsPaid == true)
+            {
+                <MudChip Variant="Variant.Filled" Color="Color.Info">Paid</MudChip>
+
+            }
+            else if (context?.IsPaid == null || context?.IsPaid == false)
+            {
+                <button @onclick="((e)=>handlePayment(context.Id))" class="khalti-btn">Pay Now</button>
+            }
+        </MudTd>
         <MudTd>
             <MudMenu Icon="@Icons.Material.Filled.MoreVert">
                 <MudMenuItem @onclick="@((e)=>CancelRequest(context.Id))">
-                    <MudIcon Icon="@Icons.Material.Filled.Approval" Title="Add" />
-                    Approve Request
-                </MudMenuItem>
-                <MudMenuItem>
                     <MudIcon Icon="@Icons.Material.Filled.Recommend" Title="Add" />
-                    Reject Request
+                    Cancel Request
                 </MudMenuItem>
             </MudMenu>
 
@@ -131,6 +143,38 @@
         }
     }
 
+    private async Task handlePayment(string id)
+    {
+        var data = new { bookingId = id };
+        var json = JsonConvert.SerializeObject(data);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        if (content != null)
+        {
+            var response = await HttpClientExtension.AuthPostAsync<dynamic>(_httpClient, "https://localhost:7190/api/khalti-payment", content, User.Token.ToString());
+            Console.WriteLine(response.status);
+            if (response != null && response.status == "Success")
+            {
+                Console.WriteLine("Here");
+                // Open the payment URL in a new tab
+                var paymentUrl = response.data?.payment_url;
+                Console.WriteLine(paymentUrl);
+                if (!string.IsNullOrEmpty($"{paymentUrl}"))
+                {
+                    NavigationManager.NavigateTo($"{paymentUrl}");
+                }
+            }
+            else
+            {
+                Snackbar.Add($"{response?.data?.error}", Severity.Error);
+                //Snackbar.Add($"Could not Book Car!", Severity.Error);
+            }
+        }
+    }
+
+
+
+
     protected override async Task OnInitializedAsync()
     {
         var currentUrl = NavigationManager.Uri;
@@ -147,7 +191,7 @@
     }
 
 
-    
+
     private bool FilterFunc(MyBookingDetails element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
