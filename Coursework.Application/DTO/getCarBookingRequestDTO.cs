@@ -18,6 +18,7 @@ namespace Coursework.Application.DTO
         
         public DateTime RentStartdate { get; set; }
         public DateTime RentEnddate { get;  set; }
+        public int TotalAmount { get;  set; }
 
     }
 }

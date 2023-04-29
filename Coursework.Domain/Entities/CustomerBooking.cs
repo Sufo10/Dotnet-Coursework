@@ -19,8 +19,10 @@ namespace Coursework.Domain.Entities
         public DateTime RentStartdate { get; set; }
         public DateTime RentEnddate { get; set;}
         public Boolean? IsApproved { get; set; } 
-        public Boolean? rented { get; set; } 
+        public Boolean? rented { get; set; }
         public Boolean? payment { get; set; } 
+        public int TotalAmount { get; set; } 
+
 
        
     }
