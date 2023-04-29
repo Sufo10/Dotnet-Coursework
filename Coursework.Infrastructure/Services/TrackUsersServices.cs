@@ -71,7 +71,7 @@ namespace Coursework.Infrastructure.Services
 
             return new ResponseDataDTO<List<GetIInactiveUsersDTO>>
             {
-                Status = "successful",
+                Status = "success",
                 Message = "Data fetched",
                 Data = inactiveUsersDTOs
             };
@@ -125,7 +125,7 @@ namespace Coursework.Infrastructure.Services
                 var topThree = result.OrderByDescending(x => x.NoOfRequest).Take(3).ToList();
                 return new ResponseDataDTO<List<GetMostRentalRequestDTO>>
                 {
-                    Status = "successful",
+                    Status = "success",
                     Message = "fetch successful",
                     Data = topThree
                 };

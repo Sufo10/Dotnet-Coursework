@@ -24,5 +24,13 @@ namespace Coursework.API.Controllers
             var data = await _rcars.RentCars(BookingId);
             return data;
         }
+
+        [HttpPatch]
+        [Route("/api/ReturnCar/{BookingId}")]
+        public async Task<ResponseDTO> RemoveRent(string BookingId)
+        {
+            var data = await _rcars.RemoveRent(BookingId);
+            return data;
+        }
     }
 }
