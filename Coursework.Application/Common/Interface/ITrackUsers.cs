@@ -10,5 +10,6 @@ namespace Coursework.Application.Common.Interface
     public interface ITrackUsers
     {
         Task<ResponseDataDTO<List<GetMostRentalRequestDTO>>> GetMostRentalRequest();
+        Task<ResponseDataDTO<List<GetIInactiveUsersDTO>>> GetInactiveUsersRequest();
     }
 }

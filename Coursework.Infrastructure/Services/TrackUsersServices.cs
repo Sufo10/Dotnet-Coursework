@@ -26,6 +26,60 @@ namespace Coursework.Infrastructure.Services
             _userManager = userManager;
 
         }
+
+        public async Task<ResponseDataDTO<List<GetIInactiveUsersDTO>>> GetInactiveUsersRequest()
+        {
+            var today = DateTime.Today;
+            var threeMonthsAgo = today.AddMonths(-3).ToUniversalTime(); ;
+
+            var inactiveUsers = await _dbContext.CustomerBooking
+                .Where(cb => cb.RentEnddate <= threeMonthsAgo && cb.rented == true && cb.payment == true && cb.IsApproved == true)
+                .ToListAsync();
+
+            var inactiveUsersDTOs = new List<GetIInactiveUsersDTO>();
+            foreach (var user in inactiveUsers)
+            {
+                if (user.customerId != null)
+                {
+                    var customer = await _dbContext.Customer.FindAsync(user.customerId);
+                    if (customer != null)
+                    {
+                        var inactiveCustomerDTO = new GetIInactiveUsersDTO
+                        {
+                            UserId = customer.UserId,
+                            Name = customer.Name,
+                            PhoneNumber = customer.Phone,
+                        };
+                        inactiveUsersDTOs.Add(inactiveCustomerDTO);
+                    }
+                }
+                else if (user.ApprovedBy != null)
+                {
+                    var employee = await _dbContext.Employee.FindAsync(user.ApprovedBy);
+                    if (employee != null)
+                    {
+                        var inactiveEmployeeDTO = new GetIInactiveUsersDTO
+                        {
+                            UserId = employee.UserId,
+                            Name = employee.Name,
+                            PhoneNumber = employee.Phone,
+                        };
+                        inactiveUsersDTOs.Add(inactiveEmployeeDTO);
+                    }
+                }
+            }
+
+            return new ResponseDataDTO<List<GetIInactiveUsersDTO>>
+            {
+                Status = "successful",
+                Message = "Data fetched",
+                Data = inactiveUsersDTOs
+            };
+
+
+
+        }
+
         public async Task<ResponseDataDTO<List<GetMostRentalRequestDTO>>> GetMostRentalRequest()
         {
             try
