@@ -85,7 +85,7 @@ namespace Coursework.Infrastructure.Services
             try
             {
                 var bookings = await _dbContext.CustomerBooking
-                .Where(x => x.IsApproved == true && x.OnRent == true && x.payment == true)
+                .Where(x => x.IsApproved == true && x.payment == true)
                 .ToListAsync();
 
                 var customerIds = bookings.Select(x => x.customerId).Distinct();
@@ -98,23 +98,23 @@ namespace Coursework.Infrastructure.Services
                     var user = await _userManager.FindByIdAsync(customerId);
                     var userRoles = await _userManager.GetRolesAsync(user);
 
-                    if (userRoles.FirstOrDefault() == "customer")
+                    if (userRoles.FirstOrDefault() == "Customer")
                     {
-                        var customer = await _dbContext.Customer.FirstOrDefaultAsync(x => x.UserId == customerId);
+                        var customers = await _dbContext.Customer.FirstOrDefaultAsync(x => x.UserId == customerId);
                         result.Add(new GetMostRentalRequestDTO
                         {
-                            CustomerId = customer.UserId,
-                            CustomerName = customer.Name,
+                            CustomerId = customers.UserId,
+                            CustomerName = customers.Name,
                             NoOfRequest = count
                         });
                     }
-                    else if (userRoles.FirstOrDefault() == "employee")
+                    else if (userRoles.FirstOrDefault() == "Staff")
                     {
-                        var customer = await _dbContext.Employee.FirstOrDefaultAsync(x => x.UserId == customerId);
+                        var employees = await _dbContext.Employee.FirstOrDefaultAsync(x => x.UserId == customerId);
                         result.Add(new GetMostRentalRequestDTO
                         {
-                            CustomerId = customer.UserId,
-                            CustomerName = customer.Name,
+                            CustomerId = employees.UserId,
+                            CustomerName = employees.Name,
                             NoOfRequest = count
                         });
                     }
@@ -136,7 +136,7 @@ namespace Coursework.Infrastructure.Services
                 return new ResponseDataDTO<List<GetMostRentalRequestDTO>>
                 {
                     Status = "error",
-                    Message = ex.Message.ToString(),   
+                    Message = ex.Message.ToString(),
                 };
             }
 
