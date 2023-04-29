@@ -1,0 +1,116 @@
+﻿@using System.Text;
+@using Newtonsoft.Json;
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@inject HttpClient _httpClient
+
+@inject ISnackbar Snackbar
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.CarCrash" Class="mr-3 mb-n1" />
+            Report Damage
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <div class="col-12 d-flex justify-content-center align-item-center">
+            <MudPaper Width="500" Class="pa-5 mx-auto ma-2" Square="true" Style="box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;border-radius: 8px;">
+                <div class="mt-3">
+                    <MudForm @ref="form" @bind-IsValid="@isSuccess" @onsubmit="handleSubmit" @bind-Errors="@errors" ReadOnly="false">
+                        <MudGrid Spacing=3>
+                            <MudItem xs="12">
+                                <MudTextField
+                                              @bind-Value="Description" Required="true" RequiredError="Description is required" MaxLength="300" HelperText="Please describe damage in car" Immediate="true" Label="Description" Variant="Variant.Outlined" />
+                            </MudItem>
+                        </MudGrid>
+                        <MudCardActions>
+                            <MudButton Disabled="@(_processing)"
+                                       Size="Size.Large" StartIcon="@Icons.Material.Filled.CarCrash" Class="mt-14" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary"
+                                       ButtonType="ButtonType.Submit">
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                    <MudText Class="ms-2">Processing</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Report</MudText>
+                                }
+
+                            </MudButton>
+                        </MudCardActions>
+                    </MudForm>
+                    @*<MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" Disabled="@_processing" OnClick="ProcessSomething" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">*@
+
+
+                    @*</MudButton>*@
+
+                </div>
+            </MudPaper>
+        </div>
+    </DialogContent>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+    MudForm form;
+    string[] errors = { };
+    bool isShow;
+    bool isSuccess;
+    bool success = false;
+    public string Description { get; set; }
+    public bool _processing { get; set; }
+    MudTextField<string> pwField1;
+
+
+    [Parameter]
+    public UserInfo User { get; set; }
+
+    [Parameter]
+    public string BookingId { get; set; }
+
+    [Parameter]
+    public string CarId { get; set; }
+
+    async Task handleSubmit()
+    {
+        _processing = true;
+        var data = new
+        {
+            CarId = CarId,
+            Description=Description,
+            BookingId=BookingId
+        };
+        var json = JsonConvert.SerializeObject(data);
+        var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+        if (content != null)
+        {
+            var response = await HttpClientExtension.AuthPostAsync<ApiResponse>(_httpClient, "https://localhost:7190/api/admin/register-employee", content, User.Token.ToString());
+            // Process the response as needed
+            if (response != null && response.Status == "Success")
+            {
+                Snackbar.Add("User Added Successfully!", Severity.Success);
+                _processing = false;
+                StateHasChanged();
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                // Handle error responses
+                Snackbar.Add($"{response.Message}", Severity.Error);
+                _processing = false;
+            }
+        }
+        else
+        {
+            Snackbar.Add("Some Problem Occured", Severity.Error);
+        }
+    }
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+    private bool _autoClose;
+}

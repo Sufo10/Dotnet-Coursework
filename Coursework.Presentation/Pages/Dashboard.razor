@@ -1,0 +1,65 @@
+﻿@page "/dashboard"
+@using Newtonsoft.Json;
+@inject NavigationManager NavigationManager
+@inject HttpClient _httpClient
+
+<PageTitle>Login</PageTitle>
+
+<div>
+    @if (Series != null && Series.Count > 0 && CarNames != null && CarNames.Length > 0)
+    {
+        <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" @bind-SelectedIndex="Index" XAxisLabels="@CarNames" Width="100%" Height="350px"></MudChart>
+    }
+    else
+    {
+        <p>Loading chart data...</p>
+    }
+
+
+</div>
+@code {
+    [CascadingParameter(Name = "UserInfo")]
+    public UserInfo User { get; set; }
+    public List<CarReportDetails> CarRentalData { get; set; }
+    public string[] CarNames { get; set; }
+    public List<ChartSeries> Series = new List<ChartSeries>();
+    private int Index = -1;
+    private bool _processing = true;
+    protected override async Task OnInitializedAsync()
+    {
+
+        var currentUrl = NavigationManager.Uri;
+        if (currentUrl.Contains("/dashboard"))
+        {
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<CarReportDetails>>>("https://localhost:7190/api/reports/car", User.Token);
+
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                CarRentalData = jsonResponse.Data;
+                UpdateChartSeries();
+            }
+        }
+    }
+
+
+    private void UpdateChartSeries()
+    {
+        List<double> numberOfRentals = new List<double>();
+        List<string> carNames = new List<string>();
+        foreach (var item in CarRentalData)
+        {
+            numberOfRentals.Add(item.NumberOfRentals);
+            carNames.Add(item.Name);
+        }
+
+        Series = new List<ChartSeries>()
+    {
+        new ChartSeries() { Name = "Car Rentals", Data = numberOfRentals.ToArray() }
+    };
+
+        CarNames = carNames.ToArray();
+        _processing = true;
+        StateHasChanged(); // Notify the component to refresh the UI
+    }
+}
+
