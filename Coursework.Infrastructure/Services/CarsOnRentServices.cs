@@ -22,6 +22,31 @@ namespace Coursework.Infrastructure.Services
             _userManager = userManager;
             _emailService = emailService;
         }
+
+        public async Task<ResponseDTO> RemoveRent(string BookingId)
+        {
+            try
+            {
+                var entityToUpdate = await _dbContext.CustomerBooking.FindAsync(Guid.Parse(BookingId));
+
+                if (entityToUpdate == null)
+                {
+                    return new ResponseDTO() { Status = "Error", Message = "Booking not found" };
+                }
+
+                entityToUpdate.OnRent = false;
+                _dbContext.CustomerBooking.Update(entityToUpdate);
+                await _dbContext.SaveChangesAsync(default(CancellationToken));
+                return new ResponseDTO() { Status = "Success", Message = "Car is now returned" };
+            }
+
+            catch (Exception ex)
+            {
+                return new ResponseDTO() { Status = "error", Message = ex.Message.ToString() };
+            }
+
+        }
+
         public async Task<ResponseDTO> RentCars(string BookingId)
         {
             try
@@ -41,7 +66,7 @@ namespace Coursework.Infrastructure.Services
 
             catch (Exception ex)
             {
-                return new ResponseDTO() { Status = "unsuccessful", Message = ex.Message.ToString() };
+                return new ResponseDTO() { Status = "error", Message = ex.Message.ToString() };
             }
 
 
