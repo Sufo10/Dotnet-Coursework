@@ -1,0 +1,145 @@
+﻿@using System.Text;
+@using Newtonsoft.Json;
+@inject ISnackbar Snackbar
+@inject HttpClient _httpClient
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.CarRental" Class="mr-3 mb-n1" />
+            Offline Payment
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <div class="col-12 d-flex justify-content-center align-item-center">
+            <MudPaper Class="pa-5 mx-auto ma-2" Square="true" Style="box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;border-radius: 8px;">
+                <div class="mt-3">
+                    <MudForm @ref="form" @bind-IsValid="@isSuccess" @onsubmit="handleSubmit" @bind-Errors="@errors" ReadOnly="false">
+                        <div class="product-tumb">
+                            <img src=@carImage alt="">
+                        </div>
+                        <MudGrid Spacing=3>
+                            <MudItem xs="12">
+                                <MudTextField Class="mt-3" @bind-Value="Name" Required="true" RequiredError="Name is required" Label="Car Name" Variant="Variant.Outlined" Clearable="true" Immediate="true"  Disabled="true"/>
+                            </MudItem>
+                        </MudGrid>
+                        <MudGrid Spacing=3>
+                            <MudGrid Class="mt-3 mx-1" Spacing=3>
+                                <MudItem xs="12">
+                                    <MudNumericField @bind-Value="Amount" Label="Amount" Format="F1" Variant="Variant.Outlined" Disabled="true" />
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Class="mt-3 mx-1" Spacing=12>
+                                <MudItem xs="6">
+                                    <MudTextField Class="mt-3 mx-1 ms-2" @bind-Value="CustomerName" Required="true"  Label="Customer Name" Variant="Variant.Outlined" Clearable="true" Immediate="true" Disabled="true" />
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudTextField Class="mt-3 mx-1 me-2" @bind-Value="CustomerPhone" Required="true"  Label="Customer Phone" Variant="Variant.Outlined" Clearable="true" Immediate="true" Disabled="true" />
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Class="mt-3 mx-1" Spacing=12>
+                                <MudItem xs="6">
+                                    <MudTextField Class="mt-3 mx-1 ms-2" @bind-Value="RentStartDate" Required="true" Label="Rent Start Date" Variant="Variant.Outlined" Clearable="true" Immediate="true" Disabled="true" />
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudTextField Class="mt-3 mx-1 me-2" @bind-Value="RentEndDate" Required="true" Label="Rent End Date" Variant="Variant.Outlined" Clearable="true" Immediate="true" Disabled="true" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudGrid>
+                        <MudCardActions>
+                            <MudButton Disabled="@(_processing)"
+                                       Size="Size.Large" StartIcon="@Icons.Material.Filled.Payment" Class="mt-14" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary"
+                                       ButtonType="ButtonType.Submit">
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                    <MudText Class="ms-2">Processing</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Pay</MudText>
+                                }
+
+                            </MudButton>
+                        </MudCardActions>
+                    </MudForm>
+                    @*<MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" Disabled="@_processing" OnClick="ProcessSomething" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">*@
+
+
+                    @*</MudButton>*@
+
+                </div>
+            </MudPaper>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+    MudForm form;
+    string[] errors = { };
+    bool isShow;
+    bool isSuccess;
+    bool success = false;
+    public string Name { get; set; }
+    public string CustomerName { get; set; }
+    public string CustomerPhone { get; set; }
+    public int Amount { get; set; }
+    public string Description { get; set; }
+    public string RentStartDate { get; set; }
+    public string RentEndDate { get; set; }
+    public bool _processing { get; set; }
+    [Parameter]
+    public AdminBooking Booking { get; set; }
+    public string carImage = "";
+    [Parameter]
+    public UserInfo User { get; set; }
+
+    protected override void OnInitialized()
+    {
+        carImage = $"https://localhost:7190/images/{Booking.Image}";
+        Name = Booking.CarName;
+        Amount = Booking.TotalAmount;
+        CustomerName = Booking.CustomerName;
+        CustomerPhone = Booking.CustomerPhone;
+        RentStartDate = Booking.RentStartDate.Substring(0, 10); 
+        RentEndDate = Booking.RentEndDate.Substring(0, 10); 
+    }
+
+    async Task handleSubmit()
+    {
+        var data = new { BookingId = Booking.BookingId };
+        var json = JsonConvert.SerializeObject(data);
+        Console.WriteLine(data);
+        var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+        if(content != null)
+        {
+            var response = await HttpClientExtension.AuthPostAsync<ApiResponse>(_httpClient, "https://localhost:7190/api/offline-payment", content, User.Token.ToString() ?? "");
+            if (response != null && response.Status == "Success")
+            {
+                Snackbar.Add("Car Payment Successful", Severity.Success);
+                MudDialog.Cancel();
+            }
+            else
+            {
+                Snackbar.Add($"{response.Message}", Severity.Error);
+                MudDialog.Cancel();
+            }
+        }
+        else
+        {
+            Snackbar.Add($"Content object is null!", Severity.Error);
+
+        }
+    }
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+    private bool _autoClose;
+}
