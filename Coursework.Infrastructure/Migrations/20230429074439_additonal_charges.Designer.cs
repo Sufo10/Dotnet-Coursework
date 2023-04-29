@@ -3,6 +3,7 @@ using System;
 using Coursework.Infrastructure.Persistent;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Coursework.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230429074439_additonal_charges")]
+    partial class additonal_charges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -333,9 +336,6 @@ namespace Coursework.Infrastructure.Migrations
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<bool?>("OnRent")
-                        .HasColumnType("boolean");
-
                     b.Property<DateTime>("RentEnddate")
                         .HasColumnType("timestamp with time zone");
 
@@ -353,6 +353,9 @@ namespace Coursework.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<bool?>("payment")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("rented")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");

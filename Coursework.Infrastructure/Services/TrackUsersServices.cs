@@ -26,12 +26,66 @@ namespace Coursework.Infrastructure.Services
             _userManager = userManager;
 
         }
+
+        public async Task<ResponseDataDTO<List<GetIInactiveUsersDTO>>> GetInactiveUsersRequest()
+        {
+            var today = DateTime.Today;
+            var threeMonthsAgo = today.AddMonths(-3).ToUniversalTime(); ;
+
+            var inactiveUsers = await _dbContext.CustomerBooking
+                .Where(cb => cb.RentEnddate <= threeMonthsAgo && cb.OnRent == true && cb.payment == true && cb.IsApproved == true)
+                .ToListAsync();
+
+            var inactiveUsersDTOs = new List<GetIInactiveUsersDTO>();
+            foreach (var user in inactiveUsers)
+            {
+                if (user.customerId != null)
+                {
+                    var customer = await _dbContext.Customer.FindAsync(user.customerId);
+                    if (customer != null)
+                    {
+                        var inactiveCustomerDTO = new GetIInactiveUsersDTO
+                        {
+                            UserId = customer.UserId,
+                            Name = customer.Name,
+                            PhoneNumber = customer.Phone,
+                        };
+                        inactiveUsersDTOs.Add(inactiveCustomerDTO);
+                    }
+                }
+                else if (user.ApprovedBy != null)
+                {
+                    var employee = await _dbContext.Employee.FindAsync(user.ApprovedBy);
+                    if (employee != null)
+                    {
+                        var inactiveEmployeeDTO = new GetIInactiveUsersDTO
+                        {
+                            UserId = employee.UserId,
+                            Name = employee.Name,
+                            PhoneNumber = employee.Phone,
+                        };
+                        inactiveUsersDTOs.Add(inactiveEmployeeDTO);
+                    }
+                }
+            }
+
+            return new ResponseDataDTO<List<GetIInactiveUsersDTO>>
+            {
+                Status = "successful",
+                Message = "Data fetched",
+                Data = inactiveUsersDTOs
+            };
+
+
+
+        }
+
         public async Task<ResponseDataDTO<List<GetMostRentalRequestDTO>>> GetMostRentalRequest()
         {
             try
             {
                 var bookings = await _dbContext.CustomerBooking
-                .Where(x => x.IsApproved == true && x.rented == true && x.payment == true)
+                .Where(x => x.IsApproved == true && x.OnRent == true && x.payment == true)
                 .ToListAsync();
 
                 var customerIds = bookings.Select(x => x.customerId).Distinct();

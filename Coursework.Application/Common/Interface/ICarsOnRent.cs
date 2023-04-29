@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace Coursework.Application.Common.Interface
 {
-    public interface ITrackUsers
+    public interface ICarsOnRent
     {
-        Task<ResponseDataDTO<List<GetMostRentalRequestDTO>>> GetMostRentalRequest();
-        Task<ResponseDataDTO<List<GetIInactiveUsersDTO>>> GetInactiveUsersRequest();
+        Task<ResponseDTO> RentCars(string BookingId);
     }
 }
