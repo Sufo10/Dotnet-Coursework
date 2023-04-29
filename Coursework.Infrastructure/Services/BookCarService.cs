@@ -167,7 +167,7 @@ namespace Coursework.Infrastructure.Services
                             var rentDays = (model.RentEnddate - model.RentStartdate).TotalDays + 1;
                             var totalAmount = car.RatePerDay * rentDays;
                             var totalAfterDiscount = regular ? totalAmount * 0.9 : totalAmount;
-                            var vatAmount = totalAfterDiscount * 0.13;
+                            var vatAmount = totalAfterDiscount * 1.13 + totalAfterDiscount;
 
                             var bookCar = new CustomerBooking
                             {
@@ -185,7 +185,7 @@ namespace Coursework.Infrastructure.Services
                             return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
                         }
                     }
-                    else if (role.FirstOrDefault() == "staff")
+                    else if (role.FirstOrDefault() == "Staff")
                     {
 
                         var customerDetails = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
@@ -199,7 +199,7 @@ namespace Coursework.Infrastructure.Services
                             var rentDays = (model.RentEnddate - model.RentStartdate).TotalDays + 1;
                             var totalAmount = car.RatePerDay * rentDays;
                             var totalAfterDiscount = totalAmount * 0.75;
-                            var vatAmount = totalAfterDiscount * 0.13;
+                            var vatAmount = totalAfterDiscount * 0.13 + totalAfterDiscount;
                             var bookCar = new CustomerBooking
                             {
                                 customerId = userID.ToString(),
