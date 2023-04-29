@@ -1,0 +1,132 @@
+﻿@page "/sales-report"
+@using MudBlazor
+@using System.Net.Http.Json
+@inject HttpClient _httpClient
+@inject IDialogService DialogService
+@inject IConfiguration _config
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<MudPaper Class="p-4">
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            <MudDatePicker Label="Start Date" @bind-Date="startDate" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudDatePicker Label="End Date" @bind-Date="endDate" />
+        </MudItem>
+        @if (!_loading)
+        {
+
+            <MudItem xs="12" sm="4">
+                <MudSelect Label="Customer" T="string" @bind-Value="selectedCustomer">
+                    <MudSelectItem Value="@("All")">All</MudSelectItem>
+                    @foreach (var customer in customers)
+                    {
+                        <MudSelectItem Value="@customer">@customer</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+
+        }
+    </MudGrid>
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="FilterData">Filter</MudButton>
+    <MudTable Class="mt-5" Items="@filteredData" Dense="false" Hover="true" ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info"
+               SortLabel="Sort By" CommitEditTooltip="Commit Edit">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Booking Request</MudText>
+            <MudSpacer />
+        </ToolBarContent>
+        <ColGroup>
+            <col style="width:20%;" />
+            <col style="width:20%;" />
+            <col style="width:20%;" />
+            <col style="width:20%;" />
+            <col style="width:20%;" />
+            <col />
+            <col />
+        </ColGroup>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel Class="text-center" InitialDirection="SortDirection.Ascending" SortBy="new Func<AdminBooking, object>(x=>x.CustomerName)">Customer Name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.CarName)">Car Name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.CustomerPhone)">Customer Phone</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.RentStartDate)">Start-Date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.RentEndDate)">End-Date</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd Class="text-center" DataLabel="Customer Name">@context.CustomerName</MudTd>
+            <MudTd Class="text-center" DataLabel="Car Name">@context.CarName</MudTd>
+            <MudTd Class="text-center" DataLabel="Customer Phone">@context.CustomerPhone</MudTd>
+            <MudTd Class="text-center" DataLabel="Start Date">@context.RentStartDate</MudTd>
+            <MudTd Class="text-center" DataLabel="End Date">@context.RentEndDate</MudTd>
+        </RowTemplate>
+
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+        <EditButtonContent Context="button">
+            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+        </EditButtonContent>
+    </MudTable>
+</MudPaper>
+
+@code {
+
+
+    [CascadingParameter(Name = "UserInfo")]
+    public UserInfo User { get; set; }
+    private DateTime? startDate = DateTime.Today.AddDays(-30);
+    private DateTime? endDate = DateTime.Today;
+    private string selectedCustomer = "All";
+    private List<AdminBooking> bookings;
+    private HashSet<string> customers;
+    private IEnumerable<AdminBooking> filteredData = new List<AdminBooking>();
+
+    public bool _loading { get; set; } = true;
+    protected override async Task OnInitializedAsync()
+
+    {
+        var currentUrl = NavigationManager.Uri;
+        if (currentUrl.Contains("/sales-report"))
+        {
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdminBooking>>>("https://localhost:7190/api/car-request", User.Token);
+
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                bookings = jsonResponse.Data;
+                filteredData = bookings;
+                customers = new HashSet<string>(bookings.Select(b => b.CustomerName));
+                _loading = false;
+            }
+        }
+    }
+
+
+    private void FilterData()
+    {
+        if (selectedCustomer == "All")
+        {
+            filteredData = bookings;
+        }
+        else
+        {
+
+            filteredData = bookings
+                .Where(b =>
+                {
+                    DateTime rentStartDate;
+                    return !startDate.HasValue || (DateTime.TryParse(b.RentStartDate, out rentStartDate) && rentStartDate >= startDate);
+                })
+                .Where(b =>
+                {
+                    DateTime rentEndDate;
+                    return !endDate.HasValue || (DateTime.TryParse(b.RentEndDate, out rentEndDate) && rentEndDate <= endDate);
+                })
+                .Where(b => string.IsNullOrEmpty(selectedCustomer) || b.CustomerName == selectedCustomer)
+                .ToList();
+        }
+    }
+
+    }
+
+

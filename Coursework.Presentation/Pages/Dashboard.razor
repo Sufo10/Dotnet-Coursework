@@ -8,14 +8,15 @@
 <div>
     @if (Series != null && Series.Count > 0 && CarNames != null && CarNames.Length > 0)
     {
-        <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" @bind-SelectedIndex="Index" XAxisLabels="@CarNames" Width="100%" Height="350px"></MudChart>
+         <div>
+                <MudText Typo="Typo.h4">Car Report</MudText>
+                <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" @bind-SelectedIndex="Index" XAxisLabels="@CarNames" Width="100%" Height="350px"></MudChart>
+         </div>
     }
     else
     {
         <p>Loading chart data...</p>
     }
-
-
 </div>
 @code {
     [CascadingParameter(Name = "UserInfo")]

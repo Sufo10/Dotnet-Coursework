@@ -37,6 +37,15 @@
                 </span>
             </MudNavLink>
         }
+        @if (User?.Role == "Admin")
+        {
+            <MudNavLink Style="text-decoration:none" Href="/user" Class="text-decoration-none" Icon="@Icons.Material.Filled.SupervisedUserCircle">
+                <span class="text-decoration-none">
+
+                    Employee
+                </span>
+            </MudNavLink>
+        }
         @if (User?.Role == "Admin" || User?.Role == "Staff")
         {
             <MudNavLink Style="text-decoration:none" Href="/booking-request" Class="text-decoration-none" Icon="@Icons.Material.Filled.Redeem">
