@@ -48,5 +48,7 @@ namespace Coursework.Application.DTO
         public string CustomerId { get; set; }
         public string CustomerName { get; set; }
         public int Amount { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 }
