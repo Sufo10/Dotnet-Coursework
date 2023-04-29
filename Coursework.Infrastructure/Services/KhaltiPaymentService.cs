@@ -54,7 +54,7 @@ namespace Coursework.Infrastructure.Services
                     phone = "9815091234",
                 };
 
-                var rentalAmount = (int)Math.Round((customerBooking.RentEnddate - customerBooking.RentStartdate).Days * car.RatePerDay*100); //amount in paisa
+                var rentalAmount = (int)Math.Round((customerBooking.RentEnddate - customerBooking.RentStartdate).Days * car.RatePerDay * 100); //amount in paisa
 
                 var VAT = (int)Math.Round(0.13 * rentalAmount); // 13% Vat
                 var totalAmount = rentalAmount + VAT;
@@ -159,8 +159,9 @@ namespace Coursework.Infrastructure.Services
                     var user = await _userManager.FindByIdAsync(customerBooking.customerId);
                     var car = await _dbContext.Car.FindAsync(Guid.Parse(customerBooking.CarId));
                     var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
-                    var VATAmount = (0.13 * amount) / 100;
-                    var rentalAmount = (amount / 100) - VATAmount;
+                    double realAmount = amount / 113;
+                    var rentalAmount = (int) Math.Round(realAmount);
+                    var VATAmount =(int) Math.Round(amount/100 - realAmount);
                     var invoice = new GenerateInvoiceDTO()
                     {
                         CustomerName = customer.Name,
@@ -214,8 +215,8 @@ namespace Coursework.Infrastructure.Services
                 var user = await _userManager.FindByIdAsync(customerBooking.customerId);
                 var car = await _dbContext.Car.FindAsync(Guid.Parse(customerBooking.CarId));
                 var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
-                var rentalAmount = (int)Math.Round((customerBooking.RentEnddate - customerBooking.RentStartdate).Days * car.RatePerDay * 100); //amount in paisa
-                var VAT = (int)Math.Round(0.13 * rentalAmount); // 13% Vat
+                var rentalAmount = (int)Math.Round(customerBooking.TotalAmount / 1.13); //amount in paisa
+                var VAT = customerBooking.TotalAmount - rentalAmount; // 13% Vat
 
                 var invoice = new GenerateInvoiceDTO()
                 {

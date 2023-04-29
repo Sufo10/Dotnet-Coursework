@@ -7,7 +7,7 @@ namespace Coursework.Application.Common.Interface
 	public interface ICarBookingHistory
     {
         Task<ResponseDataDTO<IEnumerable<BookingHistoryResponseDTO>>> GetCarHistory(string id);
-        Task<ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>>> GetSalesRecord(DateTime startDate, DateTime endDate);
+        Task<ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>>> GetSalesRecord();
     }
 }
 

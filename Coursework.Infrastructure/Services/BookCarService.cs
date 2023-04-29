@@ -156,7 +156,6 @@ namespace Coursework.Infrastructure.Services
                         var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
 
 
-
                         if (customerDetails.IsVerified == false)
                         {
                             return new ResponseDTO { Status = "Error", Message = "Customer not verified" };
@@ -167,7 +166,7 @@ namespace Coursework.Infrastructure.Services
                             var rentDays = (model.RentEnddate - model.RentStartdate).TotalDays + 1;
                             var totalAmount = car.RatePerDay * rentDays;
                             var totalAfterDiscount = regular ? totalAmount * 0.9 : totalAmount;
-                            var vatAmount = totalAfterDiscount * 0.13;
+                            var vatAmount = totalAfterDiscount * 0.13 + totalAfterDiscount;
 
                             var bookCar = new CustomerBooking
                             {
@@ -185,7 +184,7 @@ namespace Coursework.Infrastructure.Services
                             return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
                         }
                     }
-                    else if (role.FirstOrDefault() == "staff")
+                    else if (role.FirstOrDefault() == "Staff")
                     {
 
                         var customerDetails = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
@@ -199,7 +198,7 @@ namespace Coursework.Infrastructure.Services
                             var rentDays = (model.RentEnddate - model.RentStartdate).TotalDays + 1;
                             var totalAmount = car.RatePerDay * rentDays;
                             var totalAfterDiscount = totalAmount * 0.75;
-                            var vatAmount = totalAfterDiscount * 0.13;
+                            var vatAmount = totalAfterDiscount * 0.13 + totalAfterDiscount;
                             var bookCar = new CustomerBooking
                             {
                                 customerId = userID.ToString(),
@@ -216,7 +215,7 @@ namespace Coursework.Infrastructure.Services
                     }
                     else
                     {
-                        return new ResponseDTO { Status = "unsuccessful", Message = "something went wrong" };
+                        return new ResponseDTO { Status = "error", Message = "Something went wrong" };
                     }
                 }
 
@@ -261,8 +260,12 @@ namespace Coursework.Infrastructure.Services
                     Image = car.Image,
                     RentStartdate = booking.RentStartdate,
                     RentEnddate = booking.RentEnddate,
-                    TotalAmount = booking.TotalAmount, 
-                    IsPaid = booking.payment == true,
+                    TotalAmount = booking.TotalAmount,  
+                    IsAppoved = (bool)booking.IsApproved,
+                    IsCompleted = (bool)booking.IsComplete,
+                    OnRent = (bool)booking.OnRent,
+                    payment = (bool)booking.payment,
+
                 }
                 ).ToListAsync();
 
