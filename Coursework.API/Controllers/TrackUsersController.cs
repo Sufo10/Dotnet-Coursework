@@ -23,5 +23,15 @@ namespace Coursework.API.Controllers
             var data = await _Track.GetMostRentalRequest();
             return data;
         }
+
+
+        [HttpGet]
+        [Route("/api/inactiveUsers")]
+
+        public async Task<ResponseDataDTO<List<GetIInactiveUsersDTO>>> GetInactiveUsersRequesttt()
+        {
+            var data = await _Track.GetInactiveUsersRequest();
+            return data;
+        }
     }
 }
