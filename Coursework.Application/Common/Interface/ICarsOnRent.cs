@@ -10,5 +10,6 @@ namespace Coursework.Application.Common.Interface
     public interface ICarsOnRent
     {
         Task<ResponseDTO> RentCars(string BookingId);
+        Task<ResponseDTO> RemoveRent(string BookingId);
     }
 }
