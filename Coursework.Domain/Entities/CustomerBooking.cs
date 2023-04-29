@@ -21,9 +21,9 @@ namespace Coursework.Domain.Entities
         public Boolean? IsApproved { get; set; } 
         public Boolean? OnRent { get; set; }
         public Boolean? payment { get; set; } 
-        public int TotalAmount { get; set; } 
+        public int TotalAmount { get; set; }
 
-
+        public Boolean IsComplete { get; set; }
        
     }
 }
