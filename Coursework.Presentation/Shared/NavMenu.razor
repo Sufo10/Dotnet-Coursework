@@ -3,12 +3,21 @@
 @implements IDisposable
 <MudNavMenu>
     <MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Primary" Class="pa-2">
-        <MudNavLink Href="/" Class="text-decoration-none" Icon="@Icons.Material.Filled.Dashboard">
+        <MudNavLink Href="/" Class="text-decoration-none" Icon="@Icons.Material.Filled.Home">
             <span class="text-decoration-none">
 
-                Dashboard
+                Home
             </span>
         </MudNavLink>
+
+        @if (User?.Role == "Admin" || User?.Role == "Staff")
+        {
+            <MudNavLink Style="text-decoration:none" Href="/dashboard" Class="text-decoration-none" Icon="@Icons.Material.Filled.Dashboard">
+                <span class="text-decoration-none">
+                    Dashboard
+                </span>
+            </MudNavLink>
+        }
         @if (User?.Username == null)
         {
 
