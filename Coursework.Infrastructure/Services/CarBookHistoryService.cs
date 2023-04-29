@@ -84,7 +84,9 @@ namespace Coursework.Infrastructure.Services
                                       ApprovedBy = employee != null ? employee.Name : "Unknown",
                                       CustomerName = (customer != null ? customer.Name : null) ?? (employee != null ? employee.Name : null),
                                       Amount = booking.TotalAmount,
-                                      CustomerId = customer.Id.ToString() ?? employee.Id.ToString()
+                                      CustomerId = customer.Id.ToString() ?? employee.Id.ToString(),
+                                      StartDate = booking.RentStartdate,
+                                      EndDate = booking.RentEnddate,
                                   };
 
                 var result = await salesRecord.ToListAsync();
