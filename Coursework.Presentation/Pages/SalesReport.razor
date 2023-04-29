@@ -8,17 +8,33 @@
 @inject NavigationManager NavigationManager
 
 <MudPaper Class="p-4">
-    <MudGrid>
-        <MudItem xs="12" sm="4">
-            <MudDatePicker Label="Start Date" @bind-Date="startDate" />
+    <MudGrid Class="p-3" Spacing="3">
+        <MudItem Class="p-2" xs="12" sm="3">
+            <MudDatePicker @ref="_picker" Label="Start Date" @bind-Date="startDate" AutoClose="true">
+                <PickerActions>
+                    <MudButton Class="mr-auto align-self-start" OnClick="@(() => _picker.Clear())">Clear</MudButton>
+                    <MudButton OnClick="@(() => _picker.Close(false))">Cancel</MudButton>
+                    <MudButton Color="Color.Primary" OnClick="@(() => _picker.Close())">Ok</MudButton>
+                </PickerActions>
+            </MudDatePicker>
+            @*<MudDatePicker Label="Start Date" @bind-Date="startDate" />*@
         </MudItem>
-        <MudItem xs="12" sm="4">
-            <MudDatePicker Label="End Date" @bind-Date="endDate" />
+        <MudItem Class="p-2" xs="12" sm="3">
+
+            @*<MudDatePicker Label="End Date" @bind-Date="endDate" />*@
+            <MudDatePicker @ref="_picker" Label="Start Date" @bind-Date="endDate" AutoClose="true">
+                <PickerActions>
+                    <MudButton Class="mr-auto align-self-start" OnClick="@(() => _picker.Clear())">Clear</MudButton>
+                    <MudButton OnClick="@(() => _picker.Close(false))">Cancel</MudButton>
+                    <MudButton Color="Color.Primary" OnClick="@(() => _picker.Close())">Ok</MudButton>
+                </PickerActions>
+            </MudDatePicker>
         </MudItem>
         @if (!_loading)
         {
 
-            <MudItem xs="12" sm="4">
+            <MudItem Class="p-2" xs="12" sm="3">
+
                 <MudSelect Label="Customer" T="string" @bind-Value="selectedCustomer">
                     <MudSelectItem Value="@("All")">All</MudSelectItem>
                     @foreach (var customer in customers)
@@ -29,8 +45,12 @@
             </MudItem>
 
         }
+        <MudItem Class="p-2 pt-4" xs="12" sm="3">
+
+
+            <MudButton Class="mt-3" FullWidth="true" Color="Color.Primary" Variant="Variant.Filled" OnClick="FilterData">Filter</MudButton>
+        </MudItem>
     </MudGrid>
-    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="FilterData">Filter</MudButton>
     <MudTable Class="mt-5" Items="@filteredData" Dense="false" Hover="true" ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info"
                SortLabel="Sort By" CommitEditTooltip="Commit Edit">
         <ToolBarContent>
@@ -47,18 +67,18 @@
             <col />
         </ColGroup>
         <HeaderContent>
-            <MudTh><MudTableSortLabel Class="text-center" InitialDirection="SortDirection.Ascending" SortBy="new Func<AdminBooking, object>(x=>x.CustomerName)">Customer Name</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.CarName)">Car Name</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.CustomerPhone)">Customer Phone</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.RentStartDate)">Start-Date</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.RentEndDate)">End-Date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Class="text-center" InitialDirection="SortDirection.Ascending" SortBy="new Func<SalesReportDetails, object>(x=>x.CustomerName)">Customer Name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<SalesReportDetails, object>(x=>x.CarName)">Car Name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<SalesReportDetails, object>(x=>x.StartDate)">Start-Date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<SalesReportDetails, object>(x=>x.EndDate)">End-Date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<SalesReportDetails, object>(x=>x.Amount)">Amount</MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd Class="text-center" DataLabel="Customer Name">@context.CustomerName</MudTd>
             <MudTd Class="text-center" DataLabel="Car Name">@context.CarName</MudTd>
-            <MudTd Class="text-center" DataLabel="Customer Phone">@context.CustomerPhone</MudTd>
-            <MudTd Class="text-center" DataLabel="Start Date">@context.RentStartDate</MudTd>
-            <MudTd Class="text-center" DataLabel="End Date">@context.RentEndDate</MudTd>
+            <MudTd Class="text-center" DataLabel="Start Date">@context.StartDate</MudTd>
+            <MudTd Class="text-center" DataLabel="End Date">@context.EndDate</MudTd>
+            <MudTd Class="text-center" DataLabel="Amount">@context.Amount</MudTd>
         </RowTemplate>
 
         <PagerContent>
@@ -72,15 +92,15 @@
 
 @code {
 
-
     [CascadingParameter(Name = "UserInfo")]
     public UserInfo User { get; set; }
     private DateTime? startDate = DateTime.Today.AddDays(-30);
     private DateTime? endDate = DateTime.Today;
+    MudDatePicker _picker;
     private string selectedCustomer = "All";
-    private List<AdminBooking> bookings;
+    private List<SalesReportDetails> bookings;
     private HashSet<string> customers;
-    private IEnumerable<AdminBooking> filteredData = new List<AdminBooking>();
+    private IEnumerable<SalesReportDetails> filteredData = new List<SalesReportDetails>();
 
     public bool _loading { get; set; } = true;
     protected override async Task OnInitializedAsync()
@@ -89,12 +109,20 @@
         var currentUrl = NavigationManager.Uri;
         if (currentUrl.Contains("/sales-report"))
         {
-            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdminBooking>>>("https://localhost:7190/api/car-request", User.Token);
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<SalesReportDetails>>>("https://localhost:7190/api/sales-record", User.Token);
 
             if (jsonResponse != null && jsonResponse.Status == "Success")
             {
                 bookings = jsonResponse.Data;
-                filteredData = bookings;
+                filteredData =
+                    bookings
+           .Where(b =>
+           {
+               DateTime rentStartDate;
+               return !startDate.HasValue || !endDate.HasValue || (DateTime.TryParse(b.StartDate, out rentStartDate) && rentStartDate >= startDate && rentStartDate <= endDate);
+           })
+           .ToList()
+                    ;
                 customers = new HashSet<string>(bookings.Select(b => b.CustomerName));
                 _loading = false;
             }
@@ -104,28 +132,20 @@
 
     private void FilterData()
     {
-        if (selectedCustomer == "All")
-        {
-            filteredData = bookings;
-        }
-        else
-        {
-
-            filteredData = bookings
-                .Where(b =>
-                {
-                    DateTime rentStartDate;
-                    return !startDate.HasValue || (DateTime.TryParse(b.RentStartDate, out rentStartDate) && rentStartDate >= startDate);
-                })
-                .Where(b =>
-                {
-                    DateTime rentEndDate;
-                    return !endDate.HasValue || (DateTime.TryParse(b.RentEndDate, out rentEndDate) && rentEndDate <= endDate);
-                })
-                .Where(b => string.IsNullOrEmpty(selectedCustomer) || b.CustomerName == selectedCustomer)
-                .ToList();
-        }
+        filteredData = bookings
+            .Where(b =>
+            {
+                DateTime rentStartDate;
+                if (!DateTime.TryParse(b.StartDate, out rentStartDate)) return false;
+                if (startDate.HasValue && rentStartDate < startDate) return false;
+                if (endDate.HasValue && rentStartDate > endDate) return false;
+                return true;
+            })
+            .Where(b => selectedCustomer == "All" || b.CustomerName == selectedCustomer)
+            .ToList();
     }
+
+
 
     }
 
