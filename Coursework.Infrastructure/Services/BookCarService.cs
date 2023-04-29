@@ -265,6 +265,7 @@ namespace Coursework.Infrastructure.Services
                     IsCompleted = (bool)booking.IsComplete,
                     OnRent = (bool)booking.OnRent,
                     payment = (bool)booking.payment,
+
                 }
                 ).ToListAsync();
 
