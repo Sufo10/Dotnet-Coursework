@@ -20,5 +20,10 @@ namespace Coursework.Application.DTO
         public DateTime RentEnddate { get;  set; }
         public int TotalAmount { get;  set; }
 
+        public Boolean IsAppoved { get; set; }  
+        public Boolean OnRent { get; set; }  
+
+        public Boolean payment { get; set; }
+        public Boolean IsCompleted { get; set; }
     }
 }
