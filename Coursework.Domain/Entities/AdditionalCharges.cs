@@ -11,8 +11,10 @@ namespace Coursework.Domain.Entities
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public string BookingId { get; set; }
-        public string ChargeType { get; set; }
+        public string CarId { get; set; }
+        public string UserId { get; set; }
         public string Description { get; set; }
         public Double Amount { get; set; }
+        public bool IsPaid { get; set; }
     }
 }

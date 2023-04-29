@@ -35,7 +35,7 @@ namespace Coursework.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ChargeType")
+                    b.Property<string>("CarId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -55,18 +55,25 @@ namespace Coursework.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool?>("isDeleted")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
-                    b.ToTable("AdditionCharges");
+                    b.ToTable("AdditionalCharges");
                 });
 
             modelBuilder.Entity("Coursework.Domain.Entities.AppUser", b =>

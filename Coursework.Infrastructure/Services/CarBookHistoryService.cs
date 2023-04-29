@@ -98,6 +98,32 @@ namespace Coursework.Infrastructure.Services
                 return new ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>> { Status = "Failed", Message = "Data Fetch Failed", Data = { } };
             }
         }
+
+        public async Task<ResponseDTO> AddAdditionalCharges(AdditionalChargeRequestDTO model)
+        {
+            try
+            {
+                var newAddChg = new AdditionalCharges
+                {
+                    BookingId = model.BookingId,
+                    CarId = model.CarId,
+                    UserId = "sdljkhaa",
+                    Description = model.Description
+                };
+
+                _dbContext.AdditionalCharges.AddAsync(newAddChg);
+                await _dbContext.SaveChangesAsync(default(CancellationToken));
+                
+                return new ResponseDTO { Status = "Success", Message = "Additional Charges Successfully Added" };
+
+           }
+            catch (Exception err)
+            {
+               return new ResponseDTO { Status = "Error", Message = err.ToString() };
+
+            }
+        }
+
     }
 }
 

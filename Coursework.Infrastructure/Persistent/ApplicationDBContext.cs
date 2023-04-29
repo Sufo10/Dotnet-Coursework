@@ -25,7 +25,7 @@ namespace Coursework.Infrastructure.Persistent
         public DbSet<CustomerFileUpload> CustomerFileUpload { get; set; }
         public DbSet<Car> Car { get; set; }
         public DbSet<CustomerBooking> CustomerBooking { get; set; } 
-        public DbSet<AdditionalCharges> AdditionCharges { get; set; }
+        public DbSet<AdditionalCharges> AdditionalCharges { get; set; }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {

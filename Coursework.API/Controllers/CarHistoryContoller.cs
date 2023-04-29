@@ -37,5 +37,14 @@ namespace Coursework.API.Controllers
             var data = await _carDetails.GetSalesRecord(startDate, endDate);
             return data;
         }
+
+        [HttpPost]
+        [Consumes("multipart/form-data")]
+        [Route("/api/additional-charge")]
+        public async Task<ResponseDTO> AddAdditionalCharges([FromForm] AdditionalChargeRequestDTO model)
+        {
+            var data = await _carDetails.AddAdditionalCharges(model);
+            return data;
+        }
     }
 }
