@@ -201,12 +201,25 @@ namespace Coursework.Infrastructure.Services
 
         }
 
-        public async Task ConfirmEmailAsync(string userId, string token)
+        public async Task<ResponseDTO> ConfirmEmailAsync(string userId, string token)
         {
             var user = await _userManager.FindByIdAsync(userId);
+            if (user.EmailConfirmed)
+            {
+                return new ResponseDTO
+                {
+                    Status = "Already Confirmed",
+                    Message = "Error"
+                };
+            }
             var emailConfirmationToken = UtilityService.FromUrlSafeBase64(token);
             var result = await _userManager.ConfirmEmailAsync(user, emailConfirmationToken);
             UtilityService.ValidateIdentityResult(result);
+            return new ResponseDTO
+            {
+                Status = "Success",
+                Message = "Success"
+            };
         }
 
         public async Task<ResponseDTO> EmployeeRegister(EmployeeRegistrationRequestDTO model, string userEmail)

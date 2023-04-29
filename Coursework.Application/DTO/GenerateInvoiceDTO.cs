@@ -16,5 +16,6 @@ namespace Coursework.Application.DTO
         public DateTime RentEndDate { get; set; }
         public double RentalAmount { get; set; }
         public double VATAmount { get; set; }
+        public string Message { get; set; }
     }
 }

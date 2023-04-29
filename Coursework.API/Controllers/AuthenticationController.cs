@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Security.Claims;
@@ -21,11 +22,15 @@ namespace Coursework.API.Controllers
         private readonly ICustomerDetails _customerDetails;
         private readonly IAuthenticate _authenticate;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public AuthenticationController(ICustomerDetails customerDetails, IAuthenticate authenticate, RoleManager<IdentityRole> roleManager)
+        private readonly string _baseUrl;
+
+        public AuthenticationController(IConfiguration configuration, ICustomerDetails customerDetails, IAuthenticate authenticate, RoleManager<IdentityRole> roleManager)
         {
             _customerDetails = customerDetails;
             _authenticate = authenticate;
             _roleManager = roleManager;
+            _baseUrl = configuration.GetSection("BaseUrl:Frontend").Value!;
+
         }
         [HttpGet]
         [Route("api/customer/all-customer")]
@@ -77,8 +82,15 @@ namespace Coursework.API.Controllers
         [Route("/api/confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
-            await _authenticate.ConfirmEmailAsync(userId, token);
-            return Redirect("https://www.google.com");
+           var data = await _authenticate.ConfirmEmailAsync(userId, token);
+            if(data.Status == "Already Confirmed")
+            {
+                return Redirect($"{_baseUrl}email-confirmed?confirmed=already");
+            }
+            else
+            {
+                return Redirect($"{_baseUrl}email-confirmed?confirmed=true");
+            }
         }
 
         [Authorize(Roles ="Admin")]

@@ -76,6 +76,7 @@ namespace Coursework.Infrastructure.DI
             services.AddTransient<ICarBookingHistory, CarBookHistoryService>();
             services.AddTransient<ICarRent, RentCars>();
             services.AddTransient<ITrackUsers, TrackUsersServices> ();
+            services.AddTransient<IKhaltiPaymentService, KhaltiPaymentService>();
 
             return services;
         }
