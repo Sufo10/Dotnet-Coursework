@@ -49,5 +49,6 @@ namespace Coursework.API.Controllers
             var data = await _carDetails.EditCar(id, model);
             return data;
         }
+
     }
 }
