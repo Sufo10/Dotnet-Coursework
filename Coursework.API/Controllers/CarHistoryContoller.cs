@@ -34,7 +34,7 @@ namespace Coursework.API.Controllers
         [HttpGet("/api/sales-record")]
         public async Task<ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>>> GetCarHistory()
         {
-            var data = await _carDetails.GetSalesRecord(startDate, endDate);
+            var data = await _carDetails.GetSalesRecord();
             return data;
         }
     }
