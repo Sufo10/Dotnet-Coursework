@@ -118,7 +118,10 @@ namespace Coursework.Infrastructure.Services
                        RentEnddate = b.RentEnddate,
                        IsPaid=b.payment,
                        IsDeleted=b.isDeleted,
-                       IsApproved=b.IsApproved
+                       IsApproved=b.IsApproved,
+                       TotalAmount=b.TotalAmount,
+                       OnRent=b.OnRent,
+                       IsCompleted=b.IsComplete
                    });
 
                 return new ResponseDataDTO<IEnumerable<BookingHistoryResponseDTO>> { Status = "Success", Message = "Data Fetched Successully", Data = innerJoin };

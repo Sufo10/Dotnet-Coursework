@@ -62,6 +62,7 @@
         {
             _processing = false;
             Snackbar.Add("Booking Cancelled Successfully!", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
         }
         else
         {
