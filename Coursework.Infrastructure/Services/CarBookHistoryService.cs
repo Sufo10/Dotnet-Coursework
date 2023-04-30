@@ -16,6 +16,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Coursework.Infrastructure.Services;
 using System.Collections;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Security.Cryptography;
 
 namespace Coursework.Infrastructure.Services
 {
@@ -143,11 +144,13 @@ namespace Coursework.Infrastructure.Services
         {
             try
             {
+                string uId = _dbContext.CustomerBooking.Where(u => u.Id.ToString() == model.BookingId).Select(u => u.customerId).FirstOrDefault();
+
                 var newAddChg = new AdditionalCharges
                 {
                     BookingId = model.BookingId,
                     CarId = model.CarId,
-                    UserId = "98310c32-dd5f-4731-ba46-2fc13b4d742c",
+                    UserId = uId,
                     Description = model.Description
                 };
 
@@ -208,7 +211,6 @@ namespace Coursework.Infrastructure.Services
 
             }
         }
-
     }
 }
 
