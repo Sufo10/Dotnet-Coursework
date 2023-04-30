@@ -48,4 +48,14 @@ namespace Coursework.Application.DTO
         public string ChargeId { get; set; }
         public float Amount { get; set; }
     }
+
+    public class AdditionalChargetDTO
+    {
+        public string Id { get; set; }
+        public string CarId { get; set; }
+        public string BookingId { get; set; }
+        public string Description { get; set; }
+        public float Amount { get; set; }
+        public bool IsPaid { get; set; }
+    }
 }

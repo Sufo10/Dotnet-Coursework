@@ -14,7 +14,8 @@ namespace Coursework.Application.Common.Interface
         Task<ResponseDTO> AddAdditionalChargesUpdate(string chargeID, float amount);
 
         Task<ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>>> GetSalesRecord();
-
+        Task<ResponseDataDTO<IEnumerable<AdditionalChargetDTO>>> GetAdditionalCharges(string id);
+        Task<ResponseDataDTO<IEnumerable<AdditionalChargetDTO>>> GetAdditionalCharges2();
     }
 }
 

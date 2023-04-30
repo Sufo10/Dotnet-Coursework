@@ -187,9 +187,9 @@ namespace Coursework.Infrastructure.Services
                 string userEmail = "";
                 string userID = cId;
 
-                string carId = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.CarId).FirstOrDefault();
+                string carName= _dbContext.Car.Where(u => u.Id.ToString() == bookingToUpdate.CarId).Select(u => u.Name).FirstOrDefault();
 
-                string usrId = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.UserId).FirstOrDefault();
+                //string usrId = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.UserId).FirstOrDefault();
 
                 string desc = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.Description).FirstOrDefault();
 
@@ -201,7 +201,7 @@ namespace Coursework.Infrastructure.Services
                     userEmail = user.Email;
                 }
 
-                await _emailService.SendEmailAdditionalChargesAsync(amount.ToString(), desc, bId, carId, usrId, ct, userEmail);
+                await _emailService.SendEmailAdditionalChargesAsync(amount.ToString(), desc, bId, carName, user.UserName, ct, userEmail);
                 
                 return new ResponseDTO { Status = "Success", Message = "Additional Charges Invoice Sent" };
             }
@@ -209,6 +209,60 @@ namespace Coursework.Infrastructure.Services
             {
                 return new ResponseDTO { Status = "Error", Message = err.ToString() };
 
+            }
+        }
+
+        public async Task<ResponseDataDTO<IEnumerable<AdditionalChargetDTO>>> GetAdditionalCharges(string id)
+        {
+            try
+            {
+                var data = await _dbContext.AdditionalCharges
+                .Where(ac => ac.UserId == id)
+                .Join(_dbContext.Car,
+                    ac => ac.CarId,
+                    c => c.Id.ToString(),
+                    (ac, c) => new AdditionalChargetDTO
+                    {
+                        Id = ac.Id.ToString(),
+                        CarId = c.Name, // Get car name from the Cars table
+                        BookingId = ac.BookingId,
+                        Description = ac.Description,
+                        Amount = (float)ac.Amount,
+                        IsPaid = ac.IsPaid
+                    })
+                .ToListAsync();
+
+                return new ResponseDataDTO<IEnumerable<AdditionalChargetDTO>> { Status = "Success", Message = "Data Fetched Successully", Data = data };
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return new ResponseDataDTO<IEnumerable<AdditionalChargetDTO>> { Status = "Failed", Message = "Data Fetch Failed", Data = { } };
+            }
+        }
+
+        public async Task<ResponseDataDTO<IEnumerable<AdditionalChargetDTO>>> GetAdditionalCharges2()
+        {
+            try
+            {
+                var data = await _dbContext.AdditionalCharges
+                .Join(_dbContext.Car, ac => ac.CarId, c => c.Id.ToString(), (ac, c) => new AdditionalChargetDTO
+                {
+                    Id = ac.Id.ToString(),
+                    CarId = c.Name,
+                    BookingId = ac.BookingId,
+                    Description = ac.Description,
+                    Amount = (float)ac.Amount,
+                    IsPaid = ac.IsPaid
+                })
+                .ToListAsync();
+
+                return new ResponseDataDTO<IEnumerable<AdditionalChargetDTO>> { Status = "Success", Message = "Data Fetched Successully", Data = data };
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return new ResponseDataDTO<IEnumerable<AdditionalChargetDTO>> { Status = "Failed", Message = "Data Fetch Failed", Data = { } };
             }
         }
     }
