@@ -6,16 +6,31 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using static System.Net.Mime.MediaTypeNames;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Schema;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Coursework.Infrastructure.Services;
+using System.Collections;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Coursework.Infrastructure.Services
 {
     public class CarBookHistoryService : ICarBookingHistory
     {
         private readonly IApplicationDBContext _dbContext;
+
+        private readonly IEmailService _emailService;
         private readonly UserManager<AppUser> _userManager;
-        public CarBookHistoryService(IApplicationDBContext dBContext, UserManager<AppUser> userManager)
+        //public CarBookHistoryService(UserManager<AppUser> userManager, IApplicationDBContext dBContext, IEmailService emailService)
+
+        public CarBookHistoryService(IApplicationDBContext dBContext, UserManager<AppUser> userManager, IEmailService emailService)
         {
             _dbContext = dBContext;
+            _emailService = emailService;
             _userManager = userManager;
         }
 
@@ -123,6 +138,77 @@ namespace Coursework.Infrastructure.Services
                 return new ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>> { Status = "Error", Message = "Data Fetch Failed", Data = { } };
             }
         }
+
+        public async Task<ResponseDTO> AddAdditionalCharges(AdditionalChargeRequestDTO model)
+        {
+            try
+            {
+                var newAddChg = new AdditionalCharges
+                {
+                    BookingId = model.BookingId,
+                    CarId = model.CarId,
+                    UserId = "98310c32-dd5f-4731-ba46-2fc13b4d742c",
+                    Description = model.Description
+                };
+
+                _dbContext.AdditionalCharges.AddAsync(newAddChg);
+                await _dbContext.SaveChangesAsync(default(CancellationToken));
+                
+                return new ResponseDTO { Status = "Success", Message = "Additional Charges Successfully Added" };
+
+           }
+            catch (Exception err)
+            {
+               return new ResponseDTO { Status = "Error", Message = err.ToString() };
+
+            }
+        }
+
+        public async Task<ResponseDTO> AddAdditionalChargesUpdate(string chargeID, float amount)
+        {
+            try
+            {
+                var bookingToUpdate = _dbContext.AdditionalCharges.FirstOrDefault(b => b.Id.ToString() == chargeID);
+
+                if (bookingToUpdate != null)
+                {
+                    bookingToUpdate.Amount = amount;
+                    await _dbContext.SaveChangesAsync(default(CancellationToken));
+                }
+                //get booking id form add chg table by id
+                string bId = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.BookingId).FirstOrDefault();
+
+                //get customer id/ user id by booking_id form customer book
+                string cId = _dbContext.CustomerBooking.Where(u => u.Id.ToString() == bId).Select(u => u.customerId).FirstOrDefault();
+
+                string userEmail = "";
+                string userID = cId;
+
+                string carId = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.CarId).FirstOrDefault();
+
+                string usrId = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.UserId).FirstOrDefault();
+
+                string desc = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.Description).FirstOrDefault();
+
+                string ct = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.CreatedAt).FirstOrDefault().ToString();
+
+                var user = await _userManager.FindByIdAsync(userID);
+                if (user != null)
+                {
+                    userEmail = user.Email;
+                }
+
+                await _emailService.SendEmailAdditionalChargesAsync(amount.ToString(), desc, bId, carId, usrId, ct, userEmail);
+                
+                return new ResponseDTO { Status = "Success", Message = "Additional Charges Invoice Sent" };
+            }
+            catch (Exception err)
+            {
+                return new ResponseDTO { Status = "Error", Message = err.ToString() };
+
+            }
+        }
+
     }
 }
 

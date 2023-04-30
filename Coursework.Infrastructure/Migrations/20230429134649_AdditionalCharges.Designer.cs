@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Coursework.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20230429074439_additonal_charges")]
-    partial class additonal_charges
+    [Migration("20230429134649_AdditionalCharges")]
+    partial class AdditionalCharges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,7 +38,7 @@ namespace Coursework.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ChargeType")
+                    b.Property<string>("CarId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -58,18 +58,25 @@ namespace Coursework.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool?>("isDeleted")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
-                    b.ToTable("AdditionCharges");
+                    b.ToTable("AdditionalCharges");
                 });
 
             modelBuilder.Entity("Coursework.Domain.Entities.AppUser", b =>
@@ -330,11 +337,17 @@ namespace Coursework.Infrastructure.Migrations
                     b.Property<bool?>("IsApproved")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsComplete")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uuid");
+
+                    b.Property<bool?>("OnRent")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("RentEnddate")
                         .HasColumnType("timestamp with time zone");
@@ -353,9 +366,6 @@ namespace Coursework.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<bool?>("payment")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool?>("rented")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
