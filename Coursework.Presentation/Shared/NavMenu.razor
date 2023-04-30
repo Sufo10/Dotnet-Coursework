@@ -3,7 +3,7 @@
 @implements IDisposable
 <MudNavMenu>
     <MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Primary" Class="pa-2">
-        <MudNavLink Href="/" Class="text-decoration-none" Icon="@Icons.Material.Filled.Home"  Match=NavLinkMatch.All>
+        <MudNavLink Href="/" Class="text-decoration-none" Icon="@Icons.Material.Filled.Home" Match=NavLinkMatch.All>
             <span class="text-decoration-none">
                 Home
             </span>
@@ -36,7 +36,7 @@
                 </span>
             </MudNavLink>
         }
-        @if (User?.Role == "Admin" || User?.Role=="Staff")
+        @if (User?.Role == "Admin" || User?.Role == "Staff")
         {
             <MudNavLink Style="text-decoration:none" Href="/sales-report" Class="text-decoration-none" Icon="@Icons.Material.Filled.TrendingUp">
                 <span class="text-decoration-none">
@@ -75,6 +75,14 @@
                 <span class="text-decoration-none">
 
                     Change Password
+                </span>
+            </MudNavLink>
+        }
+        @if (User?.Role == "Customer")
+        {
+            <MudNavLink Style="text-decoration:none" Href="/damage-record" Class="text-decoration-none" Icon="@Icons.Material.Filled.CarCrash">
+                <span class="text-decoration-none">
+                    Damage Record
                 </span>
             </MudNavLink>
         }
