@@ -12,6 +12,7 @@ namespace Coursework.Application.DTO
         public string BookingId { get; set; }
         public string Description { get; set; }
     }
+
     public class BookingHistoryResponseDTO
     {
         public Guid Id { get; set; }

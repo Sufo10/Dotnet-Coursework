@@ -4,15 +4,31 @@ using Coursework.Application.DTO;
 using Coursework.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using static System.Net.Mime.MediaTypeNames;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Schema;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Coursework.Infrastructure.Services;
+using System.Collections;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Coursework.Infrastructure.Services
 {
     public class CarBookHistoryService : ICarBookingHistory
     {
+        private readonly UserManager<AppUser> _userManager;
         private readonly IApplicationDBContext _dbContext;
-        public CarBookHistoryService(IApplicationDBContext dBContext)
+        private readonly IEmailService _emailService;
+        public CarBookHistoryService(UserManager<AppUser> userManager, IApplicationDBContext dBContext, IEmailService emailService)
         {
+            _userManager = userManager;
             _dbContext = dBContext;
+            _emailService = emailService;
         }
         
         public async Task<ResponseDataDTO<IEnumerable<BookingHistoryResponseDTO>>> GetCarHistory(string id)
@@ -107,7 +123,7 @@ namespace Coursework.Infrastructure.Services
                 {
                     BookingId = model.BookingId,
                     CarId = model.CarId,
-                    UserId = "sdljkhaa",
+                    UserId = "98310c32-dd5f-4731-ba46-2fc13b4d742c",
                     Description = model.Description
                 };
 
@@ -120,6 +136,51 @@ namespace Coursework.Infrastructure.Services
             catch (Exception err)
             {
                return new ResponseDTO { Status = "Error", Message = err.ToString() };
+
+            }
+        }
+
+        public async Task<ResponseDTO> AddAdditionalChargesUpdate(string chargeID, float amount)
+        {
+            try
+            {
+                var bookingToUpdate = _dbContext.AdditionalCharges.FirstOrDefault(b => b.Id.ToString() == chargeID);
+
+                if (bookingToUpdate != null)
+                {
+                    bookingToUpdate.Amount = amount;
+                    await _dbContext.SaveChangesAsync(default(CancellationToken));
+                }
+                //get booking id form add chg table by id
+                string bId = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.BookingId).FirstOrDefault();
+
+                //get customer id/ user id by booking_id form customer book
+                string cId = _dbContext.CustomerBooking.Where(u => u.Id.ToString() == bId).Select(u => u.customerId).FirstOrDefault();
+
+                string userEmail = "";
+                string userID = cId;
+
+                string carId = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.CarId).FirstOrDefault();
+
+                string usrId = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.UserId).FirstOrDefault();
+
+                string desc = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.Description).FirstOrDefault();
+
+                string ct = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.CreatedAt).FirstOrDefault().ToString();
+
+                var user = await _userManager.FindByIdAsync(userID);
+                if (user != null)
+                {
+                    userEmail = user.Email;
+                }
+
+                await _emailService.SendEmailAdditionalChargesAsync(amount.ToString(), desc, bId, carId, usrId, ct, userEmail);
+                
+                return new ResponseDTO { Status = "Success", Message = "Additional Charges Invoice Sent" };
+            }
+            catch (Exception err)
+            {
+                return new ResponseDTO { Status = "Error", Message = err.ToString() };
 
             }
         }
