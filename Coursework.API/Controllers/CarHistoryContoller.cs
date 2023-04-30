@@ -54,5 +54,19 @@ namespace Coursework.API.Controllers
 
             return data;
         }
+
+        [HttpGet("/api/additional-charges/{id}")]
+        public async Task<ResponseDataDTO<IEnumerable<AdditionalChargetDTO>>> GetAddiChgs(string id)
+        {
+            var data = await _carDetails.GetAdditionalCharges(id);
+            return data;
+        }
+
+        [HttpGet("/api/all-additional-charges")]
+        public async Task<ResponseDataDTO<IEnumerable<AdditionalChargetDTO>>> GetAddiChgs2()
+        {
+            var data = await _carDetails.GetAdditionalCharges2();
+            return data;
+        }
     }
 }
