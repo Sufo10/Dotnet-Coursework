@@ -14,7 +14,7 @@ namespace Coursework.Presentation.Data.Models
 		public string RentEndDate { get; set; }
         public bool? payment { get; set; }
 		public bool? IsCompleted { get; set; }
-		public bool? IsApproved { get; set; }
+		public bool? IsAppoved { get; set; }
 		public bool? IsDeleted { get; set; }
         public bool? OnRent { get; set; }
 		public int TotalAmount { get; set; }

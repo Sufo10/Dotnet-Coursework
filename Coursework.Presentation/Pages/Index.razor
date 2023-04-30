@@ -166,9 +166,23 @@
         }
 
         async Task OpenEditDialog(DialogOptions options, Cars car)
-{
+        {
+            var parameters = new DialogParameters { ["car"] = car, ["User"] = User };
+            var dialog = await DialogService.ShowAsync<EditCar>("Edit Car", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                IsLoading = true;
+                var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
 
-}
+                if (jsonResponse != null && jsonResponse.Status == "Success")
+                {
+                    Cars = jsonResponse.Data;
+                    IsLoading = false;
+
+                }
+            }
+        }
         public void RedirectLogin()
         {
             Snackbar.Add("Please Login to book a car", Severity.Warning);

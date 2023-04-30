@@ -64,6 +64,31 @@ namespace Coursework.Presentation.Data.Helper
                 throw new HttpRequestException($"Failed to send request: {response.ReasonPhrase}");
             }
         }
+
+        public static async Task<TResponse> AuthPatchAsync<TResponse>(HttpClient httpClient, string url, HttpContent content, string token)
+        {
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Patch, url)
+            {
+                Content = content,
+                Headers =
+        {
+            Authorization = new AuthenticationHeaderValue("Bearer", token),
+        },
+            };
+
+            using var response = await httpClient.SendAsync(requestMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<TResponse>(jsonResponse);
+            }
+            else
+            {
+                throw new HttpRequestException($"Failed to send request: {response.ReasonPhrase}");
+            }
+        }
+
         public static async Task<T>  AuthPostAsJsonAsync<T>(this HttpClient httpClient, string requestUri, T data, string bearerToken) where T : class
         {
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
