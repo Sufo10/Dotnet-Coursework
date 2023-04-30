@@ -37,6 +37,7 @@ namespace Coursework.Infrastructure.Services
                 entityToUpdate.OnRent = false;
                 _dbContext.CustomerBooking.Update(entityToUpdate);
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
+
                 return new ResponseDTO() { Status = "Success", Message = "Car is now returned" };
             }
 

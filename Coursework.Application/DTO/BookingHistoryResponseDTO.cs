@@ -6,22 +6,13 @@ using System.Threading.Tasks;
 
 namespace Coursework.Application.DTO
 {
-    //public class CarDTO
-    //{
-    //    public Guid Id { get; set; }
-    //    public string Name { get; set; }
-    //    public string Description { get; set; }
-    //    public string Image { get; set; }
-    //    public double RatePerDay { get; set; }
-    //}
-    //public class CarBookDTO
-    //{
-    //    public Guid Id { get; set; }
-    //    public string customerId { get; set; }
-    //    public string CarId { get; set; }
-    //    public DateTime RentStartdate { get; set; }
-    //    public DateTime RentEnddate { get; set; }
-    //}
+    public class AdditionalChargeRequestDTO
+    {
+        public string CarId { get; set; }
+        public string BookingId { get; set; }
+        public string Description { get; set; }
+    }
+
     public class BookingHistoryResponseDTO
     {
         public Guid Id { get; set; }
