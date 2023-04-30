@@ -11,24 +11,26 @@
 
 <CascadingValue Value="_user" Name="UserInfo">
     <MudLayout>
-            <MudAppBar Elevation="0">
-                <MudSpacer />
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-                @if (_user?.Username != null)
-                {
+        <MudAppBar Elevation="0">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+            <MudSpacer />
+            <MudText Typo="Typo.h5">Hajur Ko Car Rental</MudText>
+            <MudSpacer />
+            @if (_user?.Username != null)
+            {
 
-                    <MudButton Class="mr-3" Color="Color.Inherit" Size="Size.Medium" StartIcon="@Icons.Material.Outlined.Logout" OnClick="@Logout">
-                    </MudButton>
-                }
-                @if (_isDarkMode)
-                {
-                    <MudSwitch @bind-Checked="@_isDarkMode" ThumbIcon="@Icons.Material.Outlined.LightMode" ThumbIconColor="Color.Info"></MudSwitch>
-                }
-                else
-                {
-                    <MudSwitch @bind-Checked="@_isDarkMode" ThumbIcon="@Icons.Material.Outlined.DarkMode" ThumbIconColor="Color.Info"></MudSwitch>
-                }
-            </MudAppBar>
+                <MudButton Class="mr-3" Color="Color.Inherit" Size="Size.Medium" StartIcon="@Icons.Material.Outlined.Logout" OnClick="@Logout">
+                </MudButton>
+            }
+            @if (_isDarkMode)
+            {
+                <MudSwitch @bind-Checked="@_isDarkMode" ThumbIcon="@Icons.Material.Outlined.LightMode" ThumbIconColor="Color.Info"></MudSwitch>
+            }
+            else
+            {
+                <MudSwitch @bind-Checked="@_isDarkMode" ThumbIcon="@Icons.Material.Outlined.DarkMode" ThumbIconColor="Color.Info"></MudSwitch>
+            }
+        </MudAppBar>
             <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
                 <MudDrawerHeader>
                 <MudImage Src="logo.png"/>
@@ -36,10 +38,10 @@
                 <NavMenu />
             </MudDrawer>
         <MudMainContent>
-            <MudContainer Class="mt-5" MaxWidth="MaxWidth.ExtraExtraLarge">
-                @Body
-            </MudContainer>
-        </MudMainContent>
+                <MudContainer Class="mt-5" MaxWidth="MaxWidth.ExtraExtraLarge">
+                    @Body
+                </MudContainer>
+</MudMainContent>
     </MudLayout>
 
 </CascadingValue>
@@ -87,6 +89,7 @@
     private void Logout()
     {
         UserService.ClearUser();
+        NavigationManager.NavigateTo("/login");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

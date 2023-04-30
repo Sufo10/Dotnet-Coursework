@@ -88,10 +88,12 @@
             if (response != null && response.Status == "Success")
             {
                 Snackbar.Add("Car Booked Successfully", Severity.Success);
+                MudDialog.Cancel();
             }
             else
             {
                 Snackbar.Add($"{response.Message}", Severity.Error);
+                MudDialog.Cancel();
                 //Snackbar.Add($"Could not Book Car!", Severity.Error);
             }
         }

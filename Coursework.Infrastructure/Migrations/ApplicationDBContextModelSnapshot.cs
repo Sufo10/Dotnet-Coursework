@@ -22,6 +22,60 @@ namespace Coursework.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Coursework.Domain.Entities.AdditionalCharges", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("BookingId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CarId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("isDeleted")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AdditionalCharges");
+                });
+
             modelBuilder.Entity("Coursework.Domain.Entities.AppUser", b =>
                 {
                     b.Property<string>("Id")
@@ -91,6 +145,9 @@ namespace Coursework.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<double>("ActualPrice")
+                        .HasColumnType("double precision");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -277,11 +334,17 @@ namespace Coursework.Infrastructure.Migrations
                     b.Property<bool?>("IsApproved")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsComplete")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uuid");
+
+                    b.Property<bool?>("OnRent")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("RentEnddate")
                         .HasColumnType("timestamp with time zone");
@@ -289,11 +352,17 @@ namespace Coursework.Infrastructure.Migrations
                     b.Property<DateTime>("RentStartdate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("TotalAmount")
+                        .HasColumnType("integer");
+
                     b.Property<string>("customerId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool?>("isDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("payment")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");

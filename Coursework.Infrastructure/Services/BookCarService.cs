@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Xml.Schema;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Coursework.Infrastructure.Services;
+using System.Collections;
 
 namespace Coursework.Infrastructure.Services
 {
@@ -53,12 +54,19 @@ namespace Coursework.Infrastructure.Services
                 var threeMonthsAgo = today.AddMonths(-3);
 
                 var regular = false;
+                var isStaff = false;
 
                 if (latestBooking != null && latestBooking.RentStartdate >= threeMonthsAgo)
                 {
                     regular = true;
                 }
 
+                var customerRole = await _userManager.GetRolesAsync(customerDetails);
+                
+                if ( customerRole.FirstOrDefault() == "staff") 
+                {
+                    isStaff = true;
+                }
 
                 var car = await _dbContext.Car
                  .Where(c => c.Id == Guid.Parse(entityToUpdate.CarId))
@@ -67,9 +75,9 @@ namespace Coursework.Infrastructure.Services
 
 
 
-                var rentDays = regular ? (latestBooking.RentEnddate - latestBooking.RentStartdate).TotalDays + 1 : (entityToUpdate.RentEnddate - entityToUpdate.RentStartdate).TotalDays + 1 ;
+                var rentDays = (entityToUpdate.RentEnddate - entityToUpdate.RentStartdate).TotalDays + 1 ;
                 var totalAmount = car.RatePerDay * rentDays;
-                var totalAfterDiscount = regular ? totalAmount * 0.9 : totalAmount;
+                var totalAfterDiscount = regular ? totalAmount * 0.9 : (isStaff ? totalAmount * 0.75 : totalAmount);
                 var vatAmount = totalAfterDiscount * 0.13;
 
                 entityToUpdate.IsApproved = true;
@@ -109,24 +117,44 @@ namespace Coursework.Infrastructure.Services
             try {
                 var user =await _userManager.FindByEmailAsync(email);
                 var userID = user.Id;
-                var carId = model.CarId;
+                var car = await _dbContext.Car.SingleOrDefaultAsync(c => c.Id == Guid.Parse(model.CarId));
+                var today = DateTime.Today;
+                var threeMonthsAgo = today.AddMonths(-3);
+
+                var latestBooking = await _dbContext.CustomerBooking
+                .Where(b => b.customerId == userID && (bool)b.IsApproved)
+                .OrderByDescending(b => b.RentStartdate)
+                .FirstOrDefaultAsync();
+
+                var regular = false;
+
+                if (latestBooking != null && latestBooking.RentStartdate >= threeMonthsAgo)
+                {
+                    regular = true;
+                }
 
                 var overlappingBookings = _dbContext.CustomerBooking
-                .Where(cb => cb.CarId == carId
+                .Where(cb => cb.CarId == model.CarId
                 && cb.RentEnddate >= model.RentStartdate
                 && cb.RentStartdate <= model.RentEnddate);
 
                 var isAvailable = !overlappingBookings.Any();
 
                 if (isAvailable == false) {
-                    return new ResponseDTO { Status = "Error", Message = "car is not available for the requested date" };
+                    return new ResponseDTO { Status = "Error", Message = "Car is not available for the requested date" };
                 }
                 else {
+
+
+
+
                     var role = await _userManager.GetRolesAsync(user);
+
                     if (role.FirstOrDefault() == "Customer")
                     {
 
                         var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
+
 
                         if (customerDetails.IsVerified == false)
                         {
@@ -134,20 +162,29 @@ namespace Coursework.Infrastructure.Services
                         }
                         else
                         {
+                            
+                            var rentDays = (model.RentEnddate - model.RentStartdate).TotalDays + 1;
+                            var totalAmount = car.RatePerDay * rentDays;
+                            var totalAfterDiscount = regular ? totalAmount * 0.9 : totalAmount;
+                            var vatAmount = totalAfterDiscount * 0.13 + totalAfterDiscount;
+
                             var bookCar = new CustomerBooking
                             {
                                 customerId = userID.ToString(),
                                 CarId = model.CarId,
                                 RentStartdate = model.RentStartdate,
-                                RentEnddate = model.RentEnddate
+                                RentEnddate = model.RentEnddate,
+                                TotalAmount = (int)Math.Round(vatAmount)
                             };
+
+
 
                             var RequestInput = await _dbContext.CustomerBooking.AddAsync(bookCar);
                             await _dbContext.SaveChangesAsync(default(CancellationToken));
                             return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
                         }
                     }
-                    else if (role.FirstOrDefault() == "employee")
+                    else if (role.FirstOrDefault() == "Staff")
                     {
 
                         var customerDetails = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
@@ -158,6 +195,10 @@ namespace Coursework.Infrastructure.Services
                         }
                         else
                         {
+                            var rentDays = (model.RentEnddate - model.RentStartdate).TotalDays + 1;
+                            var totalAmount = car.RatePerDay * rentDays;
+                            var totalAfterDiscount = totalAmount * 0.75;
+                            var vatAmount = totalAfterDiscount * 0.13 + totalAfterDiscount;
                             var bookCar = new CustomerBooking
                             {
                                 customerId = userID.ToString(),
@@ -174,7 +215,7 @@ namespace Coursework.Infrastructure.Services
                     }
                     else
                     {
-                        return new ResponseDTO { Status = "unsuccessful", Message = "something went wrong" };
+                        return new ResponseDTO { Status = "error", Message = "Something went wrong" };
                     }
                 }
 
@@ -194,7 +235,7 @@ namespace Coursework.Infrastructure.Services
         {
             try 
             {
-                
+                var baseUrl = "https://localhost:7190/images/";
 
                 var bookingRequests = await (
                 from booking in _dbContext.CustomerBooking
@@ -216,9 +257,15 @@ namespace Coursework.Infrastructure.Services
                     CustomerPhone = customerPhone,
                     CarId = booking.CarId,
                     CarName = car.Name, 
-                    Image = car.Image,
+                    Image = baseUrl + car.Image,
                     RentStartdate = booking.RentStartdate,
                     RentEnddate = booking.RentEnddate,
+                    TotalAmount = booking.TotalAmount,  
+                    IsAppoved = booking.IsApproved,
+                    IsCompleted = booking.IsComplete,
+                    OnRent = booking.OnRent,
+                    payment = booking.payment,
+                    IsDeleted=booking.isDeleted
                 }
                 ).ToListAsync();
 
@@ -236,6 +283,8 @@ namespace Coursework.Infrastructure.Services
             }
 
         }
+
+
 
 
         public async Task<ResponseDTO> RejectBookingRequest(string bookingId)

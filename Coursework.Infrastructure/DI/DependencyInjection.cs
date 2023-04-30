@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using Coursework.Application.Common.Interface;
+using Coursework.Application.DTO;
 using Coursework.Domain.Entities;
 using Coursework.Infrastructure.Persistent;
 using Coursework.Infrastructure.Services;
@@ -73,8 +74,11 @@ namespace Coursework.Infrastructure.DI
             services.AddTransient<ICarTestDetails, CarTestService>();
             services.AddTransient<IBookCar, BookCarService>();
             services.AddTransient<ICarBookingHistory, CarBookHistoryService>();
+            services.AddTransient<ICarRent, RentCars>();
+            services.AddTransient<ITrackUsers, TrackUsersServices> ();
             services.AddTransient<IKhaltiPaymentService, KhaltiPaymentService>();
-
+            services.AddTransient<ICarReport, CarReportsService>();
+            services.AddTransient<ICarsOnRent, CarsOnRentServices>();
             return services;
         }
 

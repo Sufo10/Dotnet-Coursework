@@ -38,6 +38,8 @@
         <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.CustomerPhone)">Customer Phone</MudTableSortLabel></MudTh>
         <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.RentStartDate)">Start-Date</MudTableSortLabel></MudTh>
         <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdminBooking, object>(x=>x.RentEndDate)">End-Date</MudTableSortLabel></MudTh>
+        <MudTh Class="text-center">Status</MudTh>
+        <MudTh Class="text-center">Payment</MudTh>
         <MudTh>Actions</MudTh>
     </HeaderContent>
     <RowTemplate>
@@ -45,10 +47,55 @@
         <MudTd Class="text-center" DataLabel="Car Name">@context.CarName</MudTd>
         <MudTd Class="text-center" DataLabel="Customer Phone">@context.CustomerPhone</MudTd>
         <MudTd Class="text-center" DataLabel="Start Date">@context.RentStartDate</MudTd>
-        <MudTd Class="text-center" DataLabel="End Date">@context.RentEndDate</MudTd>
+        <MudTd Class="text-center" DataLabel="Status">@context.RentEndDate</MudTd>
+        <MudTd Class="text-center">
+            @if (context.IsDeleted == true)
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Error">Cancelled</MudChip>
+            }
+            else if (context.IsCompleted == true)
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Surface">Completed</MudChip>
+
+            }
+            else if ((context.OnRent == true) && (context.IsCompleted == true || context.IsCompleted == false))
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Info">On Rent</MudChip>
+
+            }
+            else if (context.IsApproved == null)
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Warning">Pending</MudChip>
+
+            }
+            else if (context.IsApproved == true)
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Success">Approved</MudChip>
+
+            }
+            else if (context.IsApproved == false)
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Error">Rejected</MudChip>
+
+            }
+        </MudTd>
+        <MudTd Class="text-center">
+            @if (context?.payment != true)
+            {
+                <MudChip Variant="Variant.Filled" Color="Color.Error">Not Paid</MudChip>
+            }
+            else
+            {
+                <MudChip Variant="Variant.Filled" Color="Color.Tertiary">Paid</MudChip>
+
+            }
+        </MudTd>
         <MudTd>
             <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+@if (context.IsApproved == null && context.payment==false)
+{
                 <MudMenuItem @onclick="@((e)=>ApproveRequest(context.BookingId))">
+
                     <MudIcon Icon="@Icons.Material.Filled.Approval" Title="Add" />
                     Approve Request
                 </MudMenuItem>
@@ -56,6 +103,14 @@
                     <MudIcon Icon="@Icons.Material.Filled.Recommend" Title="Add" />
                     Reject Request
                 </MudMenuItem>
+}                    
+                @if (context?.payment != true && context?.IsCompleted != true && context?.IsApproved == true)
+                {
+                    <MudMenuItem @onclick="@((e) => OpenOfflinePayDialog(maxWidth, context))" Style="display: flex; align-items: center">
+                        <MudIcon Icon="@Icons.Material.Filled.Payment" Title="Add" />
+                        Offline Pay
+                    </MudMenuItem>
+                }
             </MudMenu>
 
         </MudTd>
@@ -97,8 +152,26 @@
         if (!result.Canceled)
         {
             _loading = true;
-            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdminBooking>>>("https://localhost:7190/api/car-request", User.Token??"");
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdminBooking>>>("https://localhost:7190/api/car-request", User.Token ?? "");
 
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                Elements = jsonResponse.Data;
+                _loading = false;
+            }
+        }
+    }
+
+    async Task OpenOfflinePayDialog(DialogOptions options, AdminBooking booking)
+    {
+        var parameters = new DialogParameters { ["Booking"] = booking, ["User"] = User };
+        var dialog = await DialogService.ShowAsync<OfflinePaymentModal>("Offline Payment", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            _loading = true;
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdminBooking>>>("https://localhost:7190/api/car-request", User.Token ?? "");
+            Console.WriteLine(jsonResponse);
             if (jsonResponse != null && jsonResponse.Status == "Success")
             {
                 Elements = jsonResponse.Data;
@@ -118,7 +191,7 @@
 
         var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
 
-        var dialog= DialogService.Show<ConfirmationBox>("Approve", parameters, options);
+        var dialog = DialogService.Show<ConfirmationBox>("Approve", parameters, options);
         var result = await dialog.Result;
         if (!result.Canceled)
         {

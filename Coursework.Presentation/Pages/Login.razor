@@ -10,7 +10,7 @@
 <PageTitle>Login</PageTitle>
 <div class="row min-vh-100">
     <div class="col-12 d-flex justify-content-center align-item-center">
-        <MudPaper Width="350px" Height="400px" Class="pa-5 mx-auto ma-2 mt-15" Outlined="true" Square="true">
+        <MudPaper Width="350px" Height="400px" Class="pa-5 mx-auto ma-2 mt-15" Outlined="true" Square="true" Style="box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;border-radius: 8px;">
             <div class="text-center mx-auto">
                 <MudText Class="mt-1 mx-auto" Typo="Typo.h5">Login</MudText>
 
@@ -109,7 +109,14 @@
 
                 _processing = false;
                 await Task.Delay(1000);
+                if(role=="Admin" || role == "Staff")
+                {
+                    NavManager.NavigateTo("/dashboard");
+
+                }else
+                {
                 NavManager.NavigateTo("/");
+                }
             }
             else
             {

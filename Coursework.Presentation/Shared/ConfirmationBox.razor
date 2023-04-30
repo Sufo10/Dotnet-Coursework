@@ -32,7 +32,7 @@
 
     [Parameter] public string ButtonText { get; set; }
 
-    [Parameter] public Color Color { get; set; }
+    [Parameter] public MudBlazor.Color Color { get; set; }
 
     [Parameter] public string BookingId { get; set; }
 
@@ -62,6 +62,7 @@
         {
             _processing = false;
             Snackbar.Add("Booking Cancelled Successfully!", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
         }
         else
         {

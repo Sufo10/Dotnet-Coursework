@@ -31,10 +31,29 @@ namespace Coursework.API.Controllers
             return data;
         }
 
-        [HttpGet("/api/sales-record/{startDate}/{endDate}")]
-        public async Task<ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>>> GetCarHistoryy(DateTime startDate, DateTime endDate)
+        [HttpGet("/api/sales-record")]
+        public async Task<ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>>> GetCarHistory()
         {
-            var data = await _carDetails.GetSalesRecord(startDate, endDate);
+            var data = await _carDetails.GetSalesRecord();
+            return data;
+        }
+
+        [HttpPost]
+        [Consumes("multipart/form-data")]
+        [Route("/api/additional-charge")]
+        public async Task<ResponseDTO> AddAdditionalCharges([FromForm] AdditionalChargeRequestDTO model)
+        {
+            var data = await _carDetails.AddAdditionalCharges(model);
+            return data;
+        }
+
+        [HttpPatch]
+        [Consumes("multipart/form-data")]
+        [Route("/api/additional-charge-send-invoice")]
+        public async Task<ResponseDTO> AddAdditionalChargesUpdate(string chargeID, float amount)
+        {
+            var data = await _carDetails.AddAdditionalChargesUpdate(chargeID, amount);
+
             return data;
         }
     }

@@ -12,6 +12,7 @@ using Coursework.Application.DTO;
 using Microsoft.Extensions.Configuration;
 using Coursework.Domain.Models;
 using System.Xml.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace Coursework.Infrastructure.Services
 {
@@ -81,6 +82,30 @@ namespace Coursework.Infrastructure.Services
             };
             await SendEmailAsync(message);
         }
+        public async Task SendEmailAdditionalChargesAsync(string amount, string description, string booking_id, string car_id, string user_id, string created_at_date, string toEmail)
+        {
+            StringBuilder sb = new();
+
+            sb.Append("<html>");
+            sb.Append("<head>");
+            sb.Append("<style>");
+            sb.Append("table { border-collapse: collapse; width: 100%; }");
+            sb.Append("th, td { text-align: left; padding: 8px; border: 1px solid black; }");
+            sb.Append("th { background-color: #4CAF50; color: white; }");
+            //sb.Append("td { border: 1px solid black; }");
+            sb.Append("</style>");
+            sb.Append("</head>");
+
+            sb.Append("<body>");
+            sb.AppendFormat("<h1>{0}</h1>", "Hajur Ko Car Rental");
+            sb.AppendFormat("<p>{0}</p>", @$"Dear Customer, For the damage on the car that you rented. You are required to clear the due amount.");
+            sb.AppendFormat("<p>Invoice Date: {0}</p>", DateTime.Now.ToString("yyyy-MM-dd"));
+            sb.AppendFormat("<p>Customer Email: {0}</p>", toEmail);
+
+            sb.AppendFormat("<table><tr><th>Booking ID</th><td>{0}</td></tr><tr><th>Car ID</th><td>{1}</td></tr><tr><th>User ID</th><td>{2}</td></tr><tr><th>Damage Description</th><td>{3}</td></tr><tr><th>Amount</th><td>{4}</td></tr><tr><th>Damage Repoted Date</th><td>{5}</td></tr></table>", booking_id, car_id, user_id, description, amount, created_at_date);
+            
+            sb.Append("</body>");
+            sb.Append("</html>");
 
         public async Task SendOfferNoticeAsync(OfferNoticeDTO model)
         {
@@ -121,7 +146,14 @@ namespace Coursework.Infrastructure.Services
             return sb.ToString();
 
         }
-
+            var message = new MessageModel
+            {
+                Subject = "Damage Invoice",
+                To = toEmail,
+                Body = sb.ToString(),
+            };
+            await SendEmailAsync(message);
+        }
         public string GenerateInvoice(GenerateInvoiceDTO model)
         {
             StringBuilder sb = new StringBuilder();

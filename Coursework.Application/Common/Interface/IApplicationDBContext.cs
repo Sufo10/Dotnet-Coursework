@@ -11,6 +11,7 @@ namespace Coursework.Application.Common.Interface
         DbSet<CustomerFileUpload> CustomerFileUpload { get; set; }
         DbSet<Car> Car { get; set; }
         DbSet<CustomerBooking> CustomerBooking { get; set; }
+        DbSet<AdditionalCharges> AdditionalCharges { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
