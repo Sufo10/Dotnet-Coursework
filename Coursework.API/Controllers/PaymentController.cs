@@ -58,5 +58,15 @@ namespace Coursework.API.Controllers
             var data = await _khaltiPaymentService.OfflinePayment(model);
             return data;
         }
+
+        [HttpPost]
+        //[Authorize (Roles = "Staff")]
+        [Route("/api/offline-payment/addtional-charge")]
+        public async Task<ResponseDataDTO<KhaltiResponseDTO>> OfflinePaymentForAdditonalCharge(AdditonalChargePaymentDTO model)
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var data = await _khaltiPaymentService.OfflinePaymentForAdditionalCharges(model);
+            return data;
+        }
     }
 }

@@ -250,5 +250,35 @@ namespace Coursework.Infrastructure.Services
                 };
             }
         }
+
+        public async Task<ResponseDataDTO<KhaltiResponseDTO>> OfflinePaymentForAdditionalCharges(AdditonalChargePaymentDTO model)
+        {
+            try
+            {
+                var additonalCharge = await _dbContext.AdditionalCharges.FindAsync(Guid.Parse(model.AddtionalChargeId));
+                var customerBooking = await _dbContext.CustomerBooking.FindAsync(Guid.Parse(additonalCharge.BookingId));
+                additonalCharge.IsPaid = true;
+                _dbContext.CustomerBooking.Update(customerBooking);
+                await _dbContext.SaveChangesAsync(default(CancellationToken));
+
+                return new ResponseDataDTO<KhaltiResponseDTO>
+                {
+                    Status = "Success",
+                    Message = "Success",
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDataDTO<KhaltiResponseDTO>
+                {
+                    Status = "Error",
+                    Message = "Error",
+                    Data = new KhaltiResponseDTO
+                    {
+                        error = ex.ToString()
+                    }
+                };
+            }
+        }
     }
 }
