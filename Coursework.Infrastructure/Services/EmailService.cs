@@ -107,6 +107,45 @@ namespace Coursework.Infrastructure.Services
             sb.Append("</body>");
             sb.Append("</html>");
 
+        public async Task SendOfferNoticeAsync(OfferNoticeDTO model)
+        {
+            var message = new MessageModel
+            {
+                Subject = "Offer Notice",
+                To = model.CustomerEmail,
+                Body = GenerateNotice(model)
+            };
+            await SendEmailAsync(message);
+        }
+
+        public string GenerateNotice(OfferNoticeDTO model)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("<html>");
+            sb.Append("<head>");
+            sb.Append("<style>");
+            sb.Append("table { border-collapse: collapse; width: 100%; }");
+            sb.Append("th, td { text-align: center; padding: 8px; }");
+            sb.Append("th { background-color: #4CAF50; color: white; }");
+            sb.Append("td { border: 1px solid black; }");
+            sb.Append("</style>");
+            sb.Append("</head>");
+
+            sb.Append("<body>");
+            sb.AppendFormat("<h1>{0}</h1>", "Hajur Ko Car Rental");
+            sb.AppendFormat("<p>{0}</p>", model.Message);
+
+            sb.Append("<table>");
+            sb.Append("<tr><th>Car Name</th><th>Offer Price</th><th>Actual Price</th></tr>");
+            sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</tr>", model.carName, model.OfferPrice, model.ActualAmount);
+            sb.Append("</table>");
+
+            sb.Append("</body>");
+            sb.Append("</html>");
+            return sb.ToString();
+
+        }
             var message = new MessageModel
             {
                 Subject = "Damage Invoice",

@@ -7,6 +7,7 @@ namespace Coursework.Application.DTO
         public string Name { get; set; }
         public string Description { get; set; }
         public float RatePerDay { get; set; }
+        public float ActualPrice { get; set; }
     }
 }
 
