@@ -1,4 +1,4 @@
-﻿@page "/my-booking-request"
+﻿@page "/damage-record"
 @using System.Net.Http.Json
 @using MudBlazor
 @using System.Text;
@@ -11,7 +11,7 @@
 @inject IJSRuntime JSRuntime
 @using Microsoft.JSInterop
 
-<PageTitle>My Booking Request</PageTitle>
+<PageTitle>Damange Record</PageTitle>
 <MudTable Class="mt-5" Items="@Elements" Dense="false" Hover="true" ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info" Filter="new Func<MyBookingDetails,bool>(FilterFunc)"
           @bind-SelectedItem="selectedItem1" SortLabel="Sort By" CommitEditTooltip="Commit Edit">
     <ToolBarContent>
@@ -21,17 +21,13 @@
             <MudSelectItem Value="@("Approved")" />
             <MudSelectItem Value="@("Paid")" />
             <MudSelectItem Value="@("Pending")" />
-            <MudSelectItem Value="@("Cancelled")" />
             <MudSelectItem Value="@("All")" />
         </MudSelect>
         <MudSpacer />
         <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <ColGroup>
-        @if (applyButtonPosition.DisplayApplyButtonAtStart() || (editButtonPosition.DisplayEditButtonAtStart() && editTrigger == TableEditTrigger.EditButton))
-        {
-            <col style="width:50px;" />
-        }
+     
         <col style="width:14%;" />
         <col style="width:14%;" />
         <col style="width:14%;" />
@@ -40,10 +36,6 @@
         <col style="width:14%;" />
         <col style="width:14%;" />
         <col style="width:14%;" />
-        @if (applyButtonPosition.DisplayApplyButtonAtEnd() || (editButtonPosition.DisplayEditButtonAtEnd() && editTrigger == TableEditTrigger.EditButton))
-        {
-            <col style="width:50px;" />
-        }
     </ColGroup>
     <HeaderContent>
         <MudTh><MudTableSortLabel Class="text-center" InitialDirection="SortDirection.Ascending" SortBy="new Func<MyBookingDetails, object>(x=>x.Name)"> Name</MudTableSortLabel></MudTh>
@@ -52,7 +44,7 @@
         <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.RentEndDate)">End-Date</MudTableSortLabel></MudTh>
         <MudTh>Status</MudTh>
         <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.TotalAmount)">Total</MudTableSortLabel></MudTh>
-      <MudTh>Payment</MudTh>
+        <MudTh>Payment</MudTh>
         <MudTh>Actions</MudTh>
     </HeaderContent>
     <RowTemplate>
@@ -90,6 +82,7 @@
             else if (context.IsApproved == false)
             {
                 <MudChip Variant="Variant.Outlined" Color="Color.Error">Rejected</MudChip>
+
             }
         </MudTd>
         <MudTd Class="text-center" DataLabel="Total Amount">NPR @context.TotalAmount</MudTd>
@@ -104,24 +97,6 @@
                 <button @onclick="((e)=>handlePayment(context.Id))" class="khalti-btn">Pay Now</button>
             }
         </MudTd>
-        <MudTd>
-            <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                @if (context?.IsPaid != true || context.IsDeleted!=true || context.IsApproved==false || context?.OnRent!=true)
-                {
-                    <MudMenuItem @onclick="@((e)=>CancelRequest(context.Id))">
-                        <MudIcon Icon="@Icons.Material.Filled.Recommend" Title="Add" />
-                        Cancel Request
-                    </MudMenuItem>
-                }
-                @if(context?.IsCompleted!=true && context?.OnRent == true)
-{
-<MudMenuItem @onclick="@((e)=>ReportDamage(maxWidth,context.Id,context.CarId))">
-    <MudIcon Icon="@Icons.Material.Filled.CarCrash" Title="Add" />
-    Report Damage
-</MudMenuItem>
-}
-            </MudMenu>
-        </MudTd>
     </RowTemplate>
 
     <PagerContent>
@@ -131,13 +106,12 @@
         <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
     </EditButtonContent>
 </MudTable>
-@*<MudText Inline="true">Selected1: @selectedItem1?.Name</MudText>*@
 
 @code {
     [CascadingParameter(Name = "UserInfo")]
     public UserInfo User { get; set; }
     public bool _loading { get; set; } = true;
-    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true ,CloseButton=true};
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
     private List<string> editEvents = new();
     private bool dense = false;
     private bool hover = true;
@@ -153,39 +127,7 @@
     private IEnumerable<MyBookingDetails> Elements = new List<MyBookingDetails>();
     private string _selectedValue = "All";
 
-    async Task CancelRequest(string BookingId)
-    {
-        var parameters = new DialogParameters();
-        parameters.Add("ContentText", "Do you really want to cancel the request?.");
-        parameters.Add("ButtonText", "Cancel");
-        parameters.Add("Color", MudBlazor.Color.Error);
-        parameters.Add("BookingId", BookingId);
-        parameters.Add("User", User);
-
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
-
-        var dialog = DialogService.Show<ConfirmationBox>("Approve", parameters, options);
-        var result = await dialog.Result;
-        if (!result.Canceled)
-        {
-            _loading = true;
-            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<MyBookingDetails>>>("https://localhost:7190/api/my-booking", User.Token);
-
-            if (jsonResponse != null && jsonResponse.Status == "Success")
-            {
-                Elements = jsonResponse.Data;
-                _loading = false;
-            }
-        }
-    }
-
-    async Task ReportDamage(DialogOptions options,string BookingId,string CarId) {
-        var parameters = new DialogParameters { ["User"] = User, ["BookingId"] = BookingId, ["CarId"]=CarId };
-        var dialog = await DialogService.ShowAsync<ReportDamage>("Report Damage", parameters, options);
-        var result = await dialog.Result;
-    }
-
-
+    
     private async Task handlePayment(string id)
     {
         var data = new { bookingId = id };
@@ -220,7 +162,7 @@
     protected override async Task OnInitializedAsync()
     {
         var currentUrl = NavigationManager.Uri;
-        if (currentUrl.Contains("/my-booking-request"))
+        if (currentUrl.Contains("/damage-record"))
         {
             var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<MyBookingDetails>>>("https://localhost:7190/api/my-booking", User.Token);
 
@@ -250,7 +192,7 @@
         {
             status = "Approved";
         }
-        else if(element.IsApproved == true && element.IsPaid == true)
+        else if (element.IsApproved == true && element.IsPaid == true)
         {
             status = "Paid";
         }

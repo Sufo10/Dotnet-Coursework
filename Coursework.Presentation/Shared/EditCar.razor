@@ -1,0 +1,113 @@
+﻿@using System.Text;
+@using Newtonsoft.Json;
+@inject ISnackbar Snackbar
+@inject HttpClient _httpClient
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.CarRental" Class="mr-3 mb-n1" />
+            Editing @car.Name
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="6">
+                <MudPaper Elevation="4" Outlined="true" Class="mud-width-full py-8">
+                    <div class="container-fluid card-image mt-2  d-flex justify-content-center">
+                        <img width="500" class="object-fit-contain hover-image mx-auto rounded mt-3"
+                             src=@car.Image />
+                    </div>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6">
+                <MudPaper Elevation="4" Outlined="true" Class="d-flex align-center justify-center mud-width-full py-8">
+                    <div>
+                        <MudText Class="mb-5">Editable Details</MudText>
+                        <MudForm @ref="form" @bind-IsValid="@isSuccess" @onsubmit="EditCarHandler" @bind-Errors="@errors" ReadOnly="false">
+
+                            <MudGrid Spacing=3>
+                                <MudItem xs="12">
+                                    <MudTextField  Class="mt-3" @bind-Value="Name" Required="true" RequiredError="Name is required" Label="Name" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
+                                </MudItem>
+                            </MudGrid>
+                            <MudGrid Spacing=3>
+                                <MudGrid Class="mt-3 mx-1" Spacing=3>
+                                    <MudItem xs="12">
+                                        <MudNumericField @bind-Value="ActualPrice" Label="Actual Price" RequiredError="Actual Price is required" Format="F1" Variant="Variant.Outlined" />
+                                    </MudItem>
+                                </MudGrid>
+                            </MudGrid>
+                            <MudGrid Spacing=3>
+                                <MudItem xs="12">
+                                    <MudTextField Class="mt-7" @bind-Value="Description" Required="true" RequiredError="Description is required" Label="Description" Variant="Variant.Outlined" Clearable="true" Immediate="true" />
+                                </MudItem>
+                            </MudGrid>
+                            </MudForm>
+                    </div>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="!isSuccess" Color="Color.Error" OnClick="EditCarHandler">Edit</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+    MudForm form;
+
+    [Parameter]
+    public Cars car { get; set; } = new Cars();
+
+    [Parameter]
+    public UserInfo User { get; set; }
+    bool isSuccess;
+    string[] errors = { };
+
+    bool _processing { get; set; }
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    protected override void OnParametersSet()
+    {
+        Name = car.Name;
+        ActualPrice = car.ActualPrice;
+        Description = car.Description;
+    }
+
+    public string Name { get; set; }
+    public double ActualPrice;
+    public string Description { get; set; }
+
+
+
+    async Task EditCarHandler()
+    {
+        var client = new HttpClient();
+        var formData = new MultipartFormDataContent();
+        formData.Add(new StringContent(Name), "name");
+        formData.Add(new StringContent(ActualPrice.ToString()), "rateperday");
+        formData.Add(new StringContent(Description), "description");
+
+        var response = await HttpClientExtension.AuthPatchAsync<ApiResponse>(_httpClient, $"https://localhost:7190/api/editcar/{car.Id}", formData, User.Token.ToString());
+        // Process the response as needed
+        if (response != null && response.Status == "Success")
+        {
+            Snackbar.Add("Car Edited Successfully!", Severity.Success);
+            _processing = false;
+            StateHasChanged();
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            // Handle error responses
+            Snackbar.Add($"{response.Message}", Severity.Error);
+            _processing = false;
+        }
+    }
+}

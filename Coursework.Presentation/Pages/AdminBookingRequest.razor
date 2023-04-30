@@ -58,26 +58,26 @@
                 <MudChip Variant="Variant.Outlined" Color="Color.Surface">Completed</MudChip>
 
             }
-            else if ((context.OnRent == true) && (context.IsCompleted == true || context.IsCompleted == false))
-            {
-                <MudChip Variant="Variant.Outlined" Color="Color.Info">On Rent</MudChip>
-
-            }
-            else if (context.IsApproved == null)
-            {
-                <MudChip Variant="Variant.Outlined" Color="Color.Warning">Pending</MudChip>
-
-            }
-            else if (context.IsApproved == true)
-            {
-                <MudChip Variant="Variant.Outlined" Color="Color.Success">Approved</MudChip>
-
-            }
-            else if (context.IsApproved == false)
+            else if (context.IsAppoved == false)
             {
                 <MudChip Variant="Variant.Outlined" Color="Color.Error">Rejected</MudChip>
 
             }
+            else if (context.IsAppoved == true)
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Success">Approved</MudChip>
+
+            }
+            else if (context.OnRent == true)
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Info">On Rent</MudChip>
+
+            }
+            else if (context.IsAppoved == null)
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Warning">Pending</MudChip>
+            }
+
         </MudTd>
         <MudTd Class="text-center">
             @if (context?.payment != true)
@@ -92,7 +92,7 @@
         </MudTd>
         <MudTd>
             <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-@if (context.IsApproved == null && context.payment==false)
+@if (context.IsAppoved !=true && context.payment!=true)
 {
                 <MudMenuItem @onclick="@((e)=>ApproveRequest(context.BookingId))">
 
@@ -104,7 +104,7 @@
                     Reject Request
                 </MudMenuItem>
 }                    
-                @if (context?.payment != true && context?.IsCompleted != true && context?.IsApproved == true)
+                @if (context?.payment != true && context?.IsCompleted != true && context?.IsAppoved == true)
                 {
                     <MudMenuItem @onclick="@((e) => OpenOfflinePayDialog(maxWidth, context))" Style="display: flex; align-items: center">
                         <MudIcon Icon="@Icons.Material.Filled.Payment" Title="Add" />
@@ -196,7 +196,6 @@
         if (!result.Canceled)
         {
             var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdminBooking>>>("https://localhost:7190/api/car-request", User.Token);
-
             if (jsonResponse != null && jsonResponse.Status == "Success")
             {
                 Elements = jsonResponse.Data;
