@@ -14,6 +14,7 @@ namespace Coursework.Application.Common.Interface
         public Task SendForgotPasswordEmailAsync(string userName, string toEmail, string passwordResetToken);
         public Task SendEmailConfirmationAsync(string name, string userId, string toEmail, string token);
         public  Task SendPaymentInvoiceAsync(GenerateInvoiceDTO model);
+        public Task SendOfferNoticeAsync(OfferNoticeDTO model);
 
     }
 }

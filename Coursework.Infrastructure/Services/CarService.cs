@@ -3,6 +3,8 @@ using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
 using Coursework.Domain.Entities;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Coursework.Infrastructure.Services
@@ -11,10 +13,15 @@ namespace Coursework.Infrastructure.Services
 	{
         private readonly IApplicationDBContext _dbContext;
         private readonly IFileStorage _fileStorage;
-        public CarService(IApplicationDBContext dBContext, IFileStorage fileStorage)
+        private readonly UserManager<AppUser> _userManager;
+        private readonly IEmailService _emailService;
+
+        public CarService(IApplicationDBContext dBContext, IFileStorage fileStorage, UserManager<AppUser> userManager, IEmailService emailService)
         {
             _dbContext = dBContext;
             _fileStorage = fileStorage;
+            _userManager = userManager;
+            _emailService = emailService;
         }
         public async Task<string> UploadAsync(IFormFile file)
         {
@@ -98,6 +105,102 @@ namespace Coursework.Infrastructure.Services
                 return new ResponseDTO { Status = "Error", Message = err.ToString() };
             }
         }
+
+
+        //public async Task<ResponseDTO> EditRatePerDay(Guid Id, RatePerDayDTO model)
+        //{
+        //    try
+        //    {
+        //        var car = await _dbContext.Car.FindAsync(Id);
+
+
+
+
+        //        var users = await _userManager.Users.ToListAsync();
+
+
+
+        //        if (car == null)
+        //        {
+        //            return new ResponseDTO { Status = "Error", Message = "Rate per Day not found" };
+        //        }
+
+        //        car.RatePerDay = model.RatePerDay;
+
+        //        await _dbContext.SaveChangesAsync(default(CancellationToken));
+
+
+        //        foreach (var user in users)
+        //        {
+
+        //            var notice = new OfferNoticeDTO
+        //            {
+        //                OfferPrice = model.RatePerDay,
+        //                ActualAmount = car.ActualPrice,
+        //                Message = $"{car.Name} is on offer right now.",
+        //                carName = car.Name,
+        //                CustomerEmail = await _userManager.GetEmailAsync(user)
+        //            };
+
+
+        //            await _emailService.SendOfferNoticeAsync(notice);
+
+        //        }
+
+        //        return new ResponseDTO { Status = "Success", Message = "Rate per Day Edited successfully" };
+        //    }
+        //    catch (Exception err)
+        //    {
+        //        return new ResponseDTO { Status = "Error", Message = err.ToString() };
+        //    }
+        //}
+
+
+        public async Task<ResponseDTO> EditRatePerDay(Guid Id, RatePerDayDTO model)
+        {
+            try
+            {
+                var car = await _dbContext.Car.FindAsync(Id);
+
+                var users = await _userManager.Users.ToListAsync();
+
+                if (car == null)
+                {
+                    return new ResponseDTO { Status = "Error", Message = "Rate per Day not found" };
+                }
+
+                // Validate offer price
+                if (model.RatePerDay >= car.ActualPrice)
+                {
+                    return new ResponseDTO { Status = "Error", Message = "Offer price should be less than actual price." };
+                }
+
+                car.RatePerDay = model.RatePerDay;
+
+                await _dbContext.SaveChangesAsync(default(CancellationToken));
+
+                foreach (var user in users)
+                {
+                    var notice = new OfferNoticeDTO
+                    {
+                        OfferPrice = model.RatePerDay,
+                        ActualAmount = car.ActualPrice,
+                        Message = $"{car.Name} is on offer right now.",
+                        carName = car.Name,
+                        CustomerEmail = await _userManager.GetEmailAsync(user)
+                    };
+
+                    await _emailService.SendOfferNoticeAsync(notice);
+                }
+
+                return new ResponseDTO { Status = "Success", Message = "Rate per Day Edited successfully" };
+            }
+            catch (Exception err)
+            {
+                return new ResponseDTO { Status = "Error", Message = err.ToString() };
+            }
+        }
+
 
 
 
