@@ -18,6 +18,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNet.Cors" Version="5.2.9" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.16.0" />
+    <PackageReference Include="Blazor-ApexCharts" Version="0.9.20-beta" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +33,7 @@
     <None Remove="Uploads\Documents\" />
     <None Remove="Microsoft.AspNet.Cors" />
     <None Remove="System.IdentityModel.Tokens.Jwt" />
+    <None Remove="Blazor-ApexCharts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Uploads\" />

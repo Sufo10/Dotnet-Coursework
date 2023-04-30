@@ -3,9 +3,8 @@
 @implements IDisposable
 <MudNavMenu>
     <MudNavMenu Rounded="true" Margin="Margin.Normal" Color="Color.Primary" Class="pa-2">
-        <MudNavLink Href="/" Class="text-decoration-none" Icon="@Icons.Material.Filled.Home">
+        <MudNavLink Href="/" Class="text-decoration-none" Icon="@Icons.Material.Filled.Home"  Match=NavLinkMatch.All>
             <span class="text-decoration-none">
-
                 Home
             </span>
         </MudNavLink>
@@ -37,12 +36,11 @@
                 </span>
             </MudNavLink>
         }
-        @if (User?.Role == "Admin")
+        @if (User?.Role == "Admin" || User?.Role=="Staff")
         {
-            <MudNavLink Style="text-decoration:none" Href="/user" Class="text-decoration-none" Icon="@Icons.Material.Filled.SupervisedUserCircle">
+            <MudNavLink Style="text-decoration:none" Href="/sales-report" Class="text-decoration-none" Icon="@Icons.Material.Filled.TrendingUp">
                 <span class="text-decoration-none">
-
-                    Employee
+                    Sales Report
                 </span>
             </MudNavLink>
         }

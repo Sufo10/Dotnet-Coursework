@@ -20,13 +20,12 @@ namespace Coursework.Application.DTO
         public int TotalAmount { get;  set; }
 
 
-        public Boolean IsAppoved { get; set; }  
-        public Boolean OnRent { get; set; }  
+        public Boolean? IsAppoved { get; set; }  
+        public Boolean? OnRent { get; set; }  
 
-        public Boolean payment { get; set; }
-        public Boolean IsCompleted { get; set; }
-
-        public bool IsPaid { get; set; }
+        public Boolean? payment { get; set; }
+        public Boolean? IsCompleted { get; set; }
+        public Boolean? IsDeleted { get; set; }
 
     }
 }

@@ -2,65 +2,96 @@
 @using Newtonsoft.Json;
 @inject NavigationManager NavigationManager
 @inject HttpClient _httpClient
+@using ApexCharts;
 
 <PageTitle>Login</PageTitle>
 
 <div>
-    @if (Series != null && Series.Count > 0 && CarNames != null && CarNames.Length > 0)
-    {
-         <div>
-                <MudText Typo="Typo.h4">Car Report</MudText>
-                <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" @bind-SelectedIndex="Index" XAxisLabels="@CarNames" Width="100%" Height="350px"></MudChart>
-         </div>
-    }
-    else
-    {
-        <p>Loading chart data...</p>
-    }
+    <MudText Typo="Typo.subtitle1">[Note: Chart is currently readable only in light mode.]</MudText>
+    <MudGrid Spacing="3">
+        <MudItem xs="6">
+            @if (CarRentalData != null && CarRentalData.Count > 0)
+            {
+                <ApexChart TItem="CarReportDetails"
+                           Title="Car Report">
+
+                    <ApexPointSeries TItem="CarReportDetails"
+                                     Items="CarRentalData"
+                                     Name="Gross Value"
+                                     XValue="@(e => e.Name)"
+                                     YAggregate="@(e => e.Sum(e => e.NumberOfRentals))"
+                                     OrderByDescending="e=>e.Y"
+                                     SeriesType="SeriesType.Bar" />
+                </ApexChart>
+            }
+            else
+            {
+                <p>Loading chart data...</p>
+            }
+        </MudItem>
+        <MudItem xs="6">
+            @if (UserRentalReportData != null && UserRentalReportData.Count > 0)
+            {
+                <ApexChart TItem="UserRentalData"
+                           Title="Active User">
+
+                    <ApexPointSeries TItem="UserRentalData"
+                                     Items="UserRentalReportData"
+                                     Name="Gross Value"
+                                     XValue="@(e => e.CustomerName)"
+                                     YAggregate="@(e => e.Sum(e => e.NoOfRequest))"
+                                     OrderByDescending="e=>e.Y"
+                                     SeriesType="SeriesType.Line" />
+                </ApexChart>
+            }
+            else
+            {
+                <p>Loading chart data...</p>
+            }
+        </MudItem>
+    </MudGrid>
 </div>
 @code {
     [CascadingParameter(Name = "UserInfo")]
     public UserInfo User { get; set; }
     public List<CarReportDetails> CarRentalData { get; set; }
     public string[] CarNames { get; set; }
+    public List<UserRentalData> UserRentalReportData { get; set; }
+    public string[] UserNames { get; set; }
     public List<ChartSeries> Series = new List<ChartSeries>();
+    public List<ChartSeries> CustomerSeries = new List<ChartSeries>();
     private int Index = -1;
     private bool _processing = true;
+    public ChartOptions chartOptions = new ChartOptions();
+
+    private ApexChartOptions<CarReportDetails> options;
     protected override async Task OnInitializedAsync()
     {
+        options = new ApexChartOptions<CarReportDetails>
+        {
+            Theme = new Theme
+            {
+                Mode = Mode.Dark,
+                Palette = PaletteType.Palette2
+            }
+        };
 
         var currentUrl = NavigationManager.Uri;
         if (currentUrl.Contains("/dashboard"))
         {
             var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<CarReportDetails>>>("https://localhost:7190/api/reports/car", User.Token);
-
+            var jsonResponse2 = await _httpClient.AuthGetAsync<ApiResult<List<UserRentalData>>>("https://localhost:7190/api/mostRequest", User.Token);
             if (jsonResponse != null && jsonResponse.Status == "Success")
             {
                 CarRentalData = jsonResponse.Data;
-                UpdateChartSeries();
+                //UpdateChartSeries();
+            }
+            if (jsonResponse2 != null && jsonResponse2.Status == "success")
+            {
+                UserRentalReportData = jsonResponse2.Data;
+                //UpdateUserSeriesChart();
             }
         }
-    }
-
-
-    private void UpdateChartSeries()
-    {
-        List<double> numberOfRentals = new List<double>();
-        List<string> carNames = new List<string>();
-        foreach (var item in CarRentalData)
-        {
-            numberOfRentals.Add(item.NumberOfRentals);
-            carNames.Add(item.Name);
-        }
-
-        Series = new List<ChartSeries>()
-    {
-        new ChartSeries() { Name = "Car Rentals", Data = numberOfRentals.ToArray() }
-    };
-
-        CarNames = carNames.ToArray();
-        _processing = true;
-        StateHasChanged(); // Notify the component to refresh the UI
     }
 }
 

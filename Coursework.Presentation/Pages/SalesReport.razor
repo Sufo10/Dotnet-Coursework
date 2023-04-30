@@ -22,11 +22,11 @@
         <MudItem Class="p-2" xs="12" sm="3">
 
             @*<MudDatePicker Label="End Date" @bind-Date="endDate" />*@
-            <MudDatePicker @ref="_picker" Label="Start Date" @bind-Date="endDate" AutoClose="true">
+            <MudDatePicker @ref="_endpicker" Label="End Date" @bind-Date="endDate" AutoClose="true">
                 <PickerActions>
-                    <MudButton Class="mr-auto align-self-start" OnClick="@(() => _picker.Clear())">Clear</MudButton>
-                    <MudButton OnClick="@(() => _picker.Close(false))">Cancel</MudButton>
-                    <MudButton Color="Color.Primary" OnClick="@(() => _picker.Close())">Ok</MudButton>
+                    <MudButton Class="mr-auto align-self-start" OnClick="@(() => _endpicker.Clear())">Clear</MudButton>
+                    <MudButton OnClick="@(() => _endpicker.Close(false))">Cancel</MudButton>
+                    <MudButton Color="Color.Primary" OnClick="@(() => _endpicker.Close())">Ok</MudButton>
                 </PickerActions>
             </MudDatePicker>
         </MudItem>
@@ -58,11 +58,12 @@
             <MudSpacer />
         </ToolBarContent>
         <ColGroup>
-            <col style="width:20%;" />
-            <col style="width:20%;" />
-            <col style="width:20%;" />
-            <col style="width:20%;" />
-            <col style="width:20%;" />
+            <col style="width:16%;" />
+            <col style="width:16%;" />
+            <col style="width:16%;" />
+            <col style="width:16%;" />
+            <col style="width:16%;" />
+            <col style="width:16%;" />
             <col />
             <col />
         </ColGroup>
@@ -72,6 +73,7 @@
             <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<SalesReportDetails, object>(x=>x.StartDate)">Start-Date</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<SalesReportDetails, object>(x=>x.EndDate)">End-Date</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<SalesReportDetails, object>(x=>x.Amount)">Amount</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<SalesReportDetails, object>(x=>x.ApprovedBy)">Approved By</MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd Class="text-center" DataLabel="Customer Name">@context.CustomerName</MudTd>
@@ -79,6 +81,7 @@
             <MudTd Class="text-center" DataLabel="Start Date">@context.StartDate</MudTd>
             <MudTd Class="text-center" DataLabel="End Date">@context.EndDate</MudTd>
             <MudTd Class="text-center" DataLabel="Amount">@context.Amount</MudTd>
+            <MudTd Class="text-center" DataLabel="Approved By">@context.ApprovedBy</MudTd>
         </RowTemplate>
 
         <PagerContent>
@@ -97,6 +100,7 @@
     private DateTime? startDate = DateTime.Today.AddDays(-30);
     private DateTime? endDate = DateTime.Today;
     MudDatePicker _picker;
+    MudDatePicker _endpicker;
     private string selectedCustomer = "All";
     private List<SalesReportDetails> bookings;
     private HashSet<string> customers;
