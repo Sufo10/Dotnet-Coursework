@@ -40,10 +40,7 @@ namespace Coursework.Infrastructure.Services
             {
                 IsBodyHtml = true,
             };
-            //foreach (var attachment in message.AttachmentPaths.Select(a => new Attachment(a)))
-            //{
-            //    mailMessage.Attachments.Add(attachment);
-            //    }
+
             await _client.SendMailAsync(mailMessage);
             }
 
@@ -103,9 +100,20 @@ namespace Coursework.Infrastructure.Services
             sb.AppendFormat("<p>Customer Email: {0}</p>", toEmail);
 
             sb.AppendFormat("<table><tr><th>Booking ID</th><td>{0}</td></tr><tr><th>Car ID</th><td>{1}</td></tr><tr><th>User ID</th><td>{2}</td></tr><tr><th>Damage Description</th><td>{3}</td></tr><tr><th>Amount</th><td>{4}</td></tr><tr><th>Damage Repoted Date</th><td>{5}</td></tr></table>", booking_id, car_id, user_id, description, amount, created_at_date);
-            
+
             sb.Append("</body>");
             sb.Append("</html>");
+
+            var message = new MessageModel
+            {
+                Subject = "Damage Invoice",
+                To = toEmail,
+                Body = sb.ToString(),
+            };
+            await SendEmailAsync(message);
+        }
+
+
 
         public async Task SendOfferNoticeAsync(OfferNoticeDTO model)
         {
@@ -117,6 +125,8 @@ namespace Coursework.Infrastructure.Services
             };
             await SendEmailAsync(message);
         }
+
+
 
         public string GenerateNotice(OfferNoticeDTO model)
         {
@@ -146,14 +156,7 @@ namespace Coursework.Infrastructure.Services
             return sb.ToString();
 
         }
-            var message = new MessageModel
-            {
-                Subject = "Damage Invoice",
-                To = toEmail,
-                Body = sb.ToString(),
-            };
-            await SendEmailAsync(message);
-        }
+
         public string GenerateInvoice(GenerateInvoiceDTO model)
         {
             StringBuilder sb = new StringBuilder();
@@ -189,5 +192,6 @@ namespace Coursework.Infrastructure.Services
 
             return sb.ToString();
         }
+
     }
 }
