@@ -36,35 +36,42 @@ namespace Coursework.Infrastructure.Services
                 .Where(cb => cb.RentEnddate <= threeMonthsAgo && cb.OnRent == true && cb.payment == true && cb.IsApproved == true)
                 .ToListAsync();
 
-            var inactiveUsersDTOs = new List<GetIInactiveUsersDTO>();
+            var InactiveUserDetails = new List<GetIInactiveUsersDTO>();
+
             foreach (var user in inactiveUsers)
             {
-                if (user.customerId != null)
+                var users = await _userManager.FindByIdAsync(user.customerId);
+                var userRoles = await _userManager.GetRolesAsync(users);
+                if (userRoles.FirstOrDefault() == "Customer")
                 {
-                    var customer = await _dbContext.Customer.FindAsync(user.customerId);
+                    var customer = await _dbContext.Customer.FirstOrDefaultAsync(x => x.UserId == users.Id);
+
                     if (customer != null)
                     {
-                        var inactiveCustomerDTO = new GetIInactiveUsersDTO
+                        var inactivecustomerdto = new GetIInactiveUsersDTO
                         {
                             UserId = customer.UserId,
                             Name = customer.Name,
                             PhoneNumber = customer.Phone,
                         };
-                        inactiveUsersDTOs.Add(inactiveCustomerDTO);
+
+                        InactiveUserDetails.Add(inactivecustomerdto);
+
                     }
                 }
-                else if (user.ApprovedBy != null)
+                else if (userRoles.FirstOrDefault() == "Staff")
                 {
-                    var employee = await _dbContext.Employee.FindAsync(user.ApprovedBy);
+                    var employee = await _dbContext.Employee.FirstOrDefaultAsync(x => x.UserId == users.Id);
                     if (employee != null)
                     {
-                        var inactiveEmployeeDTO = new GetIInactiveUsersDTO
+                        var inactivecustomerdto = new GetIInactiveUsersDTO
                         {
                             UserId = employee.UserId,
                             Name = employee.Name,
                             PhoneNumber = employee.Phone,
                         };
-                        inactiveUsersDTOs.Add(inactiveEmployeeDTO);
+
+                        InactiveUserDetails.Add(inactivecustomerdto);
                     }
                 }
             }
@@ -73,7 +80,7 @@ namespace Coursework.Infrastructure.Services
             {
                 Status = "success",
                 Message = "Data fetched",
-                Data = inactiveUsersDTOs
+                Data = InactiveUserDetails
             };
 
 
@@ -85,7 +92,7 @@ namespace Coursework.Infrastructure.Services
             try
             {
                 var bookings = await _dbContext.CustomerBooking
-                .Where(x => x.IsApproved == true && x.OnRent == true && x.payment == true)
+                .Where(x => x.IsApproved == true && x.payment == true)
                 .ToListAsync();
 
                 var customerIds = bookings.Select(x => x.customerId).Distinct();
@@ -98,23 +105,23 @@ namespace Coursework.Infrastructure.Services
                     var user = await _userManager.FindByIdAsync(customerId);
                     var userRoles = await _userManager.GetRolesAsync(user);
 
-                    if (userRoles.FirstOrDefault() == "customer")
+                    if (userRoles.FirstOrDefault() == "Customer")
                     {
-                        var customer = await _dbContext.Customer.FirstOrDefaultAsync(x => x.UserId == customerId);
+                        var customers = await _dbContext.Customer.FirstOrDefaultAsync(x => x.UserId == customerId);
                         result.Add(new GetMostRentalRequestDTO
                         {
-                            CustomerId = customer.UserId,
-                            CustomerName = customer.Name,
+                            CustomerId = customers.UserId,
+                            CustomerName = customers.Name,
                             NoOfRequest = count
                         });
                     }
-                    else if (userRoles.FirstOrDefault() == "employee")
+                    else if (userRoles.FirstOrDefault() == "Staff")
                     {
-                        var customer = await _dbContext.Employee.FirstOrDefaultAsync(x => x.UserId == customerId);
+                        var employees = await _dbContext.Employee.FirstOrDefaultAsync(x => x.UserId == customerId);
                         result.Add(new GetMostRentalRequestDTO
                         {
-                            CustomerId = customer.UserId,
-                            CustomerName = customer.Name,
+                            CustomerId = employees.UserId,
+                            CustomerName = employees.Name,
                             NoOfRequest = count
                         });
                     }
@@ -136,7 +143,7 @@ namespace Coursework.Infrastructure.Services
                 return new ResponseDataDTO<List<GetMostRentalRequestDTO>>
                 {
                     Status = "error",
-                    Message = ex.Message.ToString(),   
+                    Message = ex.Message.ToString(),
                 };
             }
 

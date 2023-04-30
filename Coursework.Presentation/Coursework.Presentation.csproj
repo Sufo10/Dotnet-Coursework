@@ -17,6 +17,7 @@
 		<PackageReference Include="bootstrap" Version="5.0.2" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
+		<PackageReference Include="Blazor-ApexCharts" Version="0.9.20-beta" />
 	</ItemGroup>
 	
 	
@@ -37,6 +38,7 @@
 	  <None Remove="Data\Models\" />
 	  <None Remove="Data\Helper\" />
 	  <None Remove="Blazored.LocalStorage" />
+	  <None Remove="Blazor-ApexCharts" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Content Update="Pages\Index.razor">

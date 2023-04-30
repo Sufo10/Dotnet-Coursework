@@ -34,7 +34,12 @@ namespace Coursework.Application.DTO
     public class SalesRecordResponseDTO
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
+        public string CarName { get; set; }
         public string ApprovedBy { get; set; }
+        public string CustomerId { get; set; }
+        public string CustomerName { get; set; }
+        public int Amount { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 }
