@@ -235,7 +235,7 @@ namespace Coursework.Infrastructure.Services
         {
             try 
             {
-                
+                var baseUrl = "https://localhost:7190/images/";
 
                 var bookingRequests = await (
                 from booking in _dbContext.CustomerBooking
@@ -257,14 +257,15 @@ namespace Coursework.Infrastructure.Services
                     CustomerPhone = customerPhone,
                     CarId = booking.CarId,
                     CarName = car.Name, 
-                    Image = car.Image,
+                    Image = baseUrl + car.Image,
                     RentStartdate = booking.RentStartdate,
                     RentEnddate = booking.RentEnddate,
-                    TotalAmount = booking.TotalAmount,
+                    TotalAmount = booking.TotalAmount,  
                     IsAppoved = booking.IsApproved,
                     IsCompleted = booking.IsComplete,
-                    OnRent = booking.OnRent ,
-                    payment = booking.payment ,
+                    OnRent = booking.OnRent,
+                    payment = booking.payment,
+                    IsDeleted=booking.isDeleted
                 }
                 ).ToListAsync();
 

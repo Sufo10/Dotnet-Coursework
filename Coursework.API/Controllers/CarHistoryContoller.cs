@@ -31,10 +31,10 @@ namespace Coursework.API.Controllers
             return data;
         }
 
-        [HttpGet("/api/sales-record/{startDate}/{endDate}")]
-        public async Task<ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>>> GetCarHistoryy(DateTime startDate, DateTime endDate)
+        [HttpGet("/api/sales-record")]
+        public async Task<ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>>> GetCarHistory()
         {
-            var data = await _carDetails.GetSalesRecord(startDate, endDate);
+            var data = await _carDetails.GetSalesRecord();
             return data;
         }
     }

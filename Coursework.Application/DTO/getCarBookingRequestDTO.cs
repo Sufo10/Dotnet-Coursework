@@ -25,8 +25,7 @@ namespace Coursework.Application.DTO
 
         public Boolean? payment { get; set; }
         public Boolean? IsCompleted { get; set; }
-
-        public Boolean IsPaid { get; set; }
+        public Boolean? IsDeleted { get; set; }
 
     }
 }
