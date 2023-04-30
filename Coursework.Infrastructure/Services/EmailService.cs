@@ -99,6 +99,7 @@ namespace Coursework.Infrastructure.Services
             sb.AppendFormat("<p>Invoice Date: {0}</p>", DateTime.Now.ToString("yyyy-MM-dd"));
             sb.AppendFormat("<p>Customer Email: {0}</p>", toEmail);
 
+            // sb.AppendFormat("<table><tr><th>Damage Description</th><td>{0}</td></tr><tr><th>Amount</th><td>Rs. {1}</td></tr><tr><th>Damage Repoted Date</th><td>{2}</td></tr></table>", description, amount, created_at_date);
             sb.AppendFormat("<table><tr><th>Booking ID</th><td>{0}</td></tr><tr><th>Car ID</th><td>{1}</td></tr><tr><th>User ID</th><td>{2}</td></tr><tr><th>Damage Description</th><td>{3}</td></tr><tr><th>Amount</th><td>{4}</td></tr><tr><th>Damage Repoted Date</th><td>{5}</td></tr></table>", booking_id, car_id, user_id, description, amount, created_at_date);
 
             sb.Append("</body>");
