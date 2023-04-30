@@ -260,11 +260,11 @@ namespace Coursework.Infrastructure.Services
                     Image = car.Image,
                     RentStartdate = booking.RentStartdate,
                     RentEnddate = booking.RentEnddate,
-                    TotalAmount = booking.TotalAmount,  
-                    IsAppoved = (bool)booking.IsApproved,
-                    IsCompleted = (bool)booking.IsComplete,
-                    OnRent = (bool)booking.OnRent,
-                    payment = (bool)booking.payment,
+                    TotalAmount = booking.TotalAmount,
+                    IsAppoved = booking.IsApproved,
+                    IsCompleted = booking.IsComplete,
+                    OnRent = booking.OnRent ,
+                    payment = booking.payment ,
                 }
                 ).ToListAsync();
 
