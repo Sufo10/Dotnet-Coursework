@@ -97,8 +97,8 @@
 
     [CascadingParameter(Name = "UserInfo")]
     public UserInfo User { get; set; }
-    private DateTime? startDate = DateTime.Today.AddDays(-30);
-    private DateTime? endDate = DateTime.Today;
+    private DateTime? startDate = null;
+    private DateTime? endDate = null;
     MudDatePicker _picker;
     MudDatePicker _endpicker;
     private string selectedCustomer = "All";

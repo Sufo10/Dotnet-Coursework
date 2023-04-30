@@ -69,20 +69,28 @@
                 </span>
             </MudNavLink>
         }
+        @if (User?.Role == "Customer")
+        {
+            <MudNavLink Style="text-decoration:none" Href="/damage-record" Class="text-decoration-none" Icon="@Icons.Material.Filled.CarCrash">
+                <span class="text-decoration-none">
+                    Damage Record
+                </span>
+            </MudNavLink>
+        }
+        @if (User?.Role == "Admin" || User?.Role == "Staff")
+        {
+            <MudNavLink Style="text-decoration:none" Href="/damage-request" Class="text-decoration-none" Icon="@Icons.Material.Filled.CarCrash">
+                <span class="text-decoration-none">
+                    Car Damage
+                </span>
+            </MudNavLink>
+        }
         @if (User?.Username != null)
         {
             <MudNavLink Style="text-decoration:none" Href="/change-password" Class="text-decoration-none" Icon="@Icons.Material.Filled.Password">
                 <span class="text-decoration-none">
 
                     Change Password
-                </span>
-            </MudNavLink>
-        }
-        @if (User?.Role == "Customer")
-        {
-            <MudNavLink Style="text-decoration:none" Href="/damage-record" Class="text-decoration-none" Icon="@Icons.Material.Filled.CarCrash">
-                <span class="text-decoration-none">
-                    Damage Record
                 </span>
             </MudNavLink>
         }

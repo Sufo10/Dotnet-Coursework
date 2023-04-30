@@ -90,7 +90,6 @@
             else if (context.IsApproved == false)
             {
                 <MudChip Variant="Variant.Outlined" Color="Color.Error">Rejected</MudChip>
-
             }
         </MudTd>
         <MudTd Class="text-center" DataLabel="Total Amount">NPR @context.TotalAmount</MudTd>
@@ -107,7 +106,7 @@
         </MudTd>
         <MudTd>
             <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                @if (context?.IsPaid != true || context.IsDeleted!=true || context.IsApproved==false)
+                @if (context?.IsPaid != true || context.IsDeleted!=true || context.IsApproved==false || context?.OnRent!=true)
                 {
                     <MudMenuItem @onclick="@((e)=>CancelRequest(context.Id))">
                         <MudIcon Icon="@Icons.Material.Filled.Recommend" Title="Add" />
@@ -211,7 +210,6 @@
             else
             {
                 Snackbar.Add($"{response?.data?.error}", Severity.Error);
-                //Snackbar.Add($"Could not Book Car!", Severity.Error);
             }
         }
     }

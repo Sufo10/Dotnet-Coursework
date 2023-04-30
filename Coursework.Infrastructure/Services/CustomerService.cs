@@ -112,6 +112,7 @@ namespace Coursework.Infrastructure.Services
                    {
                        Id = b.Id,
                        Name = c.Name,
+                       CarId=c.Id.ToString(),
                        Image = baseUrl + c.Image,
                        Description = c.Description,
                        RentStartdate = b.RentStartdate,

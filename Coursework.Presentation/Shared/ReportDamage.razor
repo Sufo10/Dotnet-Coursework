@@ -13,7 +13,7 @@
         </MudText>
     </TitleContent>
     <DialogContent>
-        <div class="col-12 d-flex justify-content-center align-item-center">
+        <div class="">
                 <div class="mt-3">
                     <MudForm @ref="form" @bind-IsValid="@isSuccess" @onsubmit="handleSubmit" @bind-Errors="@errors" ReadOnly="false">
                         <MudGrid Spacing=3>
@@ -23,7 +23,7 @@
                             </MudItem>
                         </MudGrid>
                         <MudCardActions>
-                            <MudButton Disabled="@(_processing)"
+                            <MudButton Disabled="@(_processing || !isSuccess)"
                                        Size="Size.Large" StartIcon="@Icons.Material.Filled.CarCrash" Class="mt-14" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary"
                                        ButtonType="ButtonType.Submit">
                                 @if (_processing)
@@ -80,7 +80,7 @@
         var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
         if (content != null)
         {
-            var response = await HttpClientExtension.AuthPostAsync<ApiResponse>(_httpClient, "https://localhost:7190/api/admin/register-employee", content, User.Token.ToString());
+            var response = await HttpClientExtension.AuthPostAsync<ApiResponse>(_httpClient, "https://localhost:7190/api/additional-charge", content, User.Token.ToString());
             // Process the response as needed
             if (response != null && response.Status == "Success")
             {
