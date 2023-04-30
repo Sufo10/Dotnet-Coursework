@@ -117,6 +117,13 @@ namespace Coursework.Infrastructure.Services
             try {
                 var user =await _userManager.FindByEmailAsync(email);
                 var userID = user.Id;
+                var userCharges = await _dbContext.AdditionalCharges.SingleOrDefaultAsync(c => c.UserId == userID && c.IsPaid == false);
+
+                if (userCharges != null) 
+                {
+                    return new ResponseDTO { Status = "Error", Message = "Damage payment not done" };
+                }
+
                 var car = await _dbContext.Car.SingleOrDefaultAsync(c => c.Id == Guid.Parse(model.CarId));
                 var today = DateTime.Today;
                 var threeMonthsAgo = today.AddMonths(-3);

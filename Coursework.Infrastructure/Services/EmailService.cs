@@ -79,7 +79,7 @@ namespace Coursework.Infrastructure.Services
             };
             await SendEmailAsync(message);
         }
-        public async Task SendEmailAdditionalChargesAsync(string amount, string description, string booking_id, string car_id, string user_id, string created_at_date, string toEmail)
+        public async Task SendEmailAdditionalChargesAsync(string amount, string description, string booking_id, string car_name, string user_name, string created_at_date, string toEmail)
         {
             StringBuilder sb = new();
 
@@ -99,7 +99,7 @@ namespace Coursework.Infrastructure.Services
             sb.AppendFormat("<p>Invoice Date: {0}</p>", DateTime.Now.ToString("yyyy-MM-dd"));
             sb.AppendFormat("<p>Customer Email: {0}</p>", toEmail);
 
-            sb.AppendFormat("<table><tr><th>Booking ID</th><td>{0}</td></tr><tr><th>Car ID</th><td>{1}</td></tr><tr><th>User ID</th><td>{2}</td></tr><tr><th>Damage Description</th><td>{3}</td></tr><tr><th>Amount</th><td>{4}</td></tr><tr><th>Damage Repoted Date</th><td>{5}</td></tr></table>", booking_id, car_id, user_id, description, amount, created_at_date);
+            sb.AppendFormat("<table><tr><th>Car</th><td>{0}</td></tr><tr><th>User</th><td>{1}</td></tr><tr><th>Damage Description</th><td>{2}</td></tr><tr><th>Amount</th><td>{3}</td></tr><tr><th>Damage Repoted Date</th><td>{4}</td></tr></table>", car_name, user_name, description, amount, created_at_date);
 
             sb.Append("</body>");
             sb.Append("</html>");
