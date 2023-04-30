@@ -50,6 +50,34 @@
             }
         </MudItem>
     </MudGrid>
+    <MudTable Class="mt-5" Items="@Elements" Dense="false" Hover="true" ReadOnly="true" Loading="@_loading" LoadingProgressColor="MudBlazor.Color.Info"
+              @bind-SelectedItem="selectedItem1" SortLabel="Sort By" CommitEditTooltip="Commit Edit">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Inactive Users</MudText>
+            <MudSpacer />
+        </ToolBarContent>
+        <ColGroup>
+            <col style="width:33%;" />
+            <col style="width:33%;" />
+            <col style="width:33%;" />
+        </ColGroup>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel Class="text-center" InitialDirection="SortDirection.Ascending" SortBy="new Func<InactiveUserDetails, object>(x=>x.Name)"> Name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<InactiveUserDetails, object>(x=>x.PhoneNumber)">Phone Number</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd Class="text-center" DataLabel="Customer Name">@context.Name</MudTd>
+            <MudTd Class="text-center" DataLabel="Phone Number">@context.PhoneNumber</MudTd>
+        </RowTemplate>
+
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+        <EditButtonContent Context="button">
+            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+        </EditButtonContent>
+    </MudTable>
+
 </div>
 @code {
     [CascadingParameter(Name = "UserInfo")]
@@ -63,6 +91,9 @@
     private int Index = -1;
     private bool _processing = true;
     public ChartOptions chartOptions = new ChartOptions();
+    private InactiveUserDetails selectedItem1 = null;
+    private IEnumerable<InactiveUserDetails> Elements = new List<InactiveUserDetails>();
+    public bool _loading { get; set; } = true;
 
     private ApexChartOptions<CarReportDetails> options;
     protected override async Task OnInitializedAsync()
@@ -81,6 +112,13 @@
         {
             var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<CarReportDetails>>>("https://localhost:7190/api/reports/car", User.Token);
             var jsonResponse2 = await _httpClient.AuthGetAsync<ApiResult<List<UserRentalData>>>("https://localhost:7190/api/mostRequest", User.Token);
+            var jsonResponse3 = await _httpClient.AuthGetAsync<ApiResult<List<InactiveUserDetails>>>("https://localhost:7190/api/inactiveUsers", User.Token);
+
+            if (jsonResponse3 != null && jsonResponse3.Status == "success")
+            {
+                Elements = jsonResponse3.Data;
+                _loading = false;
+            }
             if (jsonResponse != null && jsonResponse.Status == "Success")
             {
                 CarRentalData = jsonResponse.Data;

@@ -151,12 +151,6 @@ namespace Coursework.Infrastructure.Services
                 return new ResponseDTO { Status = "Error", Message = err.ToString() };
             }
         }
-
-
-
-
-
-
     }
 }
 

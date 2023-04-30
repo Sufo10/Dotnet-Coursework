@@ -29,6 +29,7 @@ namespace Coursework.Application.DTO
         public Double? TotalAmount { get; set; }
         public bool? OnRent { get; set; }
         public bool? IsCompleted { get; set; }
+        public string? CarId { get; set; }
     }
 
     public class SalesRecordResponseDTO
