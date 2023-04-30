@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -55,14 +57,16 @@ namespace Coursework.API.Controllers
             return data;
         }
 
-        [HttpGet("/api/additional-charges/{id}")]
-        public async Task<ResponseDataDTO<IEnumerable<AdditionalChargetDTO>>> GetAddiChgs(string id)
+        [Authorize]
+        [HttpGet("/api/additional-charges")]
+        public async Task<ResponseDataDTO<IEnumerable<AdditionalChargetDTO>>> GetAddiChgs()
         {
-            var data = await _carDetails.GetAdditionalCharges(id);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var data = await _carDetails.GetAdditionalCharges(userEmail);
             return data;
         }
 
-        [HttpGet("/api/all-additional-charges")]
+        [HttpGet("/api/admin/additional-charges")]
         public async Task<ResponseDataDTO<IEnumerable<AdditionalChargetDTO>>> GetAddiChgs2()
         {
             var data = await _carDetails.GetAdditionalCharges2();
