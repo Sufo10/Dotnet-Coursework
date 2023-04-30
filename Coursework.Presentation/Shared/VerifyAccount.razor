@@ -19,7 +19,7 @@
                             <ButtonTemplate>
                                 <MudButton HtmlTag="label"
                                            Variant="Variant.Filled"
-                                           Color="Color.Primary"
+                                           Color="MudBlazor.Color.Primary"
                                            StartIcon="@Icons.Material.Filled.CloudUpload"
                                            for="@context">
                                     Upload Documents
@@ -41,12 +41,12 @@
                         }
 
                         <MudRadioGroup Required="true" RequiredError="File type is required to verify your account" Class="mt-4" @bind-SelectedOption="@FileType">
-                            <MudRadio Option="@("Citizenship")" Color="Color.Primary">Citizenship</MudRadio>
-                            <MudRadio Option="@("License")" Color="Color.Primary">License</MudRadio>
+                            <MudRadio Option="@("Citizenship")" Color="MudBlazor.Color.Primary">Citizenship</MudRadio>
+                            <MudRadio Option="@("License")" Color="MudBlazor.Color.Primary">License</MudRadio>
                         </MudRadioGroup>
                         <MudCardActions>
                             <MudButton Disabled="@(_processing || files==null || !isSuccess)"
-                                       Size="Size.Large" Class="mt-14" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary"
+                                       Size="Size.Large" Class="mt-14" FullWidth="true" Variant="Variant.Filled" Color="MudBlazor.Color.Primary"
                                        ButtonType="ButtonType.Submit">
                                 @if (_processing)
                                 {
