@@ -14,7 +14,6 @@
     </TitleContent>
     <DialogContent>
         <div class="col-12 d-flex justify-content-center align-item-center">
-            <MudPaper Width="500" Class="pa-5 mx-auto ma-2" Square="true" Style="box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;border-radius: 8px;">
                 <div class="mt-3">
                     <MudForm @ref="form" @bind-IsValid="@isSuccess" @onsubmit="handleSubmit" @bind-Errors="@errors" ReadOnly="false">
                         <MudGrid Spacing=3>
@@ -40,13 +39,7 @@
                             </MudButton>
                         </MudCardActions>
                     </MudForm>
-                    @*<MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Login" Class="mt-14" Disabled="@_processing" OnClick="ProcessSomething" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">*@
-
-
-                    @*</MudButton>*@
-
                 </div>
-            </MudPaper>
         </div>
     </DialogContent>
 </MudDialog>
@@ -91,7 +84,7 @@
             // Process the response as needed
             if (response != null && response.Status == "Success")
             {
-                Snackbar.Add("User Added Successfully!", Severity.Success);
+                Snackbar.Add("Recorded Successfully! We will notify you as soon as possible.", Severity.Success);
                 _processing = false;
                 StateHasChanged();
                 MudDialog.Close(DialogResult.Ok(true));
