@@ -107,55 +107,6 @@ namespace Coursework.Infrastructure.Services
         }
 
 
-        //public async Task<ResponseDTO> EditRatePerDay(Guid Id, RatePerDayDTO model)
-        //{
-        //    try
-        //    {
-        //        var car = await _dbContext.Car.FindAsync(Id);
-
-
-
-
-        //        var users = await _userManager.Users.ToListAsync();
-
-
-
-        //        if (car == null)
-        //        {
-        //            return new ResponseDTO { Status = "Error", Message = "Rate per Day not found" };
-        //        }
-
-        //        car.RatePerDay = model.RatePerDay;
-
-        //        await _dbContext.SaveChangesAsync(default(CancellationToken));
-
-
-        //        foreach (var user in users)
-        //        {
-
-        //            var notice = new OfferNoticeDTO
-        //            {
-        //                OfferPrice = model.RatePerDay,
-        //                ActualAmount = car.ActualPrice,
-        //                Message = $"{car.Name} is on offer right now.",
-        //                carName = car.Name,
-        //                CustomerEmail = await _userManager.GetEmailAsync(user)
-        //            };
-
-
-        //            await _emailService.SendOfferNoticeAsync(notice);
-
-        //        }
-
-        //        return new ResponseDTO { Status = "Success", Message = "Rate per Day Edited successfully" };
-        //    }
-        //    catch (Exception err)
-        //    {
-        //        return new ResponseDTO { Status = "Error", Message = err.ToString() };
-        //    }
-        //}
-
-
         public async Task<ResponseDTO> EditRatePerDay(Guid Id, RatePerDayDTO model)
         {
             try
