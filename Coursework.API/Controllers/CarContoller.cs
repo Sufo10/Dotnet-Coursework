@@ -49,5 +49,15 @@ namespace Coursework.API.Controllers
             var data = await _carDetails.EditCar(id, model);
             return data;
         }
+
+        [HttpPatch("/api/RatePerDay{id}")]
+        [Consumes("multipart/form-data")]
+        //[Route("/api/editcar")]
+        public async Task<ResponseDTO> EditRatePerDay(Guid id, [FromForm] RatePerDayDTO model)
+        {
+            var data = await _carDetails.EditRatePerDay(id, model);
+            return data;
+        }
+
     }
 }
