@@ -187,9 +187,9 @@ namespace Coursework.Infrastructure.Services
                 string userEmail = "";
                 string userID = cId;
 
-                string carId = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.CarId).FirstOrDefault();
+                string carName= _dbContext.Car.Where(u => u.Id.ToString() == bookingToUpdate.CarId).Select(u => u.Name).FirstOrDefault();
 
-                string usrId = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.UserId).FirstOrDefault();
+                //string usrId = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.UserId).FirstOrDefault();
 
                 string desc = _dbContext.AdditionalCharges.Where(u => u.Id.ToString() == chargeID).Select(u => u.Description).FirstOrDefault();
 
@@ -201,7 +201,7 @@ namespace Coursework.Infrastructure.Services
                     userEmail = user.Email;
                 }
 
-                await _emailService.SendEmailAdditionalChargesAsync(amount.ToString(), desc, bId, carId, usrId, ct, userEmail);
+                await _emailService.SendEmailAdditionalChargesAsync(amount.ToString(), desc, bId, carName, user.UserName, ct, userEmail);
                 
                 return new ResponseDTO { Status = "Success", Message = "Additional Charges Invoice Sent" };
             }
