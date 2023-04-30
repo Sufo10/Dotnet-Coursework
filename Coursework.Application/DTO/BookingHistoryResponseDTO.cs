@@ -42,4 +42,10 @@ namespace Coursework.Application.DTO
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
     }
+
+    public class AdditionalChargeUpRequestDTO
+    {
+        public string ChargeId { get; set; }
+        public float Amount { get; set; }
+    }
 }

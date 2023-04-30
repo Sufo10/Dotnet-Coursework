@@ -39,20 +39,18 @@ namespace Coursework.API.Controllers
         }
 
         [HttpPost]
-        [Consumes("multipart/form-data")]
         [Route("/api/additional-charge")]
-        public async Task<ResponseDTO> AddAdditionalCharges([FromForm] AdditionalChargeRequestDTO model)
+        public async Task<ResponseDTO> AddAdditionalCharges(AdditionalChargeRequestDTO model)
         {
             var data = await _carDetails.AddAdditionalCharges(model);
             return data;
         }
 
         [HttpPatch]
-        [Consumes("multipart/form-data")]
         [Route("/api/additional-charge-send-invoice")]
-        public async Task<ResponseDTO> AddAdditionalChargesUpdate(string chargeID, float amount)
+        public async Task<ResponseDTO> AddAdditionalChargesUpdate(AdditionalChargeUpRequestDTO model)
         {
-            var data = await _carDetails.AddAdditionalChargesUpdate(chargeID, amount);
+            var data = await _carDetails.AddAdditionalChargesUpdate(model.ChargeId, model.Amount);
 
             return data;
         }
