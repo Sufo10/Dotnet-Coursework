@@ -66,7 +66,7 @@ namespace Coursework.Infrastructure.Services
         {
              var baseUrl = "https://localhost:7190/images/";
             var data = _dbContext.Car
-                .Where(c => c.isDeleted == false)
+                .Where(c => c.isDeleted != false)
                 .Select(e => new CarUserDTO()
             {
                 Id = e.Id,
