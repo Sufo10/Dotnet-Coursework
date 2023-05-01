@@ -90,6 +90,8 @@
             }
         </MudTd>
         <MudTd>
+            @if (IsOfficeHours)
+{
             <MudMenu Icon="@Icons.Material.Filled.MoreVert">
                 @if (context.IsAppoved != true && context.payment != true)
                 {
@@ -121,6 +123,7 @@
                     </MudMenuItem>
                 }
             </MudMenu>
+}
         </MudTd>
     </RowTemplate>
     <PagerContent>
@@ -135,6 +138,10 @@
 @code {
     [CascadingParameter(Name = "UserInfo")]
     public UserInfo User { get; set; }
+
+    [CascadingParameter(Name = "OfficeHoursInfo")]
+    private bool IsOfficeHours { get; set; }
+
     public bool _loading { get; set; } = true;
     DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
     private List<string> editEvents = new();

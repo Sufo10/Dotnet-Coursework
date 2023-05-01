@@ -43,7 +43,7 @@ namespace Coursework.Infrastructure.Services
                 {
                     Name = model.Name,
                     IsAvailable = true,
-                    RatePerDay = model.RatePerDay ?? model.ActualPrice,
+                    RatePerDay = model.RatePerDay == 0 ? model.ActualPrice : model.RatePerDay,
                     Image = uploadedFile,
                     Description=model.Description,
                     ActualPrice=model.ActualPrice

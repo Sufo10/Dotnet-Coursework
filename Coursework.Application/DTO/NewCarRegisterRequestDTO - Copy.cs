@@ -9,7 +9,7 @@ namespace Coursework.Application.DTO
         [Required(ErrorMessage = "Name is required")]
         public string? Name { get; set; }
 
-        public Double? RatePerDay { get; set; }
+        public Double RatePerDay { get; set; }
 
         [Required(ErrorMessage = "Description is required")]
         public string? Description { get; set; }

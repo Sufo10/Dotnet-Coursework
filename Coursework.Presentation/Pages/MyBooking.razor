@@ -99,14 +99,14 @@
                 <MudChip Variant="Variant.Filled" Color="Color.Info">Paid</MudChip>
 
             }
-            else if (context.IsPaid != true && context.IsApproved == true)
+            else if (context.IsPaid != true && context.IsApproved == true && context.IsDeleted!=true)
             {
                 <button @onclick="((e)=>handlePayment(context.Id))" class="khalti-btn">Pay Now</button>
             }
         </MudTd>
         <MudTd>
             <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                @if (context?.IsPaid != true || context.IsDeleted!=true || context.IsApproved==false || context?.OnRent!=true)
+                @if (context?.IsPaid != true && context.IsDeleted!=true && context?.OnRent!=true)
                 {
                     <MudMenuItem @onclick="@((e)=>CancelRequest(context.Id))">
                         <MudIcon Icon="@Icons.Material.Filled.Recommend" Title="Add" />

@@ -12,8 +12,8 @@
 <div class="hero">
     @*<div>
 
-    <MudImage Src="landing.png" Alt="Mony the dog" Class="" />
-    </div>*@
+        <MudImage Src="landing.png" Alt="Mony the dog" Class="" />
+        </div>*@
     <div>
         <MudText Typo="Typo.h2">
             The best way <br /> to rent a car
@@ -111,7 +111,7 @@ else
                                         }
                                     </div>
                                 }
-                                @if (User?.Role == "Admin" || User?.Role == "Staff")
+                                @if ((User?.Role == "Admin" || User?.Role == "Staff") && IsOfficeHours)
                                 {
                                     <MudSpacer />
                                     <MudMenu Icon="@Icons.Material.Filled.MoreVert">
@@ -139,13 +139,14 @@ else
 
 }
 
-
 @code {
     DialogOptions fullScreen = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
     DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
     [CascadingParameter(Name = "UserInfo")]
     public UserInfo User { get; set; }
 
+    [CascadingParameter(Name = "OfficeHoursInfo")]
+    private bool IsOfficeHours { get; set; }
     public List<Cars> Cars { get; set; } = new List<Cars>();
     public bool IsLoading { get; set; } = true;
     async Task OpenDialog(DialogOptions options, Cars car)
