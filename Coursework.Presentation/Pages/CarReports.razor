@@ -17,6 +17,12 @@
     <ToolBarContent>
         <MudText Typo="Typo.h6">Car Reports</MudText>
         <MudSpacer />
+        <MudSelect Margin="Margin.Dense" T="string" Label="Availability" Variant="Variant.Outlined" Class="justify-content-center" @bind-Value="_selectedValue">
+            <MudSelectItem Value="@("Available")" />
+            <MudSelectItem Value="@("On Rent")" />
+            <MudSelectItem Value="@("All")" />
+        </MudSelect>
+        <MudSpacer />
         <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <ColGroup>
@@ -91,6 +97,7 @@
     private TableEditButtonPosition editButtonPosition = TableEditButtonPosition.End;
     private TableEditTrigger editTrigger = TableEditTrigger.RowClick;
     private IEnumerable<CarReportDetails> Elements = new List<CarReportDetails>();
+    private string _selectedValue = "All";
 
     protected override async Task OnInitializedAsync()
     {
@@ -109,10 +116,43 @@
 
     private bool FilterFunc(CarReportDetails element)
     {
-        if (string.IsNullOrWhiteSpace(searchString))
+        string status = "All";
+        if (element.IsAvailable)
+        {
+            status = "Available";
+        }
+        else
+        {
+            status = "On Rent";
+        }
+
+        // filtering condition
+        if (string.IsNullOrWhiteSpace(searchString) && _selectedValue == "All")
+        {
             return true;
-        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+        }
+        else if (!string.IsNullOrWhiteSpace(searchString) && _selectedValue == "All")
+        {
+            if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
+        }
+        else if (string.IsNullOrWhiteSpace(searchString) && _selectedValue != "All")
+        {
+            if (_selectedValue == status)
+            {
+                return true;
+            }
+            return false;
+        }
+        else if (!string.IsNullOrWhiteSpace(searchString) && _selectedValue != "All")
+        {
+            if (_selectedValue == status && element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+            return false;
+        }
+        
         return false;
     }
 }
