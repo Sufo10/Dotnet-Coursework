@@ -96,7 +96,8 @@ namespace Coursework.Infrastructure.Services
                     RentStartDate = entityToUpdate.RentStartdate,
                     RentEndDate = entityToUpdate.RentEnddate,
                     RentalAmount = (int)Math.Round(totalAfterDiscount),
-                    VATAmount = vatAmount
+                    VATAmount = (int) Math.Round(vatAmount),
+                    Message = "Your request has been approved, Please pay the amount shown below:"
                 };
 
 

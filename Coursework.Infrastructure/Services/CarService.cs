@@ -2,6 +2,7 @@
 using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
 using Coursework.Domain.Entities;
+using Coursework.Infrastructure.Migrations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -60,9 +61,13 @@ namespace Coursework.Infrastructure.Services
             }
         }
         public async Task<ResponseDataDTO<List<CarUserDTO>>> GetActiveCars()
+
+
         {
              var baseUrl = "https://localhost:7190/images/";
-            var data = _dbContext.Car.Select(e => new CarUserDTO()
+            var data = _dbContext.Car
+                .Where(c => c.isDeleted == false)
+                .Select(e => new CarUserDTO()
             {
                 Id = e.Id,
                 Name=e.Name,
@@ -149,6 +154,30 @@ namespace Coursework.Infrastructure.Services
             catch (Exception err)
             {
                 return new ResponseDTO { Status = "Error", Message = err.ToString() };
+            }
+        }
+
+        public async Task<ResponseDTO> RemoveCars(string CarId)
+        {
+             try 
+            {
+                var entityToUpdate = await _dbContext.Car.FindAsync(Guid.Parse(CarId));
+
+
+                if (entityToUpdate == null)
+                {
+                    return new ResponseDTO() { Status = "Error", Message = "Car not found" };
+                }
+
+
+                entityToUpdate.isDeleted = true;
+                _dbContext.Car.Update(entityToUpdate);
+                await _dbContext.SaveChangesAsync(default(CancellationToken));
+                return new ResponseDTO() { Status = "Success", Message = "Car is removed." };
+            }
+            
+            catch (Exception ex) {
+                return new ResponseDTO() { Status = "Error", Message = ex.Message.ToString()};
             }
         }
     }

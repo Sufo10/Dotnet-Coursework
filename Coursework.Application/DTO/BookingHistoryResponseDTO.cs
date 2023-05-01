@@ -30,6 +30,7 @@ namespace Coursework.Application.DTO
         public bool? OnRent { get; set; }
         public bool? IsCompleted { get; set; }
         public string? CarId { get; set; }
+        public DateTime? CreatedAt { get; set; }
     }
 
     public class SalesRecordResponseDTO

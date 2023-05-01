@@ -12,11 +12,16 @@
 @using Microsoft.JSInterop
 
 <PageTitle>Damange Request</PageTitle>
-<MudTable Class="mt-5" Items="@Elements" Dense="false" Hover="true" ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info" 
-        SortLabel="Sort By" CommitEditTooltip="Commit Edit">
+<MudTable Class="mt-5" Items="@Elements" Dense="false" Hover="true" ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info"
+          SortLabel="Sort By" CommitEditTooltip="Commit Edit" Filter="new Func<AdditionalCharges,bool>(FilterFunc)">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Damage Request</MudText>
         <MudSpacer />
+        <MudSelect Margin="Margin.Dense" T="string" Label="Approval Status" Variant="Variant.Outlined" Class="justify-content-center" @bind-Value="_selectedValue">
+            <MudSelectItem Value="@("Paid")" />
+            <MudSelectItem Value="@("UnPaid")" />
+            <MudSelectItem Value="@("All")" />
+        </MudSelect>
         <MudSpacer />
         <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
@@ -154,5 +159,46 @@
                 _loading = false;
             }
         }
+    }
+
+    private bool FilterFunc(AdditionalCharges element)
+    {
+        string status = "";
+        if (element.IsPaid == true)
+        {
+            status = "Paid";
+        }
+        else if (element.IsPaid == false)
+        {
+            status = "UnPaid";
+        }
+
+        //filtering function
+        if (string.IsNullOrWhiteSpace(searchString) && _selectedValue == "All")
+        {
+            return true;
+        }
+        else if (!string.IsNullOrWhiteSpace(searchString) && _selectedValue == "All")
+        {
+            if (element.CarId.Contains(searchString, StringComparison.OrdinalIgnoreCase) || element.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
+        }
+        else if (string.IsNullOrWhiteSpace(searchString) && _selectedValue != "All")
+        {
+            if (_selectedValue == status)
+            {
+                return true;
+            }
+            return false;
+        }
+        else if (!string.IsNullOrWhiteSpace(searchString) && _selectedValue != "All")
+        {
+            if (_selectedValue == status && (element.CarId.Contains(searchString, StringComparison.OrdinalIgnoreCase) || element.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+            return false;
+        }
+        return false;
     }
 }
