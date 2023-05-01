@@ -32,6 +32,14 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [HttpGet]
+        [Route("/api/trash-cars")]
+        public async Task<ResponseDataDTO<List<CarUserDTO>>> GetTrashCars()
+        {
+            var data = await _carDetails.GetTrashCars();
+            return data;
+        }
+
         [HttpPost]
         [Consumes("multipart/form-data")]
         [Route("/api/cars")]
@@ -66,6 +74,15 @@ namespace Coursework.API.Controllers
             var data = await _carDetails.RemoveCars(CarId);
             return data;
         }
+
+        [Authorize]
+        [HttpDelete("/api/RestoreCar/{CarId}")]
+        public async Task<ResponseDTO> RestoreCar(string CarId)
+        {
+            var data = await _carDetails.RestoreCar(CarId);
+            return data;
+        }
+
 
     }
 }

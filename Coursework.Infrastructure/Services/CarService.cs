@@ -66,7 +66,7 @@ namespace Coursework.Infrastructure.Services
         {
              var baseUrl = "https://localhost:7190/images/";
             var data = _dbContext.Car
-                .Where(c => c.isDeleted != false)
+                .Where(c => c.isDeleted != true)
                 .Select(e => new CarUserDTO()
             {
                 Id = e.Id,
@@ -80,6 +80,28 @@ namespace Coursework.Infrastructure.Services
             }).ToList();
 
             return new ResponseDataDTO<List<CarUserDTO>> { Status="Success",Message="Data Fetched Successully",Data=data};
+        }
+
+        public async Task<ResponseDataDTO<List<CarUserDTO>>> GetTrashCars()
+
+
+        {
+            var baseUrl = "https://localhost:7190/images/";
+            var data = _dbContext.Car
+                .Where(c => c.isDeleted == true)
+                .Select(e => new CarUserDTO()
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    Image = baseUrl + e.Image,
+                    IsAvailable = e.IsAvailable,
+                    Description = e.Description,
+                    RatePerDay = e.RatePerDay,
+                    ActualPrice = e.ActualPrice
+
+                }).ToList();
+
+            return new ResponseDataDTO<List<CarUserDTO>> { Status = "Success", Message = "Data Fetched Successully", Data = data };
         }
 
         public async Task<ResponseDTO> EditCar(Guid Id, CarEditDTO model)
@@ -159,7 +181,7 @@ namespace Coursework.Infrastructure.Services
 
         public async Task<ResponseDTO> RemoveCars(string CarId)
         {
-             try 
+            try
             {
                 var entityToUpdate = await _dbContext.Car.FindAsync(Guid.Parse(CarId));
 
@@ -175,11 +197,37 @@ namespace Coursework.Infrastructure.Services
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
                 return new ResponseDTO() { Status = "Success", Message = "Car is removed." };
             }
-            
-            catch (Exception ex) {
-                return new ResponseDTO() { Status = "Error", Message = ex.Message.ToString()};
+
+            catch (Exception ex)
+            {
+                return new ResponseDTO() { Status = "Error", Message = ex.Message.ToString() };
+            }
+        }
+
+            public async Task<ResponseDTO> RestoreCar(string CarId)
+            {
+                try
+                {
+                    var entityToUpdate = await _dbContext.Car.FindAsync(Guid.Parse(CarId));
+
+
+                    if (entityToUpdate == null)
+                    {
+                        return new ResponseDTO() { Status = "Error", Message = "Car not found" };
+                    }
+
+
+                    entityToUpdate.isDeleted = false;
+                    _dbContext.Car.Update(entityToUpdate);
+                    await _dbContext.SaveChangesAsync(default(CancellationToken));
+                    return new ResponseDTO() { Status = "Success", Message = "Car is restored." };
+                }
+
+                catch (Exception ex)
+                {
+                    return new ResponseDTO() { Status = "Error", Message = ex.Message.ToString() };
+                }
             }
         }
     }
-}
 
