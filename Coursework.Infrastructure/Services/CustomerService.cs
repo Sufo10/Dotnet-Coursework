@@ -122,10 +122,12 @@ namespace Coursework.Infrastructure.Services
                        IsApproved=b.IsApproved,
                        TotalAmount=b.TotalAmount,
                        OnRent=b.OnRent,
-                       IsCompleted=b.IsComplete
-                   });
+                       IsCompleted=b.IsComplete,
+                       CreatedAt = b.CreatedAt
+                   }).OrderByDescending(b => b.CreatedAt); ;
 
-                return new ResponseDataDTO<IEnumerable<BookingHistoryResponseDTO>> { Status = "Success", Message = "Data Fetched Successully", Data = innerJoin };
+                var result = await innerJoin.ToListAsync();
+                return new ResponseDataDTO<IEnumerable<BookingHistoryResponseDTO>> { Status = "Success", Message = "Data Fetched Successully", Data = result };
             }
             catch (Exception e)
             {
