@@ -1,6 +1,151 @@
-﻿<h3>Component1</h3>
+﻿@page "/damage-request"
+@using System.Net.Http.Json
+@using MudBlazor
+@using System.Text;
+@using Newtonsoft.Json;
+@inject HttpClient _httpClient
+@inject IDialogService DialogService
+@inject IConfiguration _config
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@using Microsoft.JSInterop
+
+<PageTitle>Damange Request</PageTitle>
+<MudTable Class="mt-5" Items="@Elements" Dense="false" Hover="true" ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info" 
+        SortLabel="Sort By" CommitEditTooltip="Commit Edit">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Damage Request</MudText>
+        <MudSpacer />
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <ColGroup>
+        <col style="width:20%;" />
+        <col style="width:20%;" />
+        <col style="width:20%;" />
+        <col style="width:20%;" />
+        <col style="width:20%;" />
+    </ColGroup>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel Class="text-center" InitialDirection="SortDirection.Ascending" SortBy="new Func<AdditionalCharges, object>(x=>x.CarId)"> Name</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<AdditionalCharges, object>(x=>x.Description)">Description</MudTableSortLabel></MudTh>
+        <MudTh>Amount</MudTh>
+        <MudTh>Status</MudTh>
+        <MudTh>Action</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd Class="text-center" DataLabel="Car Name">@context.CarId</MudTd>
+        <MudTd Class="text-center" DataLabel="Description">@context.Description</MudTd>
+        <MudTd Class="text-center" DataLabel="End Date">
+            @if (context.Amount != 0)
+            {
+                @context.Amount
+            }
+            else
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Error">Pending</MudChip>
+
+            }
+        </MudTd>
+        <MudTd Class="text-center">
+            @if (context.IsPaid == true)
+            {
+                <MudChip Variant="Variant.Filled" Color="Color.Success">Paid</MudChip>
+            }
+            else if (context.IsPaid == false)
+            {
+                <MudChip Variant="Variant.Filled" Color="Color.Error">UnPaid</MudChip>
+            }
+        </MudTd>
+        <MudTd Class="text-center" DataLabel="Description">
+            <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                @if (context.IsPaid != true && context.Amount == 0)
+                {
+                    <MudMenuItem @onclick="@((e)=>ApproveRequest(maxWidth,context))">
+                        <MudIcon Icon="@Icons.Material.Filled.Approval" Title="Add" />
+                        Add Charge 
+                    </MudMenuItem>
+                }
+                @if (context?.IsPaid != true && context?.Amount!=0)
+                {
+                    <MudMenuItem @onclick="@((e) => MarkAsPaid(context.Id))" Style="display: flex; align-items: center">
+                        <MudIcon Icon="@Icons.Material.Filled.Paid" Title="Add" />
+                        Mark as Paid
+                    </MudMenuItem>
+                }
+            </MudMenu>
+        </MudTd>
+    </RowTemplate>
+
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+    <EditButtonContent Context="button">
+        <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+    </EditButtonContent>
+</MudTable>
 
 @code {
+    [CascadingParameter(Name = "UserInfo")]
+    public UserInfo User { get; set; }
+    public bool _loading { get; set; } = true;
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+    private string searchString = "";
+    private IEnumerable<AdditionalCharges> Elements = new List<AdditionalCharges>();
+    private string _selectedValue = "All";
 
+    protected override async Task OnInitializedAsync()
+    {
+        var currentUrl = NavigationManager.Uri;
+        if (currentUrl.Contains("/damage-request"))
+        {
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdditionalCharges>>>("https://localhost:7190/api/admin/additional-charges", User.Token);
+
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                Elements = jsonResponse.Data;
+                _loading = false;
+            }
+        }
+    }
+
+    async Task MarkAsPaid(string DamageId)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("DamageId", DamageId);
+        parameters.Add("User", User);
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = DialogService.Show<ApprovePayment>("Approve", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdditionalCharges>>>("https://localhost:7190/api/admin/additional-charges", User.Token);
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                Elements = jsonResponse.Data;
+                _loading = false;
+            }
+        }
+    }
+
+    async Task ApproveRequest(DialogOptions options, AdditionalCharges damage)
+    {
+        var parameters = new DialogParameters { ["damage"] = damage, ["User"] = User };
+        var dialog = await DialogService.ShowAsync<ApproveDamage>("Approve Damage", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            _loading = true;
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdditionalCharges>>>("https://localhost:7190/api/admin/additional-charges", User.Token ?? "");
+            Console.WriteLine(jsonResponse);
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                Elements = jsonResponse.Data;
+                _loading = false;
+            }
+        }
+    }
 }
-

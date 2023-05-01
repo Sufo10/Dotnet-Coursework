@@ -1,0 +1,90 @@
+﻿@using System.Text;
+@using Newtonsoft.Json;
+@inject ISnackbar Snackbar
+@inject HttpClient _httpClient
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.CarRental" Class="mr-3 mb-n1" />
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        
+      
+                <MudPaper Elevation="4" Outlined="true" Class="d-flex align-center justify-center mud-width-full py-8">
+                    <div>
+                        <MudText Class="mb-5">Offer Details</MudText>
+                        <MudForm @ref="form" @bind-IsValid="@isSuccess" @onsubmit="EditCarHandler" @bind-Errors="@errors" ReadOnly="false">
+                            <MudGrid Spacing=3>
+                                <MudItem xs="12">
+                                    <MudNumericField @bind-Value="DamagePrice" Label="Damage Rate" Format="F1" Variant="Variant.Outlined"></MudNumericField>
+                                </MudItem>
+                            </MudGrid>
+                        </MudForm>
+                    </div>
+                </MudPaper>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="!isSuccess || _processing" Color="Color.Error" OnClick="EditCarHandler">Approve</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+    MudForm form;
+
+    [Parameter]
+    public AdditionalCharges damage { get; set; } = new AdditionalCharges();
+
+    [Parameter]
+    public UserInfo User { get; set; }
+    bool isSuccess;
+    string[] errors = { };
+
+    bool _processing { get; set; }
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    protected override void OnParametersSet()
+    {
+        Name = damage.CarId;
+        Description = damage.Description;
+    }
+
+    public double DamagePrice;
+    public string Name;
+    public string Description;
+
+    async Task EditCarHandler()
+    {
+        _processing = true;
+        var client = new HttpClient();
+        var data = new
+        {
+            amount = DamagePrice.ToString(),
+            chargeId = damage.Id.ToString(),
+        };
+        var json = JsonConvert.SerializeObject(data);
+        var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+
+        var response = await HttpClientExtension.AuthPatchAsync<ApiResponse>(_httpClient, $"https://localhost:7190/api/additional-charge-send-invoice", content, User.Token.ToString());
+        // Process the response as needed
+        if (response != null && response.Status == "Success")
+        {
+            Snackbar.Add("Amount Published Successfully!", Severity.Success);
+            _processing = false;
+            StateHasChanged();
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            // Handle error responses
+            Snackbar.Add($"{response.Message}", Severity.Error);
+            _processing = false;
+        }
+    }
+}

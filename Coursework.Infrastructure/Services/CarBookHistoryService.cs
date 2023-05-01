@@ -212,10 +212,12 @@ namespace Coursework.Infrastructure.Services
             }
         }
 
-        public async Task<ResponseDataDTO<IEnumerable<AdditionalChargetDTO>>> GetAdditionalCharges(string id)
+        public async Task<ResponseDataDTO<IEnumerable<AdditionalChargetDTO>>> GetAdditionalCharges(string userEmail)
         {
             try
             {
+                var user = await  _userManager.FindByEmailAsync(userEmail);
+                var id = user.Id.ToString();
                 var data = await _dbContext.AdditionalCharges
                 .Where(ac => ac.UserId == id)
                 .Join(_dbContext.Car,

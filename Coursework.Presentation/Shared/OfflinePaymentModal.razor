@@ -107,15 +107,14 @@
         Amount = Booking.TotalAmount;
         CustomerName = Booking.CustomerName;
         CustomerPhone = Booking.CustomerPhone;
-        RentStartDate = Booking.RentStartDate.Substring(0, 10); 
-        RentEndDate = Booking.RentEndDate.Substring(0, 10); 
+        RentStartDate = Booking.RentStartDate.Substring(0, 10);
+        RentEndDate = Booking.RentEndDate.Substring(0, 10);
     }
 
     async Task handleSubmit()
     {
         var data = new { BookingId = Booking.BookingId };
         var json = JsonConvert.SerializeObject(data);
-        Console.WriteLine(data);
         var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
         if(content != null)
         {
@@ -123,7 +122,7 @@
             if (response != null && response.Status == "Success")
             {
                 Snackbar.Add("Car Payment Successful", Severity.Success);
-                MudDialog.Cancel();
+                MudDialog.Close(DialogResult.Ok(true));
             }
             else
             {
