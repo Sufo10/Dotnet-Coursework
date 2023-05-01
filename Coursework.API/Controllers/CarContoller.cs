@@ -59,5 +59,12 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [HttpPatch("/api/RemoveCar/{CarId}")]
+        public async Task<ResponseDTO> RemoveCarss(string CarId)
+        {
+            var data = await _carDetails.RemoveCars(CarId);
+            return data;
+        }
+
     }
 }
