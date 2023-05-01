@@ -40,7 +40,7 @@ namespace Coursework.Infrastructure.Services
             if (!IsFileExtensionValid(fileName))
                 throw new Exception("Only pdf and png is supported");
 
-            if (file.Length > 1.5 * 1024 * 1024) // 1MB
+            if (file.Length > 1.5 * 1024 * 1024) // 1.5MB
                 throw new Exception("File size exceeds the limit. Only file upto 1.5MB is supported");
 
             return await _fileStorage.SaveFileAsync(file);
@@ -154,7 +154,15 @@ namespace Coursework.Infrastructure.Services
                         var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == user.Id.ToString());
                         return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName, IsVerified = customer.IsVerified };
                     }
-                    return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName };
+                    else if(role=="Staff")
+                    {
+                        var employee = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == user.Id.ToString());
+                        return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName,IsVerified=employee.IsVerified };
+                    }
+                    else
+                    {
+                        return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName, IsVerified = true };
+                    }
                 }
             }
             catch (Exception err)

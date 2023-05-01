@@ -121,6 +121,10 @@ else
                                             <MudIcon Icon="@Icons.Material.Filled.Edit" Title="Edit" />
                                             Edit Car
                                         </MudMenuItem>
+                                        <MudMenuItem @onclick="@((e) => DeleteCar(item.Id.ToString()))">
+                                            <MudIcon Icon="@Icons.Material.Filled.Edit" Title="Edit" />
+                                            Delete Car
+                                        </MudMenuItem>
                                         <MudMenuItem @onclick="@((e) => OpenOfferDialog(maxWidth, item))">
                                             <MudIcon Icon="@Icons.Material.Filled.Paid" Title="Add" />
                                             Publish Offer
@@ -251,7 +255,31 @@ else
         }
     }
 
+    async Task DeleteCar(string CarId)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Do you really want to delete car?.");
+        parameters.Add("ButtonText", "Approve");
+        parameters.Add("Color", Color.Success);
+        parameters.Add("CarId", CarId);
+        parameters.Add("User", User);
 
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = DialogService.Show<ConfirmationBox>("Approve", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            IsLoading = true;
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
+
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                Cars = jsonResponse.Data;
+                IsLoading = false;
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
