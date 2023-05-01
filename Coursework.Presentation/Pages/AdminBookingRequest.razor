@@ -13,7 +13,17 @@
     <ToolBarContent>
         <MudText Typo="Typo.h6">Booking Request</MudText>
         <MudSpacer />
-        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        <MudSelect Margin="Margin.Dense" T="string" Label="Approval Status" Variant="Variant.Outlined" Class="justify-content-center" @bind-Value="_selectedValue">
+            <MudSelectItem Value="@("Approved")" />
+            <MudSelectItem Value="@("Pending")" />
+            <MudSelectItem Value="@("Cancelled")" />
+            <MudSelectItem Value="@("Completed")" />
+            <MudSelectItem Value="@("On Rent")" />
+            <MudSelectItem Value="@("Rejected")" />
+            <MudSelectItem Value="@("All")" />
+        </MudSelect>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search by car name or customer name" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <ColGroup>
         @if (applyButtonPosition.DisplayApplyButtonAtStart() || (editButtonPosition.DisplayEditButtonAtStart() && editTrigger == TableEditTrigger.EditButton))
@@ -136,11 +146,11 @@
 @*<MudText Inline="true">Selected1: @selectedItem1?.Name</MudText>*@
 
 @code {
-    [CascadingParameter(Name = "UserInfo")]
-    public UserInfo User { get; set; }
+        [CascadingParameter(Name = "UserInfo")]
+        public UserInfo User { get; set; }
 
-    [CascadingParameter(Name = "OfficeHoursInfo")]
-    private bool IsOfficeHours { get; set; }
+        [CascadingParameter(Name = "OfficeHoursInfo")]
+        private bool IsOfficeHours { get; set; }
 
     public bool _loading { get; set; } = true;
     DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
@@ -157,6 +167,7 @@
     private TableEditButtonPosition editButtonPosition = TableEditButtonPosition.End;
     private TableEditTrigger editTrigger = TableEditTrigger.RowClick;
     private IEnumerable<AdminBooking> Elements = new List<AdminBooking>();
+    private string _selectedValue = "All";
 
     async Task OpenUserAddDialog(DialogOptions options)
     {
@@ -285,12 +296,61 @@
 
     private bool FilterFunc(AdminBooking element)
     {
-        if (string.IsNullOrWhiteSpace(searchString))
+        string status = "";
+        if (element.IsDeleted == true)
+        {
+            status = "Cancelled";
+
+        }
+        else if (element.IsCompleted == true)
+        {
+            status = "Completed";
+        }
+        else if (element.IsAppoved == false)
+        {
+            status = "Rejected";
+
+        }
+        else if (element?.IsAppoved == true && element.OnRent == true)
+        {
+            status = "On Rent";
+        }
+        else if (element.IsAppoved == true)
+        {
+            status = "Approved";
+
+        }
+        else if (element.IsAppoved == null)
+        {
+            status = "Pending";
+        }
+
+        // filtering condition
+        if (string.IsNullOrWhiteSpace(searchString) && _selectedValue == "All")
+        {
             return true;
-        if (element.CustomerName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (element.CarName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+        }
+        else if (!string.IsNullOrWhiteSpace(searchString) && _selectedValue == "All")
+        {
+            if (element.CarName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || element.CustomerName.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
+        }
+        else if (string.IsNullOrWhiteSpace(searchString) && _selectedValue != "All")
+        {
+            if (_selectedValue == status)
+            {
+                return true;
+            }
+            return false;
+        }
+        else if (!string.IsNullOrWhiteSpace(searchString) && _selectedValue != "All")
+        {
+            if (_selectedValue == status && (element.CarName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || element.CustomerName.Contains(searchString, StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+            return false;
+        }
         return false;
     }
 }
