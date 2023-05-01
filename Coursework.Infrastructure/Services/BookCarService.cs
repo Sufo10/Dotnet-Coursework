@@ -79,6 +79,7 @@ namespace Coursework.Infrastructure.Services
                 var totalAmount = car.RatePerDay * rentDays;
                 var totalAfterDiscount = regular ? totalAmount * 0.9 : (isStaff ? totalAmount * 0.75 : totalAmount);
                 var vatAmount = totalAfterDiscount * 0.13;
+                
 
                 entityToUpdate.IsApproved = true;
                 entityToUpdate.ApprovedBy = userID;
@@ -94,7 +95,7 @@ namespace Coursework.Infrastructure.Services
                     RatePerDay = car.RatePerDay,
                     RentStartDate = entityToUpdate.RentStartdate,
                     RentEndDate = entityToUpdate.RentEnddate,
-                    RentalAmount = totalAfterDiscount,
+                    RentalAmount = (int)Math.Round(totalAfterDiscount),
                     VATAmount = vatAmount
                 };
 
@@ -142,8 +143,9 @@ namespace Coursework.Infrastructure.Services
 
                 var overlappingBookings = _dbContext.CustomerBooking
                 .Where(cb => cb.CarId == model.CarId
-                && cb.RentEnddate >= model.RentStartdate
-                && cb.RentStartdate <= model.RentEnddate);
+                && cb.RentEnddate >= model.RentStartdate.Date
+                && cb.RentStartdate <= model.RentEnddate.Date && cb.isDeleted != true);
+
 
                 var isAvailable = !overlappingBookings.Any();
 
@@ -151,9 +153,6 @@ namespace Coursework.Infrastructure.Services
                     return new ResponseDTO { Status = "Error", Message = "Car is not available for the requested date" };
                 }
                 else {
-
-
-
 
                     var role = await _userManager.GetRolesAsync(user);
 
@@ -250,7 +249,6 @@ namespace Coursework.Infrastructure.Services
                 let employee = _dbContext.Employee.FirstOrDefault(e => e.UserId == booking.customerId)
                 let customer = _dbContext.Customer.FirstOrDefault(c => c.UserId == booking.customerId)
                 let car = _dbContext.Car.FirstOrDefault(c => c.Id.ToString() == booking.CarId)
-
                 let customerName = employee != null ? employee.Name : customer.Name
                 let customerPhone = employee != null ? employee.Phone : customer.Phone
 
