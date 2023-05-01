@@ -1,0 +1,111 @@
+﻿@using System.Text;
+@using Newtonsoft.Json;
+@inject HttpClient _httpClient
+
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudText>@ContentText</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="@Color" Disabled="_processing" Variant="Variant.Filled"
+                   OnClick="CheckConfirmation">
+            @if (_processing)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">Processing</MudText>
+            }
+            else
+            {
+                <MudText> @ButtonText</MudText>
+            }
+        </MudButton>
+
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public string ContentText { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public MudBlazor.Color Color { get; set; }
+
+    [Parameter] public string BookingId { get; set; }
+
+    [Parameter] public string ActionName { get; set; }
+    [Parameter]
+    public UserInfo User { get; set; }
+
+    public bool _processing { get; set; }
+
+    async Task CheckConfirmation()
+    {
+        if (ActionName == "Return")
+        {
+            MarkAsReturned();
+        }
+        else if(ActionName=="Release")
+        {
+            ReleaseCar();
+        }
+    }
+
+    async Task MarkAsReturned()
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(""), Encoding.UTF8, "application/json");
+        if (content != null)
+        {
+            var response = await HttpClientExtension.AuthPatchAsync<ApiResponse>(_httpClient, $"https://localhost:7190/api/ReturnCar/{BookingId}", content, User.Token.ToString());
+            // Process the response as needed
+            if (response != null && response.Status == "Success")
+            {
+                Snackbar.Add("Car is now marked as returned!", Severity.Success);
+                _processing = false;
+                StateHasChanged();
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                // Handle error responses
+                Snackbar.Add($"{response.Message}", Severity.Error);
+                _processing = false;
+            }
+        }
+        else
+        {
+            Snackbar.Add("Some Problem Occured", Severity.Error);
+        }
+    }
+
+    async Task ReleaseCar()
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(""), Encoding.UTF8, "application/json");
+        if (content != null)
+        {
+            var response = await HttpClientExtension.AuthPatchAsync<ApiResponse>(_httpClient, $"https://localhost:7190/api/rentCar/{BookingId}", content, User.Token.ToString());
+            // Process the response as needed
+            if (response != null && response.Status == "Success")
+            {
+                Snackbar.Add("Car is now marked as on rent!", Severity.Success);
+                _processing = false;
+                StateHasChanged();
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                // Handle error responses
+                Snackbar.Add($"{response.Message}", Severity.Error);
+                _processing = false;
+            }
+        }
+        else
+        {
+            Snackbar.Add("Some Problem Occured", Severity.Error);
+        }
+    }
+    void Cancel() => MudDialog.Cancel();
+}
+

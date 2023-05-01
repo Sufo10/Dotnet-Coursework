@@ -240,9 +240,9 @@ namespace Coursework.Infrastructure.Services
                 AppUser user = new()
                 {
                     Email = model.Email,
+                    EmailConfirmed=true,
                     UserName = model.UserName,
                     SecurityStamp = Guid.NewGuid().ToString(),
-                 
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (!result.Succeeded)
@@ -250,7 +250,6 @@ namespace Coursework.Infrastructure.Services
                     var errorMessages = result.Errors.Select(e => e.Description).ToList();
                     return new ResponseDTO { Status = "Error", Message = string.Join("; ", errorMessages) };
                 }
-
                 if (model.EmployeeType.ToUpper() == "ADMIN" || model.EmployeeType.ToUpper() == "STAFF")
                 {
 

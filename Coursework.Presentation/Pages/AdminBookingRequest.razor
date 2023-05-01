@@ -63,21 +63,20 @@
                 <MudChip Variant="Variant.Outlined" Color="Color.Error">Rejected</MudChip>
 
             }
+            else if (context?.IsAppoved == true && context.OnRent == true)
+            {
+                <MudChip Variant="Variant.Outlined" Color="Color.Info">On Rent</MudChip>
+
+            }
             else if (context.IsAppoved == true)
             {
                 <MudChip Variant="Variant.Outlined" Color="Color.Success">Approved</MudChip>
-
-            }
-            else if (context.OnRent == true)
-            {
-                <MudChip Variant="Variant.Outlined" Color="Color.Info">On Rent</MudChip>
 
             }
             else if (context.IsAppoved == null)
             {
                 <MudChip Variant="Variant.Outlined" Color="Color.Warning">Pending</MudChip>
             }
-
         </MudTd>
         <MudTd Class="text-center">
             @if (context?.payment != true)
@@ -92,18 +91,14 @@
         </MudTd>
         <MudTd>
             <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-@if (context.IsAppoved !=true && context.payment!=true)
-{
-                <MudMenuItem @onclick="@((e)=>ApproveRequest(context.BookingId))">
+                @if (context.IsAppoved != true && context.payment != true)
+                {
+                    <MudMenuItem @onclick="@((e)=>ApproveRequest(context.BookingId))">
 
-                    <MudIcon Icon="@Icons.Material.Filled.Approval" Title="Add" />
-                    Approve Request
-                </MudMenuItem>
-                <MudMenuItem>
-                    <MudIcon Icon="@Icons.Material.Filled.Recommend" Title="Add" />
-                    Reject Request
-                </MudMenuItem>
-}                    
+                        <MudIcon Icon="@Icons.Material.Filled.Approval" Title="Add" />
+                        Approve Request
+                    </MudMenuItem>
+                }
                 @if (context?.payment != true && context?.IsCompleted != true && context?.IsAppoved == true)
                 {
                     <MudMenuItem @onclick="@((e) => OpenOfflinePayDialog(maxWidth, context))" Style="display: flex; align-items: center">
@@ -111,11 +106,23 @@
                         Offline Pay
                     </MudMenuItem>
                 }
+                @if (context?.payment == true && context?.IsAppoved == true && context?.IsCompleted == false && context?.OnRent!=true)
+                {
+                    <MudMenuItem @onclick="@((e)=>ReleaseCar(context.BookingId))" Style="display: flex; align-items: center">
+                        <MudIcon Icon="@Icons.Material.Filled.Payment" Title="Add" />
+                        Release Car
+                    </MudMenuItem>
+                }
+                @if (context?.payment == true && context?.IsAppoved == true && context?.IsCompleted == false && context?.OnRent==true)
+                {
+                    <MudMenuItem @onclick="@((e)=>MarkAsReturned(context.BookingId))" Style="display: flex; align-items: center">
+                        <MudIcon Icon="@Icons.Material.Filled.Payment" Title="Add" />
+                        Recieved Car
+                    </MudMenuItem>
+                }
             </MudMenu>
-
         </MudTd>
     </RowTemplate>
-
     <PagerContent>
         <MudTablePager />
     </PagerContent>
@@ -171,7 +178,6 @@
         {
             _loading = true;
             var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdminBooking>>>("https://localhost:7190/api/car-request", User.Token ?? "");
-            Console.WriteLine(jsonResponse);
             if (jsonResponse != null && jsonResponse.Status == "Success")
             {
                 Elements = jsonResponse.Data;
@@ -220,10 +226,56 @@
     }
 
 
-    //private void ApproveRequest(string BookingId)
-    //{
+    async Task MarkAsReturned(string BookingId)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Do you really want to mark the car as returned?.");
+        parameters.Add("ButtonText", "Approve");
+        parameters.Add("Color", Color.Success);
+        parameters.Add("BookingId", BookingId);
+        parameters.Add("ActionName", "Return");
+        parameters.Add("User", User);
 
-    //}
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = DialogService.Show<ConfirmationModal>("Approve", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdminBooking>>>("https://localhost:7190/api/car-request", User.Token);
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                Elements = jsonResponse.Data;
+                _loading = false;
+            }
+        }
+    }
+
+    async Task ReleaseCar(string BookingId)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Do you really want to release the car?.");
+        parameters.Add("ButtonText", "Approve");
+        parameters.Add("Color", Color.Error);
+        parameters.Add("BookingId", BookingId);
+        parameters.Add("ActionName", "Release");
+        parameters.Add("User", User);
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = DialogService.Show<ConfirmationModal>("Approve", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<AdminBooking>>>("https://localhost:7190/api/car-request", User.Token);
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                Elements = jsonResponse.Data;
+                _loading = false;
+            }
+        }
+    }
+
     private bool FilterFunc(AdminBooking element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
