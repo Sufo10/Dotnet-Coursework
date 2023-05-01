@@ -122,7 +122,7 @@ else
                                             Edit Car
                                         </MudMenuItem>
                                         <MudMenuItem @onclick="@((e) => DeleteCar(item.Id.ToString()))">
-                                            <MudIcon Icon="@Icons.Material.Filled.Edit" Title="Edit" />
+                                            <MudIcon Icon="@Icons.Material.Filled.Delete" Title="Edit" />
                                             Delete Car
                                         </MudMenuItem>
                                         <MudMenuItem @onclick="@((e) => OpenOfferDialog(maxWidth, item))">
@@ -266,7 +266,7 @@ else
 
         var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
 
-        var dialog = DialogService.Show<ConfirmationBox>("Approve", parameters, options);
+        var dialog = DialogService.Show<DeleteCarDialog>("Approve", parameters, options);
         var result = await dialog.Result;
         if (!result.Canceled)
         {

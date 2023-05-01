@@ -1,0 +1,143 @@
+﻿@page "/trash"
+@inject IDialogService DialogService
+@inject IConfiguration _config
+@inject HttpClient _httpClient
+@using Newtonsoft.Json;
+@using Newtonsoft.Json.Linq;
+@inject NavigationManager NavManager
+@inject ISnackbar Snackbar
+
+<PageTitle>Trash</PageTitle>
+
+@if (IsLoading)
+{
+    <MudGrid Spacing=2 Justify="Justify.FlexStart">
+
+        @for (int i = 0; i < 10; i++)
+        {
+            <MudItem xs="3">
+
+                <MudCard>
+                    <MudSkeleton Width="350px" SkeletonType="SkeletonType.Rectangle" Height="200px" />
+                    <MudCardContent>
+                        <MudSkeleton Width="100%" Height="42px;" />
+                        <MudSkeleton Width="80%" />
+                        <MudSkeleton Width="100%" />
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudSkeleton Width="64px" Height="40px" Class="ml-2" />
+                        <MudSkeleton Width="105px" Height="40px" Class="ml-3" />
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+
+    </MudGrid>
+}
+else
+{
+
+    <div class="d-flex flex-wrap">
+        @if (Cars.Count > 0)
+        {
+            @foreach (var item in Cars)
+            {
+                <MudCard width="380" class="product-card">
+                    <div class="product-tumb">
+                        <img src=@item.Image alt="">
+                    </div>
+                    <MudCardContent>
+                        <div class="product-details">
+                            <MudText Class="car-heading" Typo="Typo.h6">@item.Name</MudText>
+                            <MudText class="mt-4 car-description" Typo="Typo.body2">@item.Description</MudText>
+                            <div class="product-bottom-details">
+                                @if (item.ActualPrice != item.RatePerDay)
+                                {
+
+                                    <div class="product-price"><small>NPR @item.ActualPrice</small>NPR @item.RatePerDay</div>
+                                }
+                                else
+                                {
+
+                                    <div class="product-price">NPR @item.RatePerDay</div>
+                                }
+                                @if ((User?.Role == "Admin" || User?.Role == "Staff") && IsOfficeHours)
+                                {
+                                    <MudSpacer />
+                                    <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                                        <MudMenuItem @onclick="@((e) => RestoreCar(item.Id.ToString()))">
+                                            <MudIcon Icon="@Icons.Material.Filled.RestoreFromTrash" Title="Edit" />
+                                            Restore Car
+                                        </MudMenuItem>
+                                    </MudMenu>
+                                }
+                            </div>
+                        </div>
+                    </MudCardContent>
+
+                </MudCard>
+            }
+        }
+
+    </div>
+
+}
+
+@code {
+    [CascadingParameter(Name = "UserInfo")]
+    public UserInfo User { get; set; }
+
+    [CascadingParameter(Name = "OfficeHoursInfo")]
+    private bool IsOfficeHours { get; set; }
+
+    public List<Cars> Cars { get; set; } = new List<Cars>();
+    public bool IsLoading { get; set; } = true;
+
+
+
+    async Task RestoreCar(string CarId)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Do you really want to restore car?.");
+        parameters.Add("ButtonText", "Restore");
+        parameters.Add("Color", Color.Success);
+        parameters.Add("CarId", CarId);
+        parameters.Add("User", User);
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = DialogService.Show<DeleteCarDialog>("Restore", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            IsLoading = true;
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/trash-cars", User?.Token ?? "");
+
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                Cars = jsonResponse.Data;
+                IsLoading = false;
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        try
+        {
+
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/trash-cars", User?.Token ?? "");
+
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                Cars = jsonResponse.Data;
+                IsLoading = false;
+            }
+        }
+        catch (Exception err)
+        {
+            IsLoading = true;
+        }
+    }
+}

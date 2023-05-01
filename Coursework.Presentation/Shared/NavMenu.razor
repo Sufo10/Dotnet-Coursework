@@ -85,6 +85,14 @@
                 </span>
             </MudNavLink>
         }
+        @if (User?.Role == "Admin" || User?.Role == "Staff")
+        {
+            <MudNavLink Style="text-decoration:none" Href="/trash" Class="text-decoration-none" Icon="@Icons.Material.Filled.RestoreFromTrash">
+                <span class="text-decoration-none">
+                    Deleted Car
+                </span>
+            </MudNavLink>
+        }
         @if (User?.Username != null)
         {
             <MudNavLink Style="text-decoration:none" Href="/change-password" Class="text-decoration-none" Icon="@Icons.Material.Filled.Password">

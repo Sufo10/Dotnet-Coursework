@@ -43,8 +43,43 @@
 
     async Task CheckConfirmation()
     {
+        if (ButtonText == "Restore")
+        {
+            RestoreCar();
+        }
+        else
+        {
+
             DeletedCar();
-        
+        }
+
+    }
+
+    async Task RestoreCar()
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(""), Encoding.UTF8, "application/json");
+        if (content != null)
+        {
+            var response = await HttpClientExtension.AuthDeleteAsync<ApiResponse>(_httpClient, $"https://localhost:7190/api/RestoreCar/{CarId}", User.Token.ToString());
+            // Process the response as needed
+            if (response != null && response.Status == "Success")
+            {
+                Snackbar.Add("Car restored successfully!", Severity.Success);
+                _processing = false;
+                StateHasChanged();
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                // Handle error responses
+                Snackbar.Add($"{response.Message}", Severity.Error);
+                _processing = false;
+            }
+        }
+        else
+        {
+            Snackbar.Add("Some Problem Occured", Severity.Error);
+        }
     }
 
     async Task DeletedCar()
