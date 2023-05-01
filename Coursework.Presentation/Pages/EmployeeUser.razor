@@ -9,9 +9,12 @@
 
 <PageTitle>User</PageTitle>
 <div class="d-flex justify-end">
+    @if (IsOfficeHours)
+{
     <MudButton
                OnClick="@((e)=>OpenUserAddDialog(maxWidth))"
                Class="mt-5" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Add</MudButton>
+}
 </div>
 <MudTable Class="mt-5" Items="@Elements" Dense="false" Hover="true" ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info" Filter="new Func<EmployeeDetails,bool>(FilterFunc)"
           @bind-SelectedItem="selectedItem1" SortLabel="Sort By" CommitEditTooltip="Commit Edit">
@@ -57,6 +60,10 @@
 @code {
     [CascadingParameter(Name = "UserInfo")]
     public UserInfo User { get; set; }
+
+    [CascadingParameter(Name = "OfficeHoursInfo")]
+    private bool IsOfficeHours { get; set; }
+
     public bool _loading { get; set; } = true;
     DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
     private List<string> editEvents = new();

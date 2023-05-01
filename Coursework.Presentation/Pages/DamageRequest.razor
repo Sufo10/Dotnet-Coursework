@@ -59,6 +59,8 @@
             }
         </MudTd>
         <MudTd Class="text-center" DataLabel="Description">
+            @if (IsOfficeHours)
+{
             <MudMenu Icon="@Icons.Material.Filled.MoreVert">
                 @if (context.IsPaid != true && context.Amount == 0)
                 {
@@ -75,6 +77,7 @@
                     </MudMenuItem>
                 }
             </MudMenu>
+}
         </MudTd>
     </RowTemplate>
 
@@ -89,6 +92,10 @@
 @code {
     [CascadingParameter(Name = "UserInfo")]
     public UserInfo User { get; set; }
+
+    [CascadingParameter(Name = "OfficeHoursInfo")]
+    private bool IsOfficeHours { get; set; }
+
     public bool _loading { get; set; } = true;
     DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
     private string searchString = "";
