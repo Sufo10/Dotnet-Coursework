@@ -54,10 +54,10 @@ namespace Coursework.Infrastructure.Services
                     phone = "9815091234",
                 };
 
-                var rentalAmount = (int)Math.Round((customerBooking.RentEnddate - customerBooking.RentStartdate).Days * car.RatePerDay * 100); //amount in paisa
+                var totalAmount = customerBooking.TotalAmount * 100;
+                var rentalAmount = (int)Math.Round((customerBooking.TotalAmount / 1.13) * 100);
+                var VAT = totalAmount - rentalAmount;
 
-                var VAT = (int)Math.Round(0.13 * rentalAmount); // 13% Vat
-                var totalAmount = rentalAmount + VAT;
 
                 var productDetails = new[]
                 {
@@ -160,8 +160,8 @@ namespace Coursework.Infrastructure.Services
                     var car = await _dbContext.Car.FindAsync(Guid.Parse(customerBooking.CarId));
                     var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
                     double realAmount = amount / 113;
-                    var rentalAmount = (int) Math.Round(realAmount);
-                    var VATAmount =(int) Math.Round(amount/100 - realAmount);
+                    var rentalAmount = (int)Math.Round(realAmount);
+                    var VATAmount = (int)Math.Round(amount / 100 - realAmount);
                     var invoice = new GenerateInvoiceDTO()
                     {
                         CustomerName = customer.Name,
