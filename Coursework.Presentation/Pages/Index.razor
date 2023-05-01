@@ -12,257 +12,263 @@
 <div class="hero">
     @*<div>
 
-            <MudImage Src="landing.png" Alt="Mony the dog" Class="" />
+    <MudImage Src="landing.png" Alt="Mony the dog" Class="" />
     </div>*@
     <div>
-                    <MudText Typo="Typo.h2">
-                        The best way <br /> to rent a car
-                    </MudText>
-                    <MudText Class="mt-10" Typo="Typo.h5">
-                        Car Rental with special discount
-                    </MudText>
-                    <MudButton Class="mt-10" Variant="Variant.Filled" Color="Color.Primary">Get Started</MudButton>
+        <MudText Typo="Typo.h2">
+            The best way <br /> to rent a car
+        </MudText>
+        <MudText Class="mt-10" Typo="Typo.h5">
+            Car Rental with special discount
+        </MudText>
+        @if (User?.Token == null)
+        {
+            <MudButton Class="mt-10" Variant="Variant.Filled" Color="Color.Primary" @onclick="@((e)=>NavManager.NavigateTo("/register"))">
+                Get Started
+            </MudButton>
+        }
     </div>
 </div>
-        <div class="flex-1">
-        </div>
+<div class="flex-1">
+</div>
 
 <div class="d-flex justify-space-between mt-10">
     <MudText class="my-5 text-center text-white" Typo="Typo.h5">Cars We Offer</MudText>
     @if (User?.Role == "Admin" || User?.Role == "Staff")
-        {
+    {
         <MudCardActions>
             <MudButton OnClick="@((e) => OpenAddDialog(maxWidth))" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Add Cars</MudButton>
         </MudCardActions>
-        }
+    }
 </div>
 @if (IsLoading)
 {
-<MudGrid Spacing=2 Justify="Justify.FlexStart">
+    <MudGrid Spacing=2 Justify="Justify.FlexStart">
 
-    @for (int i = 0; i < 10; i++)
+        @for (int i = 0; i < 10; i++)
         {
             <MudItem xs="3">
 
-    <MudCard >
-        <MudSkeleton Width="350px" SkeletonType="SkeletonType.Rectangle" Height="200px" />
-        <MudCardContent>
-            <MudSkeleton Width="100%" Height="42px;" />
-            <MudSkeleton Width="80%" />
-            <MudSkeleton Width="100%" />
-        </MudCardContent>
-        <MudCardActions>
-            <MudSkeleton Width="64px" Height="40px" Class="ml-2" />
-            <MudSkeleton Width="105px" Height="40px" Class="ml-3" />
-        </MudCardActions>
-    </MudCard>
+                <MudCard>
+                    <MudSkeleton Width="350px" SkeletonType="SkeletonType.Rectangle" Height="200px" />
+                    <MudCardContent>
+                        <MudSkeleton Width="100%" Height="42px;" />
+                        <MudSkeleton Width="80%" />
+                        <MudSkeleton Width="100%" />
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudSkeleton Width="64px" Height="40px" Class="ml-2" />
+                        <MudSkeleton Width="105px" Height="40px" Class="ml-3" />
+                    </MudCardActions>
+                </MudCard>
             </MudItem>
         }
 
     </MudGrid>
-    }
-    else
-    {
+}
+else
+{
 
-<div class="d-flex flex-wrap">
-    @if (Cars.Count > 0)
+    <div class="d-flex flex-wrap">
+        @if (Cars.Count > 0)
         {
-        @foreach (var item in Cars)
+            @foreach (var item in Cars)
             {
-            <MudCard width="380" class="product-card">
-                 <div class="product-tumb">
-                    <img src=@item.Image alt="">
-                </div>
-                        <MudCardContent>
-                            <div class="product-details">
-                                <MudText Class="car-heading" Typo="Typo.h6">@item.Name</MudText>
-                                <MudText class="mt-4 car-description" Typo="Typo.body2">@item.Description</MudText>
-                                <div class="product-bottom-details">
-                                    @if (item.ActualPrice != item.RatePerDay)
+                <MudCard width="380" class="product-card">
+                    <div class="product-tumb">
+                        <img src=@item.Image alt="">
+                    </div>
+                    <MudCardContent>
+                        <div class="product-details">
+                            <MudText Class="car-heading" Typo="Typo.h6">@item.Name</MudText>
+                            <MudText class="mt-4 car-description" Typo="Typo.body2">@item.Description</MudText>
+                            <div class="product-bottom-details">
+                                @if (item.ActualPrice != item.RatePerDay)
+                                {
+
+                                    <div class="product-price"><small>NPR @item.ActualPrice</small>NPR @item.RatePerDay</div>
+                                }
+                                else
+                                {
+
+                                    <div class="product-price">NPR @item.RatePerDay</div>
+                                }
+                                @if (User?.Role != "Admin")
+                                {
+                                    <div class="product-links">
+                                        @if (User?.IsVerified == true)
                                         {
 
-                                        <div class="product-price"><small>NPR @item.ActualPrice</small>NPR @item.RatePerDay</div>
+                                            <MudButton OnClick="@((e) => OpenDialog(fullScreen, item))" Variant="Variant.Filled" Color="Color.Primary">Book Now</MudButton>
+                                        }
+                                        else if (User?.Username == null)
+                                        {
+                                            <MudButton OnClick="@((e) => RedirectLogin())" Variant="Variant.Filled" Color="Color.Primary">Book Now</MudButton>
                                         }
                                         else
                                         {
-
-                                        <div class="product-price">NPR @item.RatePerDay</div>
+                                            <MudButton OnClick="@((e) => OpenVerificationModel(fullScreen))" Variant="Variant.Filled" Color="Color.Primary">Verify</MudButton>
                                         }
-                                    @if (User?.Role != "Admin")
-                                        {
-                                        <div class="product-links">
-                                            @if (User?.IsVerified == true)
-                                                {
+                                    </div>
+                                }
+                                @if (User?.Role == "Admin" || User?.Role == "Staff")
+                                {
+                                    <MudSpacer />
+                                    <MudMenu Icon="@Icons.Material.Filled.MoreVert">
 
-                                                <MudButton OnClick="@((e) => OpenDialog(fullScreen, item))" Variant="Variant.Filled" Color="Color.Primary">Book Now</MudButton>
-                                                }
-                                                else if (User?.Username == null)
-                                                {
-                                                <MudButton OnClick="@((e) => RedirectLogin())" Variant="Variant.Filled" Color="Color.Primary">Book Now</MudButton>
-                                                }
-                                                else
-                                                {
-                                                <MudButton OnClick="@((e) => OpenVerificationModel(fullScreen))" Variant="Variant.Filled" Color="Color.Primary">Verify</MudButton>
-                                                }
-                                        </div>
-                                        }
-                                    @if (User?.Role == "Admin" || User?.Role == "Staff")
-                                        {
-                                            <MudSpacer/>
-                                        <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                                        <MudMenuItem @onclick="@((e) => OpenEditDialog(maxWidth, item))">
 
-                                            <MudMenuItem @onclick="@((e) => OpenEditDialog(maxWidth, item))">
-
-                                                <MudIcon Icon="@Icons.Material.Filled.Edit" Title="Edit" />
-                                                Edit Car
-                                            </MudMenuItem>
-                                            <MudMenuItem @onclick="@((e) => OpenOfferDialog(maxWidth, item))">
-                                                <MudIcon Icon="@Icons.Material.Filled.Paid" Title="Add" />
-                                                Publish Offer
-                                            </MudMenuItem>
-                                        </MudMenu>
-                                        }
-                                </div>
-</div>
-                            </MudCardContent>
+                                            <MudIcon Icon="@Icons.Material.Filled.Edit" Title="Edit" />
+                                            Edit Car
+                                        </MudMenuItem>
+                                        <MudMenuItem @onclick="@((e) => OpenOfferDialog(maxWidth, item))">
+                                            <MudIcon Icon="@Icons.Material.Filled.Paid" Title="Add" />
+                                            Publish Offer
+                                        </MudMenuItem>
+                                    </MudMenu>
+                                }
+                            </div>
+                        </div>
+                    </MudCardContent>
 
                 </MudCard>
             }
         }
 
-</div>
+    </div>
 
-    }
+}
 
 
-    @code{
-        DialogOptions fullScreen = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
-        DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
-        [CascadingParameter(Name = "UserInfo")]
-        public UserInfo User { get; set; }
+@code {
+    DialogOptions fullScreen = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+    [CascadingParameter(Name = "UserInfo")]
+    public UserInfo User { get; set; }
 
-        public List<Cars> Cars { get; set; } = new List<Cars>();
-        public bool IsLoading { get; set; } = true;
-        async Task OpenDialog(DialogOptions options, Cars car)
-        {
-            if (User?.Token == null)
-            {
-                Snackbar.Add("Please Login to book a car", Severity.Warning);
-                NavManager.NavigateTo("/login");
-            }
-
-            if (User?.IsVerified == false)
-            {
-                Snackbar.Add("Please Upload Required document to continue booking", Severity.Error);
-            }
-
-            var parameters = new DialogParameters { ["car"] = car, ["User"] = User };
-            var dialog = await DialogService.ShowAsync<BookingConfirm>("Book a Car", parameters, options);
-            var result = await dialog.Result;
-            if (!result.Canceled)
-            {
-                Console.WriteLine("Is Deleted");
-            }
-        }
-
-        async Task OpenEditDialog(DialogOptions options, Cars car)
-        {
-            var parameters = new DialogParameters { ["car"] = car, ["User"] = User };
-            var dialog = await DialogService.ShowAsync<EditCar>("Edit Car", parameters, options);
-            var result = await dialog.Result;
-            if (!result.Canceled)
-            {
-                IsLoading = true;
-                var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
-
-                if (jsonResponse != null && jsonResponse.Status == "Success")
-                {
-                    Cars = jsonResponse.Data;
-                    IsLoading = false;
-
-                }
-            }
-        }
-
-        async Task OpenOfferDialog(DialogOptions options, Cars car)
-        {
-            var parameters = new DialogParameters { ["car"] = car, ["User"] = User };
-            var dialog = await DialogService.ShowAsync<OfferPublish>("Edit Car", parameters, options);
-            var result = await dialog.Result;
-            if (!result.Canceled)
-            {
-                IsLoading = true;
-                var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
-
-                if (jsonResponse != null && jsonResponse.Status == "Success")
-                {
-                    Cars = jsonResponse.Data;
-                    IsLoading = false;
-
-                }
-            }
-        }
-        public void RedirectLogin()
+    public List<Cars> Cars { get; set; } = new List<Cars>();
+    public bool IsLoading { get; set; } = true;
+    async Task OpenDialog(DialogOptions options, Cars car)
+    {
+        if (User?.Token == null)
         {
             Snackbar.Add("Please Login to book a car", Severity.Warning);
             NavManager.NavigateTo("/login");
         }
 
-        async Task OpenAddDialog(DialogOptions options)
+        if (User?.IsVerified == false)
         {
-            var dialog = await DialogService.ShowAsync<AddCars>("Add New Car", options);
-            var result = await dialog.Result;
-            if (!result.Canceled)
+            Snackbar.Add("Please Upload Required document to continue booking", Severity.Error);
+        }
+
+        var parameters = new DialogParameters { ["car"] = car, ["User"] = User };
+        var dialog = await DialogService.ShowAsync<BookingConfirm>("Book a Car", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            Console.WriteLine("Is Deleted");
+        }
+    }
+
+    async Task OpenEditDialog(DialogOptions options, Cars car)
+    {
+        var parameters = new DialogParameters { ["car"] = car, ["User"] = User };
+        var dialog = await DialogService.ShowAsync<EditCar>("Edit Car", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            IsLoading = true;
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
+
+            if (jsonResponse != null && jsonResponse.Status == "Success")
             {
-                IsLoading = true;
-                var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
+                Cars = jsonResponse.Data;
+                IsLoading = false;
 
-                if (jsonResponse != null && jsonResponse.Status == "Success")
-                {
-                    Cars = jsonResponse.Data;
-                    IsLoading = false;
-
-                }
             }
         }
+    }
 
-        async Task OpenVerificationModel(DialogOptions options)
+    async Task OpenOfferDialog(DialogOptions options, Cars car)
+    {
+        var parameters = new DialogParameters { ["car"] = car, ["User"] = User };
+        var dialog = await DialogService.ShowAsync<OfferPublish>("Edit Car", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
         {
-            var parameters = new DialogParameters { ["User"] = User };
-            var dialog = await DialogService.ShowAsync<VerifyAccount>("Verify Account", parameters, options);
-            var result = await dialog.Result;
-            if (!result.Canceled)
+            IsLoading = true;
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
+
+            if (jsonResponse != null && jsonResponse.Status == "Success")
             {
-                IsLoading = true;
-                var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
+                Cars = jsonResponse.Data;
+                IsLoading = false;
 
-                if (jsonResponse != null && jsonResponse.Status == "Success")
-                {
-                    Cars = jsonResponse.Data;
-                    IsLoading = false;
-
-                }
             }
         }
+    }
+    public void RedirectLogin()
+    {
+        Snackbar.Add("Please Login to book a car", Severity.Warning);
+        NavManager.NavigateTo("/login");
+    }
 
-
-
-        protected override async Task OnInitializedAsync()
+    async Task OpenAddDialog(DialogOptions options)
+    {
+        var dialog = await DialogService.ShowAsync<AddCars>("Add New Car", options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
         {
+            IsLoading = true;
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
 
-            try
+            if (jsonResponse != null && jsonResponse.Status == "Success")
             {
+                Cars = jsonResponse.Data;
+                IsLoading = false;
 
-                var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
-
-                if (jsonResponse != null && jsonResponse.Status == "Success")
-                {
-                    Cars = jsonResponse.Data;
-                    IsLoading = false;
-                }
-            }catch(Exception err)
-            {
-                IsLoading = true;
             }
         }
+    }
+
+    async Task OpenVerificationModel(DialogOptions options)
+    {
+        var parameters = new DialogParameters { ["User"] = User };
+        var dialog = await DialogService.ShowAsync<VerifyAccount>("Verify Account", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            IsLoading = true;
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
+
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                Cars = jsonResponse.Data;
+                IsLoading = false;
+
+            }
         }
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        try
+        {
+
+            var jsonResponse = await _httpClient.AuthGetAsync<ApiResult<List<Coursework.Presentation.Data.Models.Cars>>>("https://localhost:7190/api/cars", User?.Token ?? "");
+
+            if (jsonResponse != null && jsonResponse.Status == "Success")
+            {
+                Cars = jsonResponse.Data;
+                IsLoading = false;
+            }
+        }
+        catch (Exception err)
+        {
+            IsLoading = true;
+        }
+    }
+}
