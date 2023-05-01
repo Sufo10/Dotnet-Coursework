@@ -59,35 +59,74 @@ namespace Coursework.Infrastructure.Services
             {
                 var currentUser = await _userManager.FindByEmailAsync(userEmail);
                 var userID = currentUser.Id;
-                var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
+                var roles = await _userManager.GetRolesAsync(currentUser);
+                var role = roles.FirstOrDefault();
 
-                if (customerDetails == null)
+                if (role== "Customer")
                 {
-                    return new ResponseDTO { Status = "Error", Message = "Customer not found." };
+                    var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
+
+                    if (customerDetails == null)
+                    {
+                        return new ResponseDTO { Status = "Error", Message = "Customer not found." };
+                    }
+
+                    if (customerDetails.IsVerified == true)
+                    {
+                        return new ResponseDTO { Status = "Error", Message = "Customer is already verified" };
+                    }
+                    else
+                    {
+                        var uploadedFile = await UploadAsync(model.File);
+                        var customerUpload = new CustomerFileUpload
+                        {
+                            FileName = uploadedFile,
+                            UserId = userID.ToString(),
+                            DocumentType = model.FileType,
+                            CreatedBy = customerDetails.Id
+                        };
+                        customerDetails.IsVerified = true;
+                        var customerInput = await _dbContext.CustomerFileUpload.AddAsync(customerUpload);
+                        _dbContext.Customer.Update(customerDetails);
+                        //if(customerInput)
+                        await _dbContext.SaveChangesAsync(default(CancellationToken));
+                        return new ResponseDTO { Status = "Success", Message = "Document added successfully." };
+                    }
                 }
+                else if(role=="Staff"){
+                    var employeeDetails = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
 
-                if (customerDetails.IsVerified == true)
-                {
-                    return new ResponseDTO { Status = "Error", Message = "Customer is already verified" };
+                    if (employeeDetails == null)
+                    {
+                        return new ResponseDTO { Status = "Error", Message = "Employee not found." };
+                    }
+
+                    if (employeeDetails.IsVerified == true)
+                    {
+                        return new ResponseDTO { Status = "Error", Message = "Employee is already verified" };
+                    }
+                    else
+                    {
+                        var uploadedFile = await UploadAsync(model.File);
+                        var customerUpload = new CustomerFileUpload
+                        {
+                            FileName = uploadedFile,
+                            UserId = userID.ToString(),
+                            DocumentType = model.FileType,
+                            CreatedBy = employeeDetails.Id
+                        };
+                        employeeDetails.IsVerified = true;
+                        var customerInput = await _dbContext.CustomerFileUpload.AddAsync(customerUpload);
+                        _dbContext.Employee.Update(employeeDetails);
+                        //if(customerInput)
+                        await _dbContext.SaveChangesAsync(default(CancellationToken));
+                        return new ResponseDTO { Status = "Success", Message = "Document added successfully." };
+                    }
                 }
                 else
                 {
-                    var uploadedFile = await UploadAsync(model.File);
-                    var customerUpload = new CustomerFileUpload
-                    {
-                        FileName = uploadedFile,
-                        UserId = userID.ToString(),
-                        DocumentType = model.FileType,
-                        CreatedBy = customerDetails.Id
-                    };
-                    customerDetails.IsVerified = true;
-                    var customerInput = await _dbContext.CustomerFileUpload.AddAsync(customerUpload);
-                    _dbContext.Customer.Update(customerDetails);
-                    //if(customerInput)
-                    await _dbContext.SaveChangesAsync(default(CancellationToken));
-                    return new ResponseDTO { Status = "Success", Message = "Document added successfully." };
+                    return new ResponseDTO { Status = "Error", Message = "Some Problem Occured" };
                 }
-
             }
             catch (Exception err)
             {

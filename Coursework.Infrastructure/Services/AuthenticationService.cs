@@ -154,7 +154,15 @@ namespace Coursework.Infrastructure.Services
                         var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == user.Id.ToString());
                         return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName, IsVerified = customer.IsVerified };
                     }
-                    return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName };
+                    else if(role=="Staff")
+                    {
+                        var employee = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == user.Id.ToString());
+                        return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName,IsVerified=employee.IsVerified };
+                    }
+                    else
+                    {
+                        return new LoginResponseDTO { Status = "Success", Message = "Login Success", Data = token, Role = role, UserName = model.UserName, IsVerified = true };
+                    }
                 }
             }
             catch (Exception err)
