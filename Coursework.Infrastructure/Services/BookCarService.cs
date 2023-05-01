@@ -252,8 +252,6 @@ namespace Coursework.Infrastructure.Services
                 let customerName = employee != null ? employee.Name : customer.Name
                 let customerPhone = employee != null ? employee.Phone : customer.Phone
 
-
-
                 select new GetCarBookingRequestDTO
                 {
                     BookingId = booking.Id.ToString(),
@@ -270,9 +268,10 @@ namespace Coursework.Infrastructure.Services
                     IsCompleted = booking.IsComplete,
                     OnRent = booking.OnRent,
                     payment = booking.payment,
-                    IsDeleted=booking.isDeleted
+                    IsDeleted=booking.isDeleted,
+                    CreatedAt = booking.CreatedAt
                 }
-                ).ToListAsync();
+                ).OrderByDescending(b => b.CreatedAt).ToListAsync();
 
                 if (bookingRequests.Count == 0)
                 {
