@@ -49,6 +49,7 @@ namespace Coursework.API.Controllers
             else return BadRequest(data);
         }
 
+        [Authorize(Roles = "Admin,Staff")]
         [HttpPost]
         //[Authorize (Roles = "Staff")]
         [Route("/api/offline-payment")]
@@ -59,8 +60,8 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [Authorize(Roles = "Admin,Staff")]
         [HttpPost]
-        //[Authorize (Roles = "Staff")]
         [Route("/api/offline-payment/addtional-charge")]
         public async Task<ResponseDataDTO<KhaltiResponseDTO>> OfflinePaymentForAdditonalCharge(AdditonalChargePaymentDTO model)
         {

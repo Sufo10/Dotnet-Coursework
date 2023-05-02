@@ -28,7 +28,7 @@ namespace Coursework.Infrastructure.Services
         {
             var fileName = file.FileName;
 
-            if (file.Length > 1 * 1024 * 1024) // 1MB
+            if (file.Length > 1 * 1024 * 1024) // 1.5MB
                 throw new Exception("File size exceeds the limit");
 
             return await _fileStorage.SaveFileAsync(file);
@@ -40,7 +40,7 @@ namespace Coursework.Infrastructure.Services
             try
             {
                 var uploadedFile = await UploadAsync(model.File);
-                var newCar = new Car
+                var newCar = new Car //new car object
                 {
                     Name = model.Name,
                     IsAvailable = true,
@@ -64,14 +64,14 @@ namespace Coursework.Infrastructure.Services
 
 
         {
-             var baseUrl = "https://localhost:7190/images/";
+             var baseUrl = "https://localhost:7190/images/"; 
             var data = _dbContext.Car
                 .Where(c => c.isDeleted != true)
                 .Select(e => new CarUserDTO()
             {
                 Id = e.Id,
                 Name=e.Name,
-                Image = baseUrl + e.Image,
+                Image = baseUrl + e.Image, //adding image with base url
                 IsAvailable=e.IsAvailable,
                 Description=e.Description,
                 RatePerDay=e.RatePerDay,
@@ -93,7 +93,7 @@ namespace Coursework.Infrastructure.Services
                 {
                     Id = e.Id,
                     Name = e.Name,
-                    Image = baseUrl + e.Image,
+                    Image = baseUrl + e.Image,  //adding image with base url
                     IsAvailable = e.IsAvailable,
                     Description = e.Description,
                     RatePerDay = e.RatePerDay,
@@ -119,7 +119,7 @@ namespace Coursework.Infrastructure.Services
 
                 // Update the car properties with values from the CarEditDTO object
                 car.Name = model.Name;
-                car.ActualPrice = model.RatePerDay;
+                car.ActualPrice = model.RatePerDay; 
                 car.Description = model.Description;
 
                 // Save the changes to the database
@@ -168,7 +168,7 @@ namespace Coursework.Infrastructure.Services
                         CustomerEmail = await _userManager.GetEmailAsync(user)
                     };
 
-                    await _emailService.SendOfferNoticeAsync(notice);
+                    await _emailService.SendOfferNoticeAsync(notice);  //sending email about the offer
                 }
 
                 return new ResponseDTO { Status = "Success", Message = "Rate per Day Edited successfully" };
@@ -192,7 +192,7 @@ namespace Coursework.Infrastructure.Services
                 }
 
 
-                entityToUpdate.isDeleted = true;
+                entityToUpdate.isDeleted = true;  //marking as deleted
                 _dbContext.Car.Update(entityToUpdate);
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
                 return new ResponseDTO() { Status = "Success", Message = "Car is removed." };
@@ -217,7 +217,7 @@ namespace Coursework.Infrastructure.Services
                     }
 
 
-                    entityToUpdate.isDeleted = false;
+                    entityToUpdate.isDeleted = false;  // marking as not deleted
                     _dbContext.Car.Update(entityToUpdate);
                     await _dbContext.SaveChangesAsync(default(CancellationToken));
                     return new ResponseDTO() { Status = "Success", Message = "Car is restored." };

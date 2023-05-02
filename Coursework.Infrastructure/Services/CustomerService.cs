@@ -28,7 +28,7 @@ namespace Coursework.Infrastructure.Services
             if (!IsFileExtensionValid(fileName))
                 throw new Exception("Only pdf and png is supported");
 
-            if (file.Length > 1.5 * 1024 * 1024) // 1MB
+            if (file.Length > 1.5 * 1024 * 1024) // 1.5MB
                 throw new Exception("File size exceeds the limit");
 
             return await _fileStorage.SaveFileAsync(file);
@@ -86,13 +86,14 @@ namespace Coursework.Infrastructure.Services
                             CreatedBy = customerDetails.Id
                         };
                         customerDetails.IsVerified = true;
-                        var customerInput = await _dbContext.CustomerFileUpload.AddAsync(customerUpload);
+                        var customerInput = await _dbContext.CustomerFileUpload.AddAsync(customerUpload); 
                         _dbContext.Customer.Update(customerDetails);
                         //if(customerInput)
                         await _dbContext.SaveChangesAsync(default(CancellationToken));
                         return new ResponseDTO { Status = "Success", Message = "Document added successfully." };
                     }
                 }
+                //adding document as staff
                 else if(role=="Staff"){
                     var employeeDetails = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
 
@@ -107,7 +108,7 @@ namespace Coursework.Infrastructure.Services
                     }
                     else
                     {
-                        var uploadedFile = await UploadAsync(model.File);
+                        var uploadedFile = await UploadAsync(model.File);  // saving document
                         var customerUpload = new CustomerFileUpload
                         {
                             FileName = uploadedFile,

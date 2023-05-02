@@ -16,8 +16,8 @@ namespace Coursework.API.Controllers
             _book = book;
         }
 
-        [HttpPost]
         [Authorize]
+        [HttpPost]
         [Route("/api/bookcars")]
         public async Task<ResponseDTO> BookRequest(BookCarRequestDTO model)
         {
@@ -27,6 +27,7 @@ namespace Coursework.API.Controllers
         }
 
 
+        [Authorize]
         [HttpGet]
         [Route("/api/car-request")]
 
@@ -36,6 +37,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [Authorize]
         [HttpDelete]
         [Route("/api/car-request/{BookingId}")]
         public async Task<ResponseDTO> RejectCarBooking(String BookingId)
@@ -45,13 +47,12 @@ namespace Coursework.API.Controllers
         }
 
 
-        [HttpPost]
         [Authorize]
+        [HttpPost]
         [Route("/api/verify-request/{bookingId}")]
 
         public async Task<ResponseDTO> VerifyBooking(String bookingId)
         {
-
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             var verify = await _book.ApproveBookingRequest(bookingId, userEmail);
             return verify;

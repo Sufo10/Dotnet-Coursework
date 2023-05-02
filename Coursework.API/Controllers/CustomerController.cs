@@ -16,7 +16,7 @@ namespace Coursework.API.Controllers
             _customerDetails = customerDetails;
         }
 
-        [HttpPost]
+        [Authorize]
         [Authorize]
         [Consumes("multipart/form-data")]
         [Route("/api/upload-document")]

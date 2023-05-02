@@ -32,14 +32,7 @@ namespace Coursework.API.Controllers
             _baseUrl = configuration.GetSection("BaseUrl:Frontend").Value!;
 
         }
-        [HttpGet]
-        [Route("api/customer/all-customer")]
-        public async Task<List<Customer>> GetAllCustomerDetails()
-        {
-            var data = await _customerDetails.GetAllCustomerService();
-            return data;
-        }
-
+       
         [HttpPost]
         [Consumes("multipart/form-data")]
         [Route("/api/register")]
@@ -58,7 +51,6 @@ namespace Coursework.API.Controllers
             return data;
         }
 
-        //incomplete
         [HttpPost]
         [AllowAnonymous]
         [Route("/api/forgot-password")]
@@ -114,6 +106,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [Authorize(Roles ="Admin")]
         [HttpGet]
         [Route("/api/employees")]
         public async Task<ResponseDataDTO<List<EmployeeResponseDTO>>> GetAllEmployee()

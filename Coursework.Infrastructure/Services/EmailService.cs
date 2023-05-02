@@ -22,7 +22,7 @@ namespace Coursework.Infrastructure.Services
         private readonly SmtpClient _client;
         private readonly string _applicationUrl;
         public EmailService(IConfiguration configuration) {
-            var userName = configuration.GetSection("EmailConfig:UserName").Value!;
+            var userName = configuration.GetSection("EmailConfig:UserName").Value!; //authentication gmail
             var password = configuration.GetSection("EmailConfig:Password").Value!;
             _from = userName;
             _client = new SmtpClient("smtp.gmail.com", 587)
@@ -34,7 +34,7 @@ namespace Coursework.Infrastructure.Services
             _applicationUrl = configuration.GetSection("BaseUrl:Frontend").Value!;
         }
 
-        public async Task SendEmailAsync(MessageModel message)
+        public async Task SendEmailAsync(MessageModel message)  //send mail function
         {
             var mailMessage = new MailMessage(_from, message.To, message.Subject, message.Body)
             {
@@ -44,7 +44,7 @@ namespace Coursework.Infrastructure.Services
             await _client.SendMailAsync(mailMessage);
             }
 
-        public async Task SendForgotPasswordEmailAsync(string name, string toEmail, string passwordResetToken)
+        public async Task SendForgotPasswordEmailAsync(string name, string toEmail, string passwordResetToken)  //send forgot password 
         {
             var passwordRestUrl = $"{_applicationUrl}reset-password?token={passwordResetToken}&email={toEmail}";
             var message = new MessageModel

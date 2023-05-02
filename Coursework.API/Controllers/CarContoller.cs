@@ -32,6 +32,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [Authorize(Roles ="Admin,Staff")]
         [HttpGet]
         [Route("/api/trash-cars")]
         public async Task<ResponseDataDTO<List<CarUserDTO>>> GetTrashCars()
@@ -40,6 +41,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [Authorize(Roles = "Admin,Staff")]
         [HttpPost]
         [Consumes("multipart/form-data")]
         [Route("/api/cars")]
@@ -49,6 +51,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [Authorize(Roles = "Admin,Staff")]
         [HttpPatch("/api/editcar/{id}")]
         [Consumes("multipart/form-data")]
         //[Route("/api/editcar")]
@@ -58,6 +61,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [Authorize(Roles = "Admin,Staff")]
         [HttpPatch("/api/RatePerDay/{id}")]
         [Consumes("multipart/form-data")]
         //[Route("/api/editcar")]
@@ -67,7 +71,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Staff")]
         [HttpDelete("/api/RemoveCar/{CarId}")]
         public async Task<ResponseDTO> RemoveCarss(string CarId)
         {
@@ -75,7 +79,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Staff")]
         [HttpDelete("/api/RestoreCar/{CarId}")]
         public async Task<ResponseDTO> RestoreCar(string CarId)
         {
