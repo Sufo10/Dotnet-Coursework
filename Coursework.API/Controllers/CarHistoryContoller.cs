@@ -25,7 +25,8 @@ namespace Coursework.API.Controllers
         }
 
 
-        // API to 
+        // API to
+        [Authorize(Roles = "Admin,Staff")]
         [HttpGet("/api/car-booking-history/{id}")]
         public async Task<ResponseDataDTO<IEnumerable<BookingHistoryResponseDTO>>> GetCarHistoryy(string id)
         {
@@ -33,6 +34,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [Authorize(Roles = "Admin,Staff")]
         [HttpGet("/api/sales-record")]
         public async Task<ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>>> GetCarHistory()
         {
@@ -40,6 +42,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [Authorize]
         [HttpPost]
         [Route("/api/additional-charge")]
         public async Task<ResponseDTO> AddAdditionalCharges(AdditionalChargeRequestDTO model)
@@ -48,6 +51,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [Authorize(Roles = "Admin,Staff")]
         [HttpPatch]
         [Route("/api/additional-charge-send-invoice")]
         public async Task<ResponseDTO> AddAdditionalChargesUpdate(AdditionalChargeUpRequestDTO model)
@@ -66,6 +70,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [Authorize(Roles = "Admin,Staff")]
         [HttpGet("/api/admin/additional-charges")]
         public async Task<ResponseDataDTO<IEnumerable<AdditionalChargetDTO>>> GetAddiChgs2()
         {

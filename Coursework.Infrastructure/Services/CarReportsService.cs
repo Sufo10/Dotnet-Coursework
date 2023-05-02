@@ -31,7 +31,7 @@ namespace Coursework.Infrastructure.Services
                                Name = car.Name,
                                IsAvailable = car.IsAvailable,
                                Description = car.Description,
-                               Image =baseUrl+ car.Image,
+                               Image =baseUrl+ car.Image, // setting image with base url
                                RatePerDay = car.RatePerDay,
                                ActualPrice = car.ActualPrice,
                                NumberOfRentals = _dbContext.CustomerBooking.Count(booking => booking.CarId == car.Id.ToString() && booking.OnRent == true)

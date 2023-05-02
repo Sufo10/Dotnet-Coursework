@@ -1,5 +1,6 @@
 ﻿using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +17,7 @@ namespace Coursework.API.Controllers
             _Track = track;
         }
 
+        [Authorize (Roles = "Staff")]
         [HttpGet]
         [Route("/api/mostRequest")]
         public async Task<ResponseDataDTO<List<GetMostRentalRequestDTO>>> GetMostRentalRequesttt()
@@ -24,7 +26,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
-
+        [Authorize (Roles = "Staff")]
         [HttpGet]
         [Route("/api/inactiveUsers")]
 

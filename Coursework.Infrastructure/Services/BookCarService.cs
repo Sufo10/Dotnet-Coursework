@@ -38,12 +38,12 @@ namespace Coursework.Infrastructure.Services
             try
             {
                 var user = await _userManager.FindByEmailAsync(email);
-                string userID = user.Id; //user Id of the staff who is 
+                string userID = user.Id; //user Id of the staff who is approving the request
                 var entityToUpdate = await _dbContext.CustomerBooking.SingleOrDefaultAsync(c => c.Id == Guid.Parse( bookingId));
                 var customerId = entityToUpdate.customerId;
                 var customerDetails1 = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerId.ToString());
                 var customerDetails =  await _userManager.FindByIdAsync(customerDetails1.UserId);
-                var latestBooking = await _dbContext.CustomerBooking
+                var latestBooking = await _dbContext.CustomerBooking  //getting user latest booking
                     .Where(b => b.customerId == customerId && (bool)b.IsApproved)
                     .OrderByDescending(b => b.RentStartdate)
                     .FirstOrDefaultAsync();
@@ -58,14 +58,14 @@ namespace Coursework.Infrastructure.Services
 
                 if (latestBooking != null && latestBooking.RentStartdate >= threeMonthsAgo)
                 {
-                    regular = true;
+                    regular = true;  //user is regualr
                 }
 
                 var customerRole = await _userManager.GetRolesAsync(customerDetails);
                 
                 if ( customerRole.FirstOrDefault() == "staff") 
                 {
-                    isStaff = true;
+                    isStaff = true; //user is staff
                 }
 
                 var car = await _dbContext.Car
@@ -102,7 +102,7 @@ namespace Coursework.Infrastructure.Services
 
 
 
-                _emailService.SendPaymentInvoiceAsync(invoice); 
+                _emailService.SendPaymentInvoiceAsync(invoice); //sending email
 
                 return new ResponseDTO() { Status = "Success", Message = "Booking request approved" };
             }
@@ -128,7 +128,7 @@ namespace Coursework.Infrastructure.Services
 
                 var car = await _dbContext.Car.SingleOrDefaultAsync(c => c.Id == Guid.Parse(model.CarId));
                 var today = DateTime.Today;
-                var threeMonthsAgo = today.AddMonths(-3);
+                var threeMonthsAgo = today.AddMonths(-3); //getting user booking
 
                 var latestBooking = await _dbContext.CustomerBooking
                 .Where(b => b.customerId == userID && (bool)b.IsApproved)
@@ -142,7 +142,7 @@ namespace Coursework.Infrastructure.Services
                     regular = true;
                 }
 
-                var overlappingBookings = _dbContext.CustomerBooking
+                var overlappingBookings = _dbContext.CustomerBooking //car is already booked for particular date range
                 .Where(cb => cb.CarId == model.CarId
                 && cb.RentEnddate >= model.RentStartdate.Date
                 && cb.RentStartdate <= model.RentEnddate.Date && cb.isDeleted != true);
@@ -157,7 +157,7 @@ namespace Coursework.Infrastructure.Services
 
                     var role = await _userManager.GetRolesAsync(user);
 
-                    if (role.FirstOrDefault() == "Customer")
+                    if (role.FirstOrDefault() == "Customer") //checking user roel for applying discount
                     {
 
                         var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
@@ -170,10 +170,10 @@ namespace Coursework.Infrastructure.Services
                         else
                         {
                             
-                            var rentDays = (model.RentEnddate - model.RentStartdate).TotalDays + 1;
-                            var totalAmount = car.RatePerDay * rentDays;
-                            var totalAfterDiscount = regular ? totalAmount * 0.9 : totalAmount;
-                            var vatAmount = totalAfterDiscount * 0.13 + totalAfterDiscount;
+                            var rentDays = (model.RentEnddate - model.RentStartdate).TotalDays + 1; //number of days for rent
+                            var totalAmount = car.RatePerDay * rentDays; 
+                            var totalAfterDiscount = regular ? totalAmount * 0.9 : totalAmount; //amount after discount
+                            var vatAmount = totalAfterDiscount * 0.13 + totalAfterDiscount;  //amount with vat
 
                             var bookCar = new CustomerBooking
                             {
@@ -191,7 +191,7 @@ namespace Coursework.Infrastructure.Services
                             return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
                         }
                     }
-                    else if (role.FirstOrDefault() == "Staff")
+                    else if (role.FirstOrDefault() == "Staff")  //if user is staff
                     {
 
                         var customerDetails = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
@@ -211,9 +211,9 @@ namespace Coursework.Infrastructure.Services
                                 customerId = userID.ToString(),
                                 CarId = model.CarId,
                                 RentStartdate = model.RentStartdate,
-                                RentEnddate = model.RentEnddate
+                                RentEnddate = model.RentEnddate,
+                                TotalAmount = (int)Math.Round(vatAmount)
                             };
-
                             var RequestInput = await _dbContext.CustomerBooking.AddAsync(bookCar);
                             await _dbContext.SaveChangesAsync(default(CancellationToken));
                             return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
@@ -304,7 +304,7 @@ namespace Coursework.Infrastructure.Services
                     return new ResponseDTO() { Status = "Error", Message = "Booking not found" };
                 }
 
-                entityToUpdate.isDeleted = true;
+                entityToUpdate.isDeleted = true; //marking as deleted
                 _dbContext.CustomerBooking.Update(entityToUpdate);
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
                 return new ResponseDTO() { Status = "Success", Message = "Booking request disapproved." };

@@ -34,8 +34,8 @@ namespace Coursework.Infrastructure.Services
                     return new ResponseDTO() { Status = "Error", Message = "Booking not found" };
                 }
 
-                entityToUpdate.OnRent = false;
-                entityToUpdate.IsComplete = true;
+                entityToUpdate.OnRent = false;  //marking as not on rent
+                entityToUpdate.IsComplete = true; // marking as completed
                 var car = await _dbContext.Car.FindAsync(Guid.Parse(entityToUpdate.CarId));
                 car.IsAvailable = true;
                 _dbContext.CustomerBooking.Update(entityToUpdate);

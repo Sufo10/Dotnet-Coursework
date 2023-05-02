@@ -60,7 +60,7 @@
                 </span>
             </MudNavLink>
         }
-        @if (User?.Role != "Admin")
+        @if (User?.Role == "Staff" || User?.Role=="Customer")
         {
             <MudNavLink Style="text-decoration:none" Href="/my-booking-request" Class="text-decoration-none" Icon="@Icons.Material.Filled.CarRepair">
                 <span class="text-decoration-none">

@@ -26,7 +26,6 @@ namespace Coursework.Infrastructure.Services
 
         private readonly IEmailService _emailService;
         private readonly UserManager<AppUser> _userManager;
-        //public CarBookHistoryService(UserManager<AppUser> userManager, IApplicationDBContext dBContext, IEmailService emailService)
 
         public CarBookHistoryService(IApplicationDBContext dBContext, UserManager<AppUser> userManager, IEmailService emailService)
         {
@@ -106,31 +105,6 @@ namespace Coursework.Infrastructure.Services
                                   };
 
                 var result = await salesRecord.ToListAsync();
-                // sales record for admin (if request is approved and is not deleted, it counts as sales)
-                    //var innerJoin = _dbContext.CustomerBooking
-                    //  .Where(b => b.IsApproved == true && b.isDeleted == null && b.RentStartdate >= DateTime.Parse(startDate) && b.RentStartdate <= DateTime.Parse(endDate)) // data filters 
-                    //  .Join(// outer sequence 
-                    //   _dbContext.Car,  // inner sequence 
-                    //   b => b.CarId,    // outerKeySelector
-                    //   c => c.Id.ToString(),  // innerKeySelector
-                    //   (b, c) => new SalesRecordResponseDTO()  // result selector
-                    //   {
-                    //       Id = b.Id,
-                    //       Name = c.Name,
-                    //       ApprovedBy = b.ApprovedBy, // it is an staff id at this point
-                    //   });
-
-                    //var leftJoin = from b in innerJoin
-                    //               join c in _dbContext.Employee on b.ApprovedBy equals c.Id.ToString() into cGroup
-                    //               from c in cGroup.DefaultIfEmpty()
-                    //               select new SalesRecordResponseDTO()
-                    //               {
-                    //                   Id = b.Id, // sales id (id of CustomerBooking)
-                    //                   Name = b.Name, // name of the car
-                    //                   ApprovedBy = c != null ? c.Name : string.Empty, // staff name Sthat approved the request
-                    //               };
-
-
                     return new ResponseDataDTO<IEnumerable<SalesRecordResponseDTO>> { Status = "Success", Message = "Data Fetched Successully", Data = result };
                 }
             catch (Exception e)
@@ -146,7 +120,7 @@ namespace Coursework.Infrastructure.Services
             {
                 string uId = _dbContext.CustomerBooking.Where(u => u.Id.ToString() == model.BookingId).Select(u => u.customerId).FirstOrDefault();
 
-                var newAddChg = new AdditionalCharges
+                var newAddChg = new AdditionalCharges  //additional charge object
                 {
                     BookingId = model.BookingId,
                     CarId = model.CarId,

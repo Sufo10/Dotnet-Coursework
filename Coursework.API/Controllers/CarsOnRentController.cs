@@ -1,5 +1,7 @@
-﻿using Coursework.Application.Common.Interface;
+﻿using System.Data;
+using Coursework.Application.Common.Interface;
 using Coursework.Application.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +19,7 @@ namespace Coursework.API.Controllers
             _rcars = rcars;
         }
 
-        [HttpPatch]
+        [Authorize(Roles = "Admin,Staff")]
         [Route("/api/rentCar/{BookingId}")]
         public async Task<ResponseDTO> BookCarRequesttt(string BookingId)
         {
@@ -25,6 +27,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
+        [Authorize(Roles = "Admin,Staff")]
         [HttpPatch]
         [Route("/api/ReturnCar/{BookingId}")]
         public async Task<ResponseDTO> RemoveRent(string BookingId)

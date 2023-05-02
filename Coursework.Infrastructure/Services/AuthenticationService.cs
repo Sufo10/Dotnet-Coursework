@@ -48,7 +48,7 @@ namespace Coursework.Infrastructure.Services
 
         private bool IsFileExtensionValid(string fileName)
         {
-            var validExtensions = new[] { ".pdf", ".png" };
+            var validExtensions = new[] { ".pdf", ".png" };  //allowed file format only
             var fileExtension = Path.GetExtension(fileName);
 
             return validExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase);
@@ -60,7 +60,7 @@ namespace Coursework.Infrastructure.Services
         {
             try
             {
-                var userExists = await _userManager.FindByEmailAsync(model.Email);
+                var userExists = await _userManager.FindByEmailAsync(model.Email);  //finding user details 
                 if (userExists != null)
                     return new ResponseDTO { Status = "Error", Message = "Email already exists" };
 
@@ -69,7 +69,7 @@ namespace Coursework.Infrastructure.Services
                     return new ResponseDTO { Status = "Error", Message = "Password doesnot match" };
                 }
                 using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-                AppUser user = new()
+                AppUser user = new() //creating user object
                 {
                     Email = model.Email,
                     UserName = model.UserName,
@@ -82,13 +82,13 @@ namespace Coursework.Infrastructure.Services
                     return new ResponseDTO { Status = "Error", Message = string.Join("; ", errorMessages) };
                 }
 
-                var roleExists = await _roleManager.RoleExistsAsync("Customer");
+                var roleExists = await _roleManager.RoleExistsAsync("Customer"); // checking if role exist
                 if (!roleExists)
                 {
                     await _roleManager.CreateAsync(new IdentityRole { Name = "Customer" });
                 }
 
-                await _userManager.AddToRoleAsync(user, "Customer");
+                await _userManager.AddToRoleAsync(user, "Customer");  //Assinging role to the user
                 var customer = new Customer
                 {
                     Name = model.Name,
@@ -99,11 +99,12 @@ namespace Coursework.Infrastructure.Services
                     UserId = user.Id
                 };
                 var customerID = customer.Id;
-                var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user); // email confirmation
                 var token = UtilityService.ToUrlSafeBase64(emailConfirmationToken);
-                await _emailService.SendEmailConfirmationAsync(model.Name, user.Id, model.Email, token);
+                await _emailService.SendEmailConfirmationAsync(model.Name, user.Id, model.Email, token);  //sending confirmation email
                 if (model.File == null || model.File.Length == 0)
                 {
+                    //If no document is uploaded
                     _dbContext.Customer.AddAsync(customer);
                     await _dbContext.SaveChangesAsync(default(CancellationToken));
                     scope.Complete();
@@ -119,7 +120,7 @@ namespace Coursework.Infrastructure.Services
                         DocumentType = model.FileType,
                         CreatedBy = customerID
                     };
-                    customer.IsVerified = true;
+                    customer.IsVerified = true; //marking user as verified
                     _dbContext.Customer.AddAsync(customer);
 
                     var customerInput = await _dbContext.CustomerFileUpload.AddAsync(customerUpload);
@@ -140,15 +141,15 @@ namespace Coursework.Infrastructure.Services
         {
             try
             {
-                var user = await _userManager.FindByNameAsync(model.UserName);
+                var user = await _userManager.FindByNameAsync(model.UserName); //checking valid username
                 if (user == null) { return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" }; }
                 else
                 {
                     var roles = await _userManager.GetRolesAsync(user);
                     var role = roles.FirstOrDefault();
-                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);  //checking valid password
                     if (!result.Succeeded) return new LoginResponseDTO { Status = "Error", Message = "Invalid username or password" };
-                    var token = _tokenService.GenerateToken(user, role);
+                    var token = _tokenService.GenerateToken(user, role); //JWT Token
                     if (role == "Customer")
                     {
                         var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == user.Id.ToString());
@@ -178,7 +179,7 @@ namespace Coursework.Infrastructure.Services
             {
                 var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var token = UtilityService.ToUrlSafeBase64(passwordResetToken);
-                await _emailService.SendForgotPasswordEmailAsync(user.UserName, email, token);
+                await _emailService.SendForgotPasswordEmailAsync(user.UserName, email, token); //Sending email
                 return new ResponseDTO { Status = "Success", Message = "Email Sent Successful" };
             }
             else
@@ -193,10 +194,10 @@ namespace Coursework.Infrastructure.Services
             if (user != null)
             {
                 var passwordResetToken = UtilityService.FromUrlSafeBase64(body.Token!);
-                var currentPassword = await _userManager.CheckPasswordAsync(user, body.Password);
+                var currentPassword = await _userManager.CheckPasswordAsync(user, body.Password); 
                 if (currentPassword)
                 {
-                    return new ResponseDTO { Status = "Error", Message = "New password cannot match current password" };
+                    return new ResponseDTO { Status = "Error", Message = "New password cannot match current password" }; // throwing error message
                 }
                 var result = await _userManager.ResetPasswordAsync(user, passwordResetToken, body.Password);
                 UtilityService.ValidateIdentityResult(result);
@@ -214,6 +215,7 @@ namespace Coursework.Infrastructure.Services
             var user = await _userManager.FindByIdAsync(userId);
             if (user.EmailConfirmed)
             {
+                //Checking email status
                 return new ResponseDTO
                 {
                     Status = "Already Confirmed",
@@ -236,7 +238,7 @@ namespace Coursework.Infrastructure.Services
             {
                
                 var userExists = await _userManager.FindByEmailAsync(model.Email);
-                if (userExists != null)
+                if (userExists != null) //checking username and email of the user
                     return new ResponseDTO { Status = "Error", Message = "Email already exists" };
 
                 if (!model.Password.Equals(model.ConfirmPassword))
@@ -245,7 +247,7 @@ namespace Coursework.Infrastructure.Services
                 }
                 var adminUser =await _userManager.FindByEmailAsync(userEmail);
 
-                AppUser user = new()
+                AppUser user = new() //User object
                 {
                     Email = model.Email,
                     EmailConfirmed=true,
@@ -261,7 +263,7 @@ namespace Coursework.Infrastructure.Services
                 if (model.EmployeeType.ToUpper() == "ADMIN" || model.EmployeeType.ToUpper() == "STAFF")
                 {
 
-                    var roleExists = await _roleManager.RoleExistsAsync(model.EmployeeType);
+                    var roleExists = await _roleManager.RoleExistsAsync(model.EmployeeType); // Adding assigned role
                     if (!roleExists)
                     {
                         await _roleManager.CreateAsync(new IdentityRole { Name = model.EmployeeType });
