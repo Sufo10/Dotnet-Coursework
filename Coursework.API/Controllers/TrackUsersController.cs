@@ -17,7 +17,7 @@ namespace Coursework.API.Controllers
             _Track = track;
         }
 
-        [Authorize (Roles = "Staff")]
+        [Authorize (Roles = "Staff,Admin")]
         [HttpGet]
         [Route("/api/mostRequest")]
         public async Task<ResponseDataDTO<List<GetMostRentalRequestDTO>>> GetMostRentalRequesttt()
@@ -26,7 +26,7 @@ namespace Coursework.API.Controllers
             return data;
         }
 
-        [Authorize (Roles = "Staff")]
+        [Authorize (Roles = "Staff,Admin")]
         [HttpGet]
         [Route("/api/inactiveUsers")]
 
