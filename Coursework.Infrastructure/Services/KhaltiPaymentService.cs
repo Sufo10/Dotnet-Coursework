@@ -36,14 +36,16 @@ namespace Coursework.Infrastructure.Services
             _baseUrl = configuration.GetSection("Khalti:BaseURL").Value!;
             _emailService = emailService;
         }
+
+        // Creating payment charge
         public async Task<ResponseDataDTO<KhaltiResponseDTO>> InitializePayment(KhaltiPaymentDTO model, string email)
         {
             try
             {
                 var client = new HttpClient();
-                client.DefaultRequestHeaders.Add("Authorization", $"Key {_apiKey}");
+                client.DefaultRequestHeaders.Add("Authorization", $"Key {_apiKey}");  //adding Authorization in header
                 var customerBooking = await _dbContext.CustomerBooking.FindAsync(Guid.Parse(model.BookingId));
-                var user = await _userManager.FindByEmailAsync(email);
+                var user = await _userManager.FindByEmailAsync(email); 
                 var car = await _dbContext.Car.FindAsync(Guid.Parse(customerBooking.CarId));
                 var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
 
@@ -142,14 +144,26 @@ namespace Coursework.Infrastructure.Services
             {
                 var client = new HttpClient();
                 client.DefaultRequestHeaders.Add("Authorization", $"Key {_apiKey}");
+
+                // Construct the payload for the API call
                 var data = new
                 {
                     pidx = pidx,
                 };
+
+                // Convert the payload to JSON and create a StringContent object
                 var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+
+                // Make the API call
                 var response = await client.PostAsync($"{_baseUrl}/epayment/lookup/", content);
+
+                // Read the response as a string
                 var result = await response.Content.ReadAsStringAsync();
+
+                // Parse the response as JSON
                 dynamic jsonResponse = JsonConvert.DeserializeObject(result);
+
+                // If the status of the payment is "Completed", update the booking in the database and send an invoice to the customer
                 if (jsonResponse.status == "Completed")
                 {
                     var customerBooking = await _dbContext.CustomerBooking.FindAsync(Guid.Parse(bookingId));
@@ -175,13 +189,15 @@ namespace Coursework.Infrastructure.Services
                         Message = "Thank you for paying your car rental fee."
                     };
                     await _emailService.SendPaymentInvoiceAsync(invoice);
+
+                    // Return a success response object
                     return new ResponseDataDTO<KhaltiResponseDTO>
                     {
                         Status = "Success",
                         Message = "Success",
                     };
                 }
-                else
+                else // If the status of the payment is anything other than "Completed", return an error response object
                 {
                     return new ResponseDataDTO<KhaltiResponseDTO>
                     {
@@ -192,6 +208,7 @@ namespace Coursework.Infrastructure.Services
             }
             catch (Exception ex)
             {
+                // If an exception is thrown, return an error response object with the exception details
                 return new ResponseDataDTO<KhaltiResponseDTO>
                 {
                     Status = "Error",
@@ -204,20 +221,29 @@ namespace Coursework.Infrastructure.Services
             }
         }
 
+        // Method to handle offline payments for a car rental booking using the Khalti payment gateway API.
         public async Task<ResponseDataDTO<KhaltiResponseDTO>> OfflinePayment(KhaltiPaymentDTO model)
         {
             try
             {
+                // Retrieve the customer booking information from the database.
                 var customerBooking = await _dbContext.CustomerBooking.FindAsync(Guid.Parse(model.BookingId));
+
+                // Update the customer booking to reflect that it has been paid.
                 customerBooking.payment = true;
                 _dbContext.CustomerBooking.Update(customerBooking);
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
+
+                // Retrieve user, car, and customer information associated with the booking.
                 var user = await _userManager.FindByIdAsync(customerBooking.customerId);
                 var car = await _dbContext.Car.FindAsync(Guid.Parse(customerBooking.CarId));
                 var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
-                var rentalAmount = (int)Math.Round(customerBooking.TotalAmount / 1.13); //amount in paisa
-                var VAT = customerBooking.TotalAmount - rentalAmount; // 13% Vat
 
+                // Calculate rental amount and VAT based on total amount.
+                var rentalAmount = (int)Math.Round(customerBooking.TotalAmount / 1.13); // amount in paisa
+                var VAT = customerBooking.TotalAmount - rentalAmount; // 13% VAT
+
+                // Generate an invoice and send it to the customer's email address.
                 var invoice = new GenerateInvoiceDTO()
                 {
                     CustomerName = customer.Name,
@@ -231,6 +257,7 @@ namespace Coursework.Infrastructure.Services
                     Message = "Thank you for paying your car rental fee."
                 };
                 await _emailService.SendPaymentInvoiceAsync(invoice);
+
                 return new ResponseDataDTO<KhaltiResponseDTO>
                 {
                     Status = "Success",
@@ -251,12 +278,18 @@ namespace Coursework.Infrastructure.Services
             }
         }
 
+
+        // Method to handle offline payments for additional charges associated with a car rental booking
+        // using the Khalti payment gateway API.
         public async Task<ResponseDataDTO<KhaltiResponseDTO>> OfflinePaymentForAdditionalCharges(AdditonalChargePaymentDTO model)
         {
             try
             {
+                // Retrieve the additional charge and customer booking information from the database.
                 var additonalCharge = await _dbContext.AdditionalCharges.FindAsync(Guid.Parse(model.AddtionalChargeId));
                 var customerBooking = await _dbContext.CustomerBooking.FindAsync(Guid.Parse(additonalCharge.BookingId));
+
+                // Update the additional charge to reflect that it has been paid.
                 additonalCharge.IsPaid = true;
                 _dbContext.CustomerBooking.Update(customerBooking);
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
@@ -280,5 +313,6 @@ namespace Coursework.Infrastructure.Services
                 };
             }
         }
+
     }
 }

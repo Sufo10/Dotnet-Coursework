@@ -20,6 +20,7 @@ namespace Coursework.API.Controllers
         }
 
         [Authorize(Roles = "Admin,Staff")]
+        [HttpGet]
         [Route("/api/rentCar/{BookingId}")]
         public async Task<ResponseDTO> BookCarRequesttt(string BookingId)
         {
