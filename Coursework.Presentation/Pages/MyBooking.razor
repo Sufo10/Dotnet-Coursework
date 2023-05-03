@@ -21,6 +21,8 @@
             <MudSelectItem Value="@("Approved")" />
             <MudSelectItem Value="@("Pending")" />
             <MudSelectItem Value="@("Cancelled")" />
+            <MudSelectItem Value="@("On Rent")" />
+            <MudSelectItem Value="@("Rejected")" />
             <MudSelectItem Value="@("All")" />
         </MudSelect>
         <MudSpacer />
@@ -51,7 +53,7 @@
         <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.RentEndDate)">End-Date</MudTableSortLabel></MudTh>
         <MudTh>Status</MudTh>
         <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.TotalAmount)">Total</MudTableSortLabel></MudTh>
-      <MudTh>Payment</MudTh>
+        <MudTh>Payment</MudTh>
         <MudTh>Actions</MudTh>
     </HeaderContent>
     <RowTemplate>
@@ -98,27 +100,27 @@
                 <MudChip Variant="Variant.Filled" Color="Color.Info">Paid</MudChip>
 
             }
-            else if (context.IsPaid != true && context.IsApproved == true && context.IsDeleted!=true)
+            else if (context.IsPaid != true && context.IsApproved == true && context.IsDeleted != true)
             {
                 <button @onclick="((e)=>handlePayment(context.Id))" class="khalti-btn">Pay Now</button>
             }
         </MudTd>
         <MudTd>
             <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                @if (context?.IsPaid != true && context.IsDeleted!=true && context?.OnRent!=true)
+                @if (context?.IsPaid != true && context.IsDeleted != true && context?.OnRent != true)
                 {
                     <MudMenuItem @onclick="@((e)=>CancelRequest(context.Id))">
                         <MudIcon Icon="@Icons.Material.Filled.Recommend" Title="Add" />
                         Cancel Request
                     </MudMenuItem>
                 }
-                @if(context?.IsCompleted!=true && context?.OnRent == true)
-{
-<MudMenuItem @onclick="@((e)=>ReportDamage(maxWidth,context.Id,context.CarId))">
-    <MudIcon Icon="@Icons.Material.Filled.CarCrash" Title="Add" />
-    Report Damage
-</MudMenuItem>
-}
+                @if (context?.IsCompleted != true && context?.OnRent == true)
+                {
+                    <MudMenuItem @onclick="@((e)=>ReportDamage(maxWidth,context.Id,context.CarId))">
+                        <MudIcon Icon="@Icons.Material.Filled.CarCrash" Title="Add" />
+                        Report Damage
+                    </MudMenuItem>
+                }
             </MudMenu>
         </MudTd>
     </RowTemplate>
@@ -136,7 +138,7 @@
     [CascadingParameter(Name = "UserInfo")]
     public UserInfo User { get; set; }
     public bool _loading { get; set; } = true;
-    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true ,CloseButton=true};
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
     private List<string> editEvents = new();
     private bool dense = false;
     private bool hover = true;
@@ -178,8 +180,9 @@
         }
     }
 
-    async Task ReportDamage(DialogOptions options,string BookingId,string CarId) {
-        var parameters = new DialogParameters { ["User"] = User, ["BookingId"] = BookingId, ["CarId"]=CarId };
+    async Task ReportDamage(DialogOptions options, string BookingId, string CarId)
+    {
+        var parameters = new DialogParameters { ["User"] = User, ["BookingId"] = BookingId, ["CarId"] = CarId };
         var dialog = await DialogService.ShowAsync<ReportDamage>("Report Damage", parameters, options);
         var result = await dialog.Result;
     }
@@ -237,9 +240,18 @@
     {
         string status = "";
 
-        if (element.IsDeleted == true)
+        @if (element.IsDeleted == true)
         {
             status = "Cancelled";
+        }
+        else if (element.IsCompleted == true)
+        {
+            status = "Completed";
+        }
+        else if ((element.OnRent == true) && (element.IsCompleted == true || element.IsCompleted == false))
+        {
+            status = "On Rent";
+
         }
         else if (element.IsApproved == null)
         {
@@ -248,10 +260,11 @@
         else if (element.IsApproved == true)
         {
             status = "Approved";
+
         }
-        else if(element.IsApproved == true && element.IsPaid == true)
+        else if (element.IsApproved == false)
         {
-            status = "Paid";
+            status = "Rejected";
         }
 
         // filtering condition
