@@ -47,7 +47,7 @@
         }
     </ColGroup>
     <HeaderContent>
-        <MudTh><MudTableSortLabel Class="text-center" InitialDirection="SortDirection.Ascending" SortBy="new Func<MyBookingDetails, object>(x=>x.Name)"> Name</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.Name)"> Name</MudTableSortLabel></MudTh>
         <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.Image)">Image</MudTableSortLabel></MudTh>
         <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.RentStartDate)">Start-Date</MudTableSortLabel></MudTh>
         <MudTh><MudTableSortLabel Class="text-center" SortBy="new Func<MyBookingDetails, object>(x=>x.RentEndDate)">End-Date</MudTableSortLabel></MudTh>
