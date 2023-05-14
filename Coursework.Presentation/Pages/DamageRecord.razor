@@ -11,7 +11,7 @@
 @inject IJSRuntime JSRuntime
 @using Microsoft.JSInterop
 
-<PageTitle>Damange Record</PageTitle>
+<PageTitle>Damage Record</PageTitle>
 <MudTable Class="mt-5" Items="@Elements" Dense="false" Hover="true" ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info"
           @bind-SelectedItem="selectedItem1" SortLabel="Sort By" CommitEditTooltip="Commit Edit" Filter="new Func<AdditionalCharges,bool>(FilterFunc)">
     <ToolBarContent>
