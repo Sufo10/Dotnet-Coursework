@@ -102,7 +102,7 @@
 
     protected override void OnInitialized()
     {
-        carImage = $"https://localhost:7190/images/{Booking.Image}";
+        carImage = Booking.Image;
         Name = Booking.CarName;
         Amount = Booking.TotalAmount;
         CustomerName = Booking.CustomerName;
