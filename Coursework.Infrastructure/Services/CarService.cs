@@ -119,7 +119,7 @@ namespace Coursework.Infrastructure.Services
 
                 // Update the car properties with values from the CarEditDTO object
                 car.Name = model.Name;
-                car.ActualPrice = model.RatePerDay; 
+                car.RatePerDay = model.RatePerDay; 
                 car.Description = model.Description;
 
                 // Save the changes to the database
