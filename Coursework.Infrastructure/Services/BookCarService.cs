@@ -41,32 +41,44 @@ namespace Coursework.Infrastructure.Services
                 string userID = user.Id; //user Id of the staff who is approving the request
                 var entityToUpdate = await _dbContext.CustomerBooking.SingleOrDefaultAsync(c => c.Id == Guid.Parse( bookingId));
                 var customerId = entityToUpdate.customerId;
+                var customer = await _userManager.FindByIdAsync(customerId);
+                var customerRole = await _userManager.GetRolesAsync(customer);
+                var isStaff = false;
+
+                
+
+                if (customerRole.FirstOrDefault() == "Staff")
+                {
+                    isStaff = true;
+                    
+
+                }
+                else if (customerRole.FirstOrDefault() == "Customer")
+                {
+                    isStaff = false;
+                    var customerDetails = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == customerId.ToString());
+      
+                }
+      
+
                 var customerDetails1 = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerId.ToString());
-                var customerDetails =  await _userManager.FindByIdAsync(customerDetails1.UserId);
+                
                 var latestBooking = await _dbContext.CustomerBooking  //getting user latest booking
                     .Where(b => b.customerId == customerId && (bool)b.IsApproved)
                     .OrderByDescending(b => b.RentStartdate)
                     .FirstOrDefaultAsync();
 
-
-
                 var today = DateTime.Today;
                 var threeMonthsAgo = today.AddMonths(-3);
 
                 var regular = false;
-                var isStaff = false;
+                
 
                 if (latestBooking != null && latestBooking.RentStartdate >= threeMonthsAgo)
                 {
                     regular = true;  //user is regualr
                 }
 
-                var customerRole = await _userManager.GetRolesAsync(customerDetails);
-                
-                if ( customerRole.FirstOrDefault() == "staff") 
-                {
-                    isStaff = true; //user is staff
-                }
 
                 var car = await _dbContext.Car
                  .Where(c => c.Id == Guid.Parse(entityToUpdate.CarId))
@@ -87,24 +99,57 @@ namespace Coursework.Infrastructure.Services
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
 
 
-                var invoice = new GenerateInvoiceDTO()
+                
+                
+                
+                if (isStaff == true) {
+                    var customerDetails = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == customerId.ToString());
+                    var Invoice = new GenerateInvoiceDTO()
+                    {
+                        CustomerName = customerDetails.Name,
+                        CustomerEmail = customer.Email,
+                        CarName = car.Name,
+                        RatePerDay = car.RatePerDay,
+                        RentStartDate = entityToUpdate.RentStartdate,
+                        RentEndDate = entityToUpdate.RentEnddate,
+                        RentalAmount = (int)Math.Round(totalAfterDiscount),
+                        VATAmount = (int)Math.Round(vatAmount),
+                        Message = "Your request has been approved, Please pay the amount shown below:"
+                    };
+
+                    _emailService.SendPaymentInvoiceAsync(Invoice);
+                    return new ResponseDTO() { Status = "Success", Message = "Booking approved" };
+
+                }
+                else if (isStaff == false)
                 {
-                    CustomerName = customerDetails1.Name,
-                    CustomerEmail = customerDetails.Email,
-                    CarName = car.Name,
-                    RatePerDay = car.RatePerDay,
-                    RentStartDate = entityToUpdate.RentStartdate,
-                    RentEndDate = entityToUpdate.RentEnddate,
-                    RentalAmount = (int)Math.Round(totalAfterDiscount),
-                    VATAmount = (int) Math.Round(vatAmount),
-                    Message = "Your request has been approved, Please pay the amount shown below:"
-                };
+                    var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerId.ToString());
+                    var Invoice = new GenerateInvoiceDTO()
+                    {
+                        CustomerName = customerDetails.Name,
+                        CustomerEmail = customer.Email,
+                        CarName = car.Name,
+                        RatePerDay = car.RatePerDay,
+                        RentStartDate = entityToUpdate.RentStartdate,
+                        RentEndDate = entityToUpdate.RentEnddate,
+                        RentalAmount = (int)Math.Round(totalAfterDiscount),
+                        VATAmount = (int)Math.Round(vatAmount),
+                        Message = "Your request has been approved, Please pay the amount shown below:"
+                    };
+
+                    _emailService.SendPaymentInvoiceAsync(Invoice);
+
+                    return new ResponseDTO() { Status = "Success", Message = "Booking approved" };
+                }
+
+                else
+                {
+                    return new ResponseDTO() { Status = "Error", Message = "No roles found" };
+                }
 
 
 
-                _emailService.SendPaymentInvoiceAsync(invoice); //sending email
 
-                return new ResponseDTO() { Status = "Success", Message = "Booking request approved" };
             }
             catch (Exception ex)
             {
@@ -114,121 +159,57 @@ namespace Coursework.Infrastructure.Services
 
 
 
-        public async Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model,string email)
+        public async Task<ResponseDTO> BookCarRequest(BookCarRequestDTO model, string email)
         {
-            try {
-                var user =await _userManager.FindByEmailAsync(email);
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
                 var userID = user.Id;
-                var userCharges = await _dbContext.AdditionalCharges.SingleOrDefaultAsync(c => c.UserId == userID && c.IsPaid == false);
+                var userCharges = await _dbContext.AdditionalCharges.FirstOrDefaultAsync(c => c.UserId == userID && !c.IsPaid);
 
-                if (userCharges != null) 
-                {
+                if (userCharges != null)
                     return new ResponseDTO { Status = "Error", Message = "Damage payment not done" };
-                }
 
                 var car = await _dbContext.Car.SingleOrDefaultAsync(c => c.Id == Guid.Parse(model.CarId));
-                var today = DateTime.Today;
-                var threeMonthsAgo = today.AddMonths(-3); //getting user booking
-
                 var latestBooking = await _dbContext.CustomerBooking
-                .Where(b => b.customerId == userID && (bool)b.IsApproved)
-                .OrderByDescending(b => b.RentStartdate)
-                .FirstOrDefaultAsync();
+                    .Where(b => b.customerId == userID && (bool)b.IsApproved)
+                    .OrderByDescending(b => b.RentStartdate)
+                    .FirstOrDefaultAsync();
 
-                var regular = false;
+                var regular = latestBooking?.RentStartdate >= DateTime.Today.AddMonths(-3);
+                var isAvailable = !_dbContext.CustomerBooking
+                    .Any(cb => cb.CarId == model.CarId
+                        && cb.RentEnddate >= model.RentStartdate.Date
+                        && cb.RentStartdate <= model.RentEnddate.Date && cb.isDeleted != true);
 
-                if (latestBooking != null && latestBooking.RentStartdate >= threeMonthsAgo)
-                {
-                    regular = true;
-                }
-
-                var overlappingBookings = _dbContext.CustomerBooking //car is already booked for particular date range
-                .Where(cb => cb.CarId == model.CarId
-                && cb.RentEnddate >= model.RentStartdate.Date
-                && cb.RentStartdate <= model.RentEnddate.Date && cb.isDeleted != true);
-
-
-                var isAvailable = !overlappingBookings.Any();
-
-                if (isAvailable == false) {
+                if (!isAvailable)
                     return new ResponseDTO { Status = "Error", Message = "Car is not available for the requested date" };
-                }
-                else {
 
-                    var role = await _userManager.GetRolesAsync(user);
+                var role = await _userManager.GetRolesAsync(user);
+                var verified = role.FirstOrDefault() == "Customer"
+                    ? (await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString())).IsVerified
+                    : (await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == userID.ToString())).IsVerified;
 
-                    if (role.FirstOrDefault() == "Customer") //checking user roel for applying discount
-                    {
+                if (!verified)
+                    return new ResponseDTO { Status = "Error", Message = "Customer not verified" };
 
-                        var customerDetails = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
+                var rentDays = (model.RentEnddate - model.RentStartdate).TotalDays + 1;
+                var totalAmount = car.RatePerDay * rentDays;
+                var discount = role.FirstOrDefault() == "Staff" ? 0.75 : regular ? 0.9 : 1;
+                var vatAmount = totalAmount * discount * 1.13;
 
+                var bookCar = new CustomerBooking
+                {
+                    customerId = userID.ToString(),
+                    CarId = model.CarId,
+                    RentStartdate = model.RentStartdate,
+                    RentEnddate = model.RentEnddate,
+                    TotalAmount = (int)Math.Round(vatAmount)
+                };
 
-                        if (customerDetails.IsVerified == false)
-                        {
-                            return new ResponseDTO { Status = "Error", Message = "Customer not verified" };
-                        }
-                        else
-                        {
-                            
-                            var rentDays = (model.RentEnddate - model.RentStartdate).TotalDays + 1; //number of days for rent
-                            var totalAmount = car.RatePerDay * rentDays; 
-                            var totalAfterDiscount = regular ? totalAmount * 0.9 : totalAmount; //amount after discount
-                            var vatAmount = totalAfterDiscount * 0.13 + totalAfterDiscount;  //amount with vat
-
-                            var bookCar = new CustomerBooking
-                            {
-                                customerId = userID.ToString(),
-                                CarId = model.CarId,
-                                RentStartdate = model.RentStartdate,
-                                RentEnddate = model.RentEnddate,
-                                TotalAmount = (int)Math.Round(vatAmount)
-                            };
-
-
-
-                            var RequestInput = await _dbContext.CustomerBooking.AddAsync(bookCar);
-                            await _dbContext.SaveChangesAsync(default(CancellationToken));
-                            return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
-                        }
-                    }
-                    else if (role.FirstOrDefault() == "Staff")  //if user is staff
-                    {
-
-                        var customerDetails = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == userID.ToString());
-
-                        if (customerDetails.IsVerified == false)
-                        {
-                            return new ResponseDTO { Status = "Error", Message = "Customer not verified" };
-                        }
-                        else
-                        {
-                            var rentDays = (model.RentEnddate - model.RentStartdate).TotalDays + 1;
-                            var totalAmount = car.RatePerDay * rentDays;
-                            var totalAfterDiscount = totalAmount * 0.75;
-                            var vatAmount = totalAfterDiscount * 0.13 + totalAfterDiscount;
-                            var bookCar = new CustomerBooking
-                            {
-                                customerId = userID.ToString(),
-                                CarId = model.CarId,
-                                RentStartdate = model.RentStartdate,
-                                RentEnddate = model.RentEnddate,
-                                TotalAmount = (int)Math.Round(vatAmount)
-                            };
-                            var RequestInput = await _dbContext.CustomerBooking.AddAsync(bookCar);
-                            await _dbContext.SaveChangesAsync(default(CancellationToken));
-                            return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
-                        }
-
-                    }
-                    else
-                    {
-                        return new ResponseDTO { Status = "error", Message = "Something went wrong" };
-                    }
-                }
-
-                
-
-
+                await _dbContext.CustomerBooking.AddAsync(bookCar);
+                await _dbContext.SaveChangesAsync(default(CancellationToken));
+                return new ResponseDTO { Status = "Success", Message = "Booking request sent" };
             }
             catch (Exception ex)
             {

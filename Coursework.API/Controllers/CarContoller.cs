@@ -45,7 +45,7 @@ namespace Coursework.API.Controllers
         [HttpPost]
         [Consumes("multipart/form-data")]
         [Route("/api/cars")]
-        public async Task<ResponseDTO> AddCustomer([FromForm] EditCarRequestDTO model)
+        public async Task<ResponseDTO> AddCar([FromForm] EditCarRequestDTO model)
         {
             var data = await _carDetails.AddCars(model);
             return data;

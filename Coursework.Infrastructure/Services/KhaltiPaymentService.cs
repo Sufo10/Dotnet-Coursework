@@ -37,7 +37,7 @@ namespace Coursework.Infrastructure.Services
             _emailService = emailService;
         }
 
-        // Creating payment charge
+        // Creating payment charge for Khalti
         public async Task<ResponseDataDTO<KhaltiResponseDTO>> InitializePayment(KhaltiPaymentDTO model, string email)
         {
             try
@@ -45,40 +45,54 @@ namespace Coursework.Infrastructure.Services
                 var client = new HttpClient();
                 client.DefaultRequestHeaders.Add("Authorization", $"Key {_apiKey}");  //adding Authorization in header
                 var customerBooking = await _dbContext.CustomerBooking.FindAsync(Guid.Parse(model.BookingId));
-                var user = await _userManager.FindByEmailAsync(email); 
+                var user = await _userManager.FindByEmailAsync(email);
+
+                var role = await _userManager.GetRolesAsync(user);
+
+                string name;
+
+                // checking the role
+                if (role.FirstOrDefault() == "Customer")
+                {
+                    var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
+                    name = customer.Name;
+                }
+                else
+                {
+                    var employee = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
+                    name = employee.Name;
+                }
+
                 var car = await _dbContext.Car.FindAsync(Guid.Parse(customerBooking.CarId));
-                var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
 
                 var customerInfo = new
                 {
-                    name = customer.Name,
+                    name,
                     email = user.Email,
-                    phone = "9815091234",
+                    //phone = "9815091234",
                 };
 
                 var totalAmount = customerBooking.TotalAmount * 100;
                 var rentalAmount = (int)Math.Round((customerBooking.TotalAmount / 1.13) * 100);
                 var VAT = totalAmount - rentalAmount;
 
-
                 var productDetails = new[]
                 {
-                   new
-                   {
-                       identity = customerBooking.CarId,
-                       name = car.Name,
-                       total_price = totalAmount,
-                       quantity = 1,
-
-                       unit_price = car.RatePerDay * 100 //amount in paisa
-                   }
-                };
+            new
+            {
+                identity = customerBooking.CarId,
+                name = car.Name,
+                total_price = totalAmount,
+                quantity = 1,
+                unit_price = car.RatePerDay * 100 //amount in paisa
+            }
+        };
 
                 var amountBreakdown = new[]
                 {
-                    new {label = "Rental Price", amount = rentalAmount },
-                    new {label = "VAT", amount = VAT }
-                };
+            new {label = "Rental Price", amount = rentalAmount },
+            new {label = "VAT", amount = VAT }
+        };
 
                 var data = new
                 {
@@ -138,6 +152,7 @@ namespace Coursework.Infrastructure.Services
             }
         }
 
+        // Method to check khalti payment status 
         public async Task<ResponseDataDTO<KhaltiResponseDTO>> CheckPaymentSuccess(string pidx, string bookingId, int amount)
         {
             try
@@ -145,21 +160,15 @@ namespace Coursework.Infrastructure.Services
                 var client = new HttpClient();
                 client.DefaultRequestHeaders.Add("Authorization", $"Key {_apiKey}");
 
-                // Construct the payload for the API call
-                var data = new
-                {
-                    pidx = pidx,
-                };
-
                 // Convert the payload to JSON and create a StringContent object
-                var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-
+                var content = new StringContent(JsonConvert.SerializeObject(new { pidx }), Encoding.UTF8, "application/json");
+                
                 // Make the API call
                 var response = await client.PostAsync($"{_baseUrl}/epayment/lookup/", content);
-
+                
                 // Read the response as a string
                 var result = await response.Content.ReadAsStringAsync();
-
+                
                 // Parse the response as JSON
                 dynamic jsonResponse = JsonConvert.DeserializeObject(result);
 
@@ -171,14 +180,28 @@ namespace Coursework.Infrastructure.Services
                     _dbContext.CustomerBooking.Update(customerBooking);
                     await _dbContext.SaveChangesAsync(default(CancellationToken));
                     var user = await _userManager.FindByIdAsync(customerBooking.customerId);
+                    var role = await _userManager.GetRolesAsync(user);
                     var car = await _dbContext.Car.FindAsync(Guid.Parse(customerBooking.CarId));
-                    var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
+                    string name;
+
+                    // checking the role
+                    if (role.FirstOrDefault() == "Customer")
+                    {
+                        var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
+                        name = customer.Name;
+                    }
+                    else
+                    {
+                        var employee = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
+                        name = employee.Name;
+                    }
+
                     double realAmount = amount / 113;
                     var rentalAmount = (int)Math.Round(realAmount);
                     var VATAmount = (int)Math.Round(amount / 100 - realAmount);
                     var invoice = new GenerateInvoiceDTO()
                     {
-                        CustomerName = customer.Name,
+                        CustomerName = name,
                         CustomerEmail = user.Email,
                         CarName = car.Name,
                         RatePerDay = car.RatePerDay,
@@ -236,33 +259,67 @@ namespace Coursework.Infrastructure.Services
 
                 // Retrieve user, car, and customer information associated with the booking.
                 var user = await _userManager.FindByIdAsync(customerBooking.customerId);
-                var car = await _dbContext.Car.FindAsync(Guid.Parse(customerBooking.CarId));
-                var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
+                var role = await _userManager.GetRolesAsync(user);
 
-                // Calculate rental amount and VAT based on total amount.
-                var rentalAmount = (int)Math.Round(customerBooking.TotalAmount / 1.13); // amount in paisa
-                var VAT = customerBooking.TotalAmount - rentalAmount; // 13% VAT
-
-                // Generate an invoice and send it to the customer's email address.
-                var invoice = new GenerateInvoiceDTO()
+                // checking the role
+                if (role.FirstOrDefault() == "Customer")
                 {
-                    CustomerName = customer.Name,
-                    CustomerEmail = user.Email,
-                    CarName = car.Name,
-                    RatePerDay = car.RatePerDay,
-                    RentStartDate = customerBooking.RentStartdate,
-                    RentEndDate = customerBooking.RentEnddate,
-                    RentalAmount = rentalAmount,
-                    VATAmount = VAT,
-                    Message = "Thank you for paying your car rental fee."
-                };
-                await _emailService.SendPaymentInvoiceAsync(invoice);
+                    var car = await _dbContext.Car.FindAsync(Guid.Parse(customerBooking.CarId));
+                    var customer = await _dbContext.Customer.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
+                    // Calculate rental amount and VAT based on total amount.
+                    var rentalAmount = (int)Math.Round(customerBooking.TotalAmount / 1.13); // amount in paisa
+                    var VAT = customerBooking.TotalAmount - rentalAmount; // 13% VAT
 
-                return new ResponseDataDTO<KhaltiResponseDTO>
+                    // Generate an invoice and send it to the customer's email address.
+                    var invoice = new GenerateInvoiceDTO()
+                    {
+                        CustomerName = customer.Name,
+                        CustomerEmail = user.Email,
+                        CarName = car.Name,
+                        RatePerDay = car.RatePerDay,
+                        RentStartDate = customerBooking.RentStartdate,
+                        RentEndDate = customerBooking.RentEnddate,
+                        RentalAmount = rentalAmount,
+                        VATAmount = VAT,
+                        Message = "Thank you for paying your car rental fee."
+                    };
+                    await _emailService.SendPaymentInvoiceAsync(invoice);
+
+                    return new ResponseDataDTO<KhaltiResponseDTO>
+                    {
+                        Status = "Success",
+                        Message = "Success",
+                    };
+                }
+                else
                 {
-                    Status = "Success",
-                    Message = "Success",
-                };
+                    var car = await _dbContext.Car.FindAsync(Guid.Parse(customerBooking.CarId));
+                    var employee = await _dbContext.Employee.SingleOrDefaultAsync(c => c.UserId == customerBooking.customerId);
+                    // Calculate rental amount and VAT based on total amount.
+                    var rentalAmount = (int)Math.Round(customerBooking.TotalAmount / 1.13); // amount in paisa
+                    var VAT = customerBooking.TotalAmount - rentalAmount; // 13% VAT
+
+                    // Generate an invoice and send it to the customer's email address.
+                    var invoice = new GenerateInvoiceDTO()
+                    {
+                        CustomerName = employee.Name,
+                        CustomerEmail = user.Email,
+                        CarName = car.Name,
+                        RatePerDay = car.RatePerDay,
+                        RentStartDate = customerBooking.RentStartdate,
+                        RentEndDate = customerBooking.RentEnddate,
+                        RentalAmount = rentalAmount,
+                        VATAmount = VAT,
+                        Message = "Thank you for paying your car rental fee."
+                    };
+                    await _emailService.SendPaymentInvoiceAsync(invoice);
+
+                    return new ResponseDataDTO<KhaltiResponseDTO>
+                    {
+                        Status = "Success",
+                        Message = "Success",
+                    };
+                }
             }
             catch (Exception ex)
             {

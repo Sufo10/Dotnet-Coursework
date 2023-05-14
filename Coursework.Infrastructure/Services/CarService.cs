@@ -116,6 +116,8 @@ namespace Coursework.Infrastructure.Services
                     // If car not found, return an error response
                     return new ResponseDTO { Status = "Error", Message = "Car not found" };
                 }
+                if (model.RatePerDay > car.RatePerDay)
+                {
 
                 // Update the car properties with values from the CarEditDTO object
                 car.Name = model.Name;
@@ -126,6 +128,13 @@ namespace Coursework.Infrastructure.Services
                 await _dbContext.SaveChangesAsync(default(CancellationToken));
 
                 return new ResponseDTO { Status = "Success", Message = "Car Edited successfully" };
+                }
+                else
+                {
+                    return new ResponseDTO { Status = "Error", Message = "Offer Price is set higher than your actual price." };
+
+                }
+
             }
             catch (Exception err)
             {
