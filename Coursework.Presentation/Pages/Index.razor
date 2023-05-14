@@ -220,7 +220,8 @@ else
 
     async Task OpenAddDialog(DialogOptions options)
     {
-        var dialog = await DialogService.ShowAsync<AddCars>("Add New Car", options);
+        var parameters = new DialogParameters {["User"] = User };
+        var dialog = await DialogService.ShowAsync<AddCars>("Add New Car", parameters, options);
         var result = await dialog.Result;
         if (!result.Canceled)
         {

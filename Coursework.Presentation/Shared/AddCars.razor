@@ -1,6 +1,8 @@
 ﻿@using System.Text;
 @using Newtonsoft.Json;
 @inject ISnackbar Snackbar
+@inject HttpClient _httpClient
+
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
@@ -102,6 +104,10 @@
     public bool _processing { get; set; }
     IBrowserFile files { get; set; }
 
+
+    [Parameter]
+    public UserInfo User { get; set; }
+
     private void UploadFiles2(IBrowserFile file)
     {
         files = file;
@@ -128,11 +134,9 @@
         }
         // Send the request
 
-        var response = await client.PostAsync("https://localhost:7190/api/cars", formData);
-        var result = await response.Content.ReadAsStringAsync();
-        dynamic jsonResponse = JsonConvert.DeserializeObject(result);
+        var response = await HttpClientExtension.AuthPostAsync<ApiResponse>(_httpClient, "https://localhost:7190/api/cars", formData, User?.Token.ToString() ?? "");
 
-        if (jsonResponse.status == "Success")
+        if (response != null && response.Status == "Success")
         {
             success = true;
             Snackbar.Add("Car Uploaded Successfully", Severity.Success);
@@ -153,4 +157,4 @@
         MudDialog.Cancel();
     }
     private bool _autoClose;
-}
+    }
