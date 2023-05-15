@@ -34,7 +34,7 @@ namespace Coursework.Infrastructure.Services
                                Image =baseUrl+ car.Image, // setting image with base url
                                RatePerDay = car.RatePerDay,
                                ActualPrice = car.ActualPrice,
-                               NumberOfRentals = _dbContext.CustomerBooking.Count(booking => booking.CarId == car.Id.ToString() && booking.OnRent == true)
+                               NumberOfRentals = _dbContext.CustomerBooking.Count(booking => booking.CarId == car.Id.ToString() && (booking.OnRent == true || booking.IsComplete==true))
                            };
 
                 return new ResponseDataDTO<List<CarReportDTO>> { Data = data.ToList(), Status = "Success" };

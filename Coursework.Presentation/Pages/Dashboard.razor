@@ -4,7 +4,7 @@
 @inject HttpClient _httpClient
 @using ApexCharts;
 
-<PageTitle>Login</PageTitle>
+<PageTitle>Home</PageTitle>
 
 <div>
     <MudText Typo="Typo.subtitle1">[Note: Chart is currently readable only in light mode.]</MudText>
@@ -120,7 +120,7 @@
             }
             if (jsonResponse != null && jsonResponse.Status == "Success")
             {
-                CarRentalData = jsonResponse.Data;
+                CarRentalData = jsonResponse.Data.FindAll(x=>x.NumberOfRentals>0);
                 //UpdateChartSeries();
             }
             if (jsonResponse2 != null && jsonResponse2.Status == "success")

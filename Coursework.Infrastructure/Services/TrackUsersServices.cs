@@ -33,7 +33,7 @@ namespace Coursework.Infrastructure.Services
             var threeMonthsAgo = today.AddMonths(-3).ToUniversalTime(); ;
 
             var inactiveUsers = await _dbContext.CustomerBooking
-                .Where(cb => cb.RentStartdate <= threeMonthsAgo && cb.OnRent == true && cb.payment == true && cb.IsApproved == true)
+                .Where(cb => cb.RentStartdate <= threeMonthsAgo && cb.payment == true && cb.IsApproved == true)
                 .ToListAsync();
 
             var InactiveUserDetails = new List<GetIInactiveUsersDTO>();
